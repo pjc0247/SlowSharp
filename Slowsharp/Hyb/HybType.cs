@@ -23,7 +23,7 @@ namespace Slowsharp
             this.interpretKlass = klass;
         }
 
-        public HybInstance CreateInstance(object[] args)
+        public HybInstance CreateInstance(Runner runner, object[] args)
         {
             if (isCompiledType)
             {
@@ -33,7 +33,7 @@ namespace Slowsharp
             }
             else
             {
-                var inst = new HybInstance(this, interpretKlass);
+                var inst = new HybInstance(runner, this, interpretKlass);
                 inst.GetMethods("$_ctor")[0].Invoke(inst, args);
                 return inst;
             }
@@ -52,6 +52,17 @@ namespace Slowsharp
             {
                 return interpretKlass.GetMethods(id);
             }
+        }
+
+        public object GetDefault()
+        {
+            if (isCompiledType)
+            {
+                if (compiledType.IsValueType)
+                    return Activator.CreateInstance(compiledType);
+                return null;
+            }
+            return null;
         }
     }
 }

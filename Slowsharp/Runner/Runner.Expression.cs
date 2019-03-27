@@ -10,7 +10,7 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        private object RunExpression(ExpressionSyntax node)
+        internal object RunExpression(ExpressionSyntax node)
         {
             if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
@@ -87,7 +87,7 @@ namespace Slowsharp
             else
                 type = name2rt.GetType($"{node.Type}");
 
-            return type.CreateInstance(args);
+            return type.CreateInstance(this, args);
         }
         private object RunArrayCreation(ArrayCreationExpressionSyntax node)
         {

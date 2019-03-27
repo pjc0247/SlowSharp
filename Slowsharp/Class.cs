@@ -13,7 +13,7 @@ namespace Slowsharp
     internal class Class
     {
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
-        private HashSet<string> fields = new HashSet<string>();
+        private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
         private Dictionary<string, Invokable> methods = new Dictionary<string, Invokable>();
         private Runner runner;
 
@@ -26,9 +26,14 @@ namespace Slowsharp
         {
             methods.Add(id, new Invokable(runner, method));
         }
-        public void AddField(string id, FieldDeclarationSyntax field)
+        public void AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
-            fields.Add(id);
+            fields.Add(id, new SSFieldInfo()
+            {
+                id = id,
+                field = field,
+                declartor = declarator
+            });
         }
 
         public Invokable[] GetMethods(string id)
@@ -39,9 +44,16 @@ namespace Slowsharp
                 .ToArray();
         }
 
+        public SSFieldInfo[] GetFields()
+        {
+            return fields
+                .Select(x => x.Value)
+                .ToArray();
+        }
+
         public bool HasField(string id)
         {
-            return fields.Contains(id);
+            return fields.ContainsKey(id);
         }
         /*
         public Invokable[] GetMethods(string id)

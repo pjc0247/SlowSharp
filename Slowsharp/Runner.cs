@@ -105,8 +105,10 @@ namespace Slowsharp
         }
         private void AddField(FieldDeclarationSyntax node)
         {
-            foreach (var f in node.Declaration.Variables) 
-                klass.AddField($"{f.Identifier}", node);
+            foreach (var f in node.Declaration.Variables)
+            {
+                klass.AddField($"{f.Identifier}", node, f);
+            }
         }
 
         internal void RunBlock(BlockSyntax node, VarFrame vf)

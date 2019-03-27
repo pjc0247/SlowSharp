@@ -96,6 +96,7 @@
     <Compile Include="Runner\Runner.Expression.cs" />
     <Compile Include="Runner\Runner.FlowControl.cs" />
     <Compile Include="Sandbox\AccessControl.cs" />
+    <Compile Include="Runtime\SSFieldInfo.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="VarFrame.cs" />
   </ItemGroup>

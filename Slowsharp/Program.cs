@@ -26,8 +26,7 @@ namespace HelloWorld
     class Bar {
         public int a;
         public Bar() {
-            a = 1234;
-            Console.WriteLine(1234);
+            Console.WriteLine(a);
         }
     }
     class Program

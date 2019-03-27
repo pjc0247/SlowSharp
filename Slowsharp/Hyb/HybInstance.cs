@@ -21,10 +21,24 @@ namespace Slowsharp
             this.type = type;
             this.obj = obj;
         }
-        public HybInstance(HybType type, Class klass)
+        public HybInstance(Runner runner, HybType type, Class klass)
         {
             this.type = type;
             this.klass = klass;
+
+            foreach (var field in klass.GetFields())
+            {
+                if (field.declartor.Initializer == null)
+                {
+                    var hybType = runner.name2rt.GetType($"{field.field.Declaration.Type}");
+                    fields.Add(field.id, hybType.GetDefault());
+                }
+                else
+                {
+                    fields.Add(field.id,
+                        runner.RunExpression(field.declartor.Initializer.Value));
+                }
+            }
         }
 
         public HybType GetHybType() => type;
