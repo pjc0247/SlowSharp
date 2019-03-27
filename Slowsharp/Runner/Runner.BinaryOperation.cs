@@ -29,7 +29,7 @@ namespace Slowsharp
             else if (op == "/") result = decLeft / decRight;
             else if (op == "%") result = decLeft % decRight;
             else if (op == ">") return decLeft > decRight;
-            else if (op == ">=") return decLeft > decRight;
+            else if (op == ">=") return decLeft >= decRight;
             else if (op == "<") return decLeft < decRight;
             else if (op == "<=") return decLeft <= decRight;
 

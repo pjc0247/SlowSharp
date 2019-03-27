@@ -41,9 +41,9 @@ namespace Slowsharp
             //RunMethod(klass.GetMethods("Main")[0]);
         }
 
-        public void RunMain()
+        public object RunMain()
         {
-            klass.GetMethods("Main")[0].Invoke(null, new object[] { });
+            return klass.GetMethods("Main")[0].Invoke(null, new object[] { });
         }
 
         public void Run(SyntaxNode node)

@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="CatchFrame.cs" />
     <Compile Include="Class.cs" />
+    <Compile Include="CScript.cs" />
     <Compile Include="Hyb\HybExt.cs" />
     <Compile Include="Hyb\HybType.cs" />
     <Compile Include="Hyb\HybInstance.cs" />
