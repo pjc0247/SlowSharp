@@ -23,5 +23,21 @@ public static void Main(string[] args) {
 }
 }");
         }
+
+        public static object Run(string classBody, string body)
+        {
+            return CScript.Run(@"
+using System;
+
+public class Foo {"
++ classBody + 
+@"
+public static void Main(string[] args) {
+"
++ body +
+@"
+}
+}");
+        }
     }
 }
