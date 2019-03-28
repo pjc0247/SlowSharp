@@ -32,6 +32,7 @@ namespace Slowsharp
             else if (op == ">=") return HybInstance.Bool(decLeft >= decRight);
             else if (op == "<") return HybInstance.Bool(decLeft < decRight);
             else if (op == "<=") return HybInstance.Bool(decLeft <= decRight);
+            else if (op == "==") return HybInstance.Bool(decLeft == decRight);
 
             //if (left.Is<Int16>()) return Convert.ToInt16(result);
             else if (left.Is<Int32>()) return HybInstance.Int(Convert.ToInt32(result));

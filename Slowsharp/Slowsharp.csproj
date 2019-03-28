@@ -92,6 +92,8 @@
     <Compile Include="Hyb\HybTypeCache.cs" />
     <Compile Include="IdLookup.cs" />
     <Compile Include="Invokable.cs" />
+    <Compile Include="Runtime\AccessModifier.cs" />
+    <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="TypeResolver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -16,7 +16,7 @@ using System;
 
 public class Foo {
 
-public static object Main(string[] args) {
+public static object Main() {
 "
 + code +
 @"
@@ -32,7 +32,7 @@ using System;
 public class Foo {"
 + classBody +
 @"
-public static object Main(string[] args) {
+public static object Main() {
 "
 + body +
 @"

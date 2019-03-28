@@ -25,8 +25,12 @@ namespace Slowsharp
                 return RunMemberAccess(node as MemberAccessExpressionSyntax);
             else if (node is AssignmentExpressionSyntax)
                 RunAssign(node as AssignmentExpressionSyntax);
+            else if (node is DefaultExpressionSyntax)
+                return RunDefault(node as DefaultExpressionSyntax);
             else if (node is InvocationExpressionSyntax)
                 return RunInvocation(node as InvocationExpressionSyntax);
+            else if (node is ConditionalExpressionSyntax)
+                return RunConditional(node as ConditionalExpressionSyntax);
             else if (node is IdentifierNameSyntax)
                 return ResolveId(node as IdentifierNameSyntax);
             else if (node is PostfixUnaryExpressionSyntax)
@@ -55,6 +59,20 @@ namespace Slowsharp
             }
 
             return null;
+        }
+
+        private HybInstance RunDefault(DefaultExpressionSyntax node)
+        {
+            var type = resolver.GetType($"{node.Type}");
+            return type.GetDefault();
+        }
+        private HybInstance RunConditional(ConditionalExpressionSyntax node)
+        {
+            var cond = RunExpression(node.Condition);
+            if (IsTrueOrEquivalent(cond))
+                return RunExpression(node.WhenTrue);
+            else
+                return RunExpression(node.WhenFalse);
         }
 
         private HybInstance RunInvocation(InvocationExpressionSyntax node)

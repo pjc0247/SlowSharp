@@ -54,6 +54,7 @@
     <Compile Include="ControlFlow\If.cs" />
     <Compile Include="Core\VarFrame.cs" />
     <Compile Include="DotNet\Collections\List.cs" />
+    <Compile Include="DotNet\Primitive\String.cs" />
     <Compile Include="Hyb\Operator.cs" />
     <Compile Include="Hyb\TypeComparision.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

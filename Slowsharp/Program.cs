@@ -26,13 +26,14 @@ namespace Slowsharp
             var src = @"
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
  
 namespace HelloWorld
 {
     class Foo {
-        public int aa = 55;
+        private int aa = 55;
         public Foo(int b) {
             aa = b;
             Console.WriteLine(aa);
@@ -45,8 +46,11 @@ static int Foo() { return 5; }
 
         static int Main(int n)
         {
-Console.WriteLine(n);
-return 1;
+var a = new Foo(5);
+Console.WriteLine(a.aa);
+var b = new Foo(50);
+Console.WriteLine(b.aa);
+return a[0];
         }
 
 static void Bo() {

@@ -20,6 +20,9 @@ namespace Slowsharp
             this.config = config;
 
             this.types = new Dictionary<string, Class>();
+
+            // This prevents bug
+            Reset();
         }
         public void Reset()
         {

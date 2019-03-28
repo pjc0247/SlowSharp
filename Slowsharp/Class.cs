@@ -32,7 +32,9 @@ namespace Slowsharp
             {
                 id = id,
                 field = field,
-                declartor = declarator
+                declartor = declarator,
+
+                accessModifier = AccessModifierParser.Parse(field.Modifiers)
             });
         }
 

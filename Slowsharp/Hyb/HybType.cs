@@ -75,15 +75,15 @@ namespace Slowsharp
             }
         }
 
-        public object GetDefault()
+        public HybInstance GetDefault()
         {
             if (isCompiledType)
             {
                 if (compiledType.IsValueType)
-                    return Activator.CreateInstance(compiledType);
-                return null;
+                    return HybInstance.Object(Activator.CreateInstance(compiledType));
+                return HybInstance.Null();
             }
-            return null;
+            return HybInstance.Null();
         }
     }
 }
