@@ -17,6 +17,7 @@ namespace Slowsharp
         public static HybType Object => HybTypeCache.Object;
         public static HybType Bool => HybTypeCache.Bool;
         public static HybType Int => HybTypeCache.Int;
+        public static HybType Char => HybTypeCache.Char;
         public static HybType String => HybTypeCache.String;
         public static HybType Float => HybTypeCache.Float;
         public static HybType Double => HybTypeCache.Double;
