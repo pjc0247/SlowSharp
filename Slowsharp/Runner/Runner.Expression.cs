@@ -15,6 +15,8 @@ namespace Slowsharp
             if (node is ParenthesizedExpressionSyntax ps)
                 return RunExpression(ps.Expression);
 
+            else if (node is ParenthesizedExpressionSyntax)
+                return RunParenthesized(node as ParenthesizedExpressionSyntax);
             else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
             else if (node is LiteralExpressionSyntax)
@@ -59,6 +61,11 @@ namespace Slowsharp
             }
 
             return null;
+        }
+
+        private HybInstance RunParenthesized(ParenthesizedExpressionSyntax node)
+        {
+            return RunExpression(node.Expression);
         }
 
         private HybInstance RunDefault(DefaultExpressionSyntax node)
@@ -107,6 +114,7 @@ namespace Slowsharp
                 else if (ma.Expression is ExpressionSyntax expr)
                 {
                     callee = RunExpression(expr);
+                    callsite = callee.GetMethods($"{ma.Name}");
                 }
 
                 targetId = $"{ma.Name}";

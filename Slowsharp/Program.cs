@@ -46,11 +46,7 @@ static int Foo() { return 5; }
 
         static int Main(int n)
         {
-var a = new Foo(5);
-Console.WriteLine(a.aa);
-var b = new Foo(50);
-Console.WriteLine(b.aa);
-return a[0];
+(new Bar()).Boo();
         }
 
 static void Bo() {
