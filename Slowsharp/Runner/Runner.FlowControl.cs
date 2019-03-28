@@ -19,18 +19,21 @@ namespace Slowsharp
             else if (node.Else != null)
                 Run(node.Else.Statement);
         }
-        private bool IsTrueOrEquivalent(object obj)
+        private bool IsTrueOrEquivalent(HybInstance obj)
         {
+            if (obj == null) return false;
+
             try
             {
-                if (Convert.ToInt32(obj) == 0)
+                if (obj.isCompiledType &&
+                    Convert.ToInt32(obj.innerObject) == 0)
                     return false;
             }
             catch { }
 
-            if (obj is bool && (bool)obj == false)
+            if (obj.Is<bool>() && obj.As<bool>() == false)
                 return false;
-            if (obj == null)
+            if (obj.As<object>() == null)
                 return false;
 
             return true;
@@ -47,11 +50,15 @@ namespace Slowsharp
 
             while (true)
             {
-                var cond = RunExpression(node.Condition);
-                if (IsTrueOrEquivalent(cond) == false)
-                    break;
+                if (node.Condition != null)
+                {
+                    var cond = RunExpression(node.Condition);
+                    if (IsTrueOrEquivalent(cond) == false)
+                        break;
+                }
 
                 Run(node.Statement);
+                if (halt) break;
 
                 foreach (var expr in node.Incrementors)
                     RunExpression(expr);

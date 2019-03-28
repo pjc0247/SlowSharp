@@ -10,12 +10,17 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        internal object RunExpression(ExpressionSyntax node)
+        internal HybInstance RunExpression(ExpressionSyntax node)
         {
-            if (node is BinaryExpressionSyntax)
+            if (node is ParenthesizedExpressionSyntax ps)
+                return RunExpression(ps.Expression);
+
+            else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
-            if (node is LiteralExpressionSyntax)
+            else if (node is LiteralExpressionSyntax)
                 return ResolveLiteral(node as LiteralExpressionSyntax);
+            else if (node is ElementAccessExpressionSyntax)
+                return RunElementAccess(node as ElementAccessExpressionSyntax);
             else if (node is MemberAccessExpressionSyntax)
                 return RunMemberAccess(node as MemberAccessExpressionSyntax);
             else if (node is AssignmentExpressionSyntax)
@@ -35,10 +40,10 @@ namespace Slowsharp
             return null;
         }
 
-        private object ResolveId(IdentifierNameSyntax node)
+        private HybInstance ResolveId(IdentifierNameSyntax node)
         {
             var id = $"{node.Identifier}";
-            object v = null;
+            HybInstance v = null;
 
             if (vars.TryGetValue(id, out v))
                 return v;
@@ -52,72 +57,157 @@ namespace Slowsharp
             return null;
         }
 
-        private object RunMemberAccess(MemberAccessExpressionSyntax node)
+        private HybInstance RunInvocation(InvocationExpressionSyntax node)
+        {
+            string calleeId = "";
+            string targetId = "";
+            HybInstance callee = null;
+            Invokable[] callsite = null;
+
+            if (node.Expression is MemberAccessExpressionSyntax ma)
+            {
+                if (ma.Expression is IdentifierNameSyntax id)
+                {
+                    var leftType = resolver.GetType($"{id.Identifier}");
+                    if (leftType == null)
+                    {
+                        callee = vars.GetValue($"{id.Identifier}");
+
+                        if (callee == null)
+                            throw new NullReferenceException($"{id.Identifier}");
+
+                        callsite = callee
+                            .GetMethods($"{ma.Name}");
+                    }
+                    else
+                    {
+                        callsite = leftType.GetMethods($"{ma.Name}");
+                    }
+
+                    calleeId = $"{id.Identifier}";
+                }
+                else if (ma.Expression is ExpressionSyntax expr)
+                {
+                    callee = RunExpression(expr);
+                }
+
+                targetId = $"{ma.Name}";
+                //callsite = ResolveMemberAccess(node.Expression as MemberAccessExpressionSyntax);
+            }
+            else if (node.Expression is IdentifierNameSyntax id)
+            {
+                callsite = ResolveLocalMember(node.Expression as IdentifierNameSyntax);
+                targetId = id.Identifier.Text;
+            }
+
+            if (callsite.Length == 0)
+                throw new NoSuchMethodException($"{calleeId}", targetId);
+
+            var args = ResolveArgumentList(node.ArgumentList);
+            var method = FindMethodWithArguments(callsite, args);
+            var ret = method.Invoke(callee, args);
+            methodEnd = false;
+            return ret;
+        }
+
+        private HybInstance RunElementAccess(ElementAccessExpressionSyntax node)
+        {
+            var left = RunExpression(node.Expression);
+            var args = new HybInstance[node.ArgumentList.Arguments.Count];
+
+            var count = 0;
+            foreach (var arg in node.ArgumentList.Arguments)
+                args[count++] = RunExpression(arg.Expression);
+
+            HybInstance o;
+            if (left.GetIndexer(args, out o))
+                return o;
+
+            throw new NoSuchMemberException("[]");
+        }
+        private HybInstance RunMemberAccess(MemberAccessExpressionSyntax node)
         {
             var left = RunExpression(node.Expression);
             var right = node.Name.Identifier.Text;
 
+            /*
             return left.GetType().GetMember(right)
                 .FirstOrDefault()
                 .GetValue(left);
+                */
+            HybInstance o;
+            if (left.GetPropertyOrField(right, out o))
+                return o;
+
+            throw new NoSuchMemberException(right);
         }
-        private object RunObjectCreation(ObjectCreationExpressionSyntax node)
+        private HybInstance RunObjectCreation(ObjectCreationExpressionSyntax node)
         {
+            Console.WriteLine("CreateObject");
+
             HybType type = null;
 
-            var args = new object[node.ArgumentList.Arguments.Count];
+            var args = new HybInstance[node.ArgumentList.Arguments.Count];
             var count = 0;
             foreach (var arg in node.ArgumentList.Arguments)
                 args[count++] = RunExpression(arg.Expression);
 
             if (node.Type is GenericNameSyntax gn)
             {
-                /*
-                type = name2rt.GetGenericType(
+                type = resolver.GetGenericType(
                     $"{gn.Identifier}",
                     gn.TypeArgumentList.Arguments.Count);
 
-                var genericArgs = new Type[gn.TypeArgumentList.Arguments.Count];
-                var count = 0;
+                var genericArgs = new HybType[gn.TypeArgumentList.Arguments.Count];
+                count = 0;
                 foreach (var arg in gn.TypeArgumentList.Arguments)
-                    genericArgs[count++] = name2rt.GetType($"{arg}");
+                    genericArgs[count++] = resolver.GetType($"{arg}");
                 type = type.MakeGenericType(genericArgs);
-                */
             }
             else
-                type = name2rt.GetType($"{node.Type}");
+                type = resolver.GetType($"{node.Type}");
 
             return type.CreateInstance(this, args);
         }
-        private object RunArrayCreation(ArrayCreationExpressionSyntax node)
+        private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)
         {
             var typeId = $"{node.Type.ElementType}";
-            var rtAry = name2rt.GetType(typeId);
+            var rtAry = resolver.GetType(typeId);
 
-            /*
-            var ary = Array.CreateInstance(
-                rtAry, node.Initializer.Expressions.Count);
+            Array ary = null;
+            Type elemType;
+            if (rtAry.isCompiledType)
+                elemType = rtAry.compiledType;
+            else
+                elemType = typeof(HybInstance);
+
+            ary = Array.CreateInstance(
+                elemType, node.Initializer.Expressions.Count);
+
             var count = 0;
             foreach (var expr in node.Initializer.Expressions)
-                ary.SetValue(RunExpression(expr), count ++);
+            {
+                var value = RunExpression(expr);
 
-            return ary;
-            */
-            return null;
+                if (rtAry.isCompiledType)
+                    ary.SetValue(value.innerObject, count++);
+                else
+                    ary.SetValue(value, count++);
+            }
+
+            return HybInstance.Object(ary);
         }
 
-        private object RunPostfixUnary(PostfixUnaryExpressionSyntax node)
+        private HybInstance RunPostfixUnary(PostfixUnaryExpressionSyntax node)
         {
             var delta = node.OperatorToken.Text == "++" ? 1 : -1;
 
             if (node.Operand is IdentifierNameSyntax id)
             {
                 var v = vars.GetValue($"{id.Identifier}");
-                var after = Convert.ChangeType(Convert.ToDecimal(v) + delta, v.GetType());
-
+                var after = v + delta;
                 vars.SetValue($"{id.Identifier}", after);
-
-                return v;
+                return after;
             }
 
             return null;

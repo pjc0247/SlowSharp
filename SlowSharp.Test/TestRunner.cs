@@ -16,7 +16,7 @@ using System;
 
 public class Foo {
 
-public static void Main(string[] args) {
+public static object Main(string[] args) {
 "
 + code +
 @"
@@ -30,9 +30,9 @@ public static void Main(string[] args) {
 using System;
 
 public class Foo {"
-+ classBody + 
++ classBody +
 @"
-public static void Main(string[] args) {
+public static object Main(string[] args) {
 "
 + body +
 @"

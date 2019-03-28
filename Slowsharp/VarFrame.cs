@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    public class VarFrame
+    internal class VarFrame
     {
         public VarFrame parent { get; }
 
-        private Dictionary<string, object> values = new Dictionary<string, object>();
+        private Dictionary<string, HybInstance> values = new Dictionary<string, HybInstance>();
 
         public VarFrame(VarFrame parent)
         {
             this.parent = parent;
         }
 
-        public object GetValue(string key)
+        public HybInstance GetValue(string key)
         {
-            object v = null;
+            HybInstance v = null;
             if (TryGetValue(key, out v))
                 return v;
             throw new ArgumentException(key);
         }
-        public bool TryGetValue(string key, out object value)
+        public bool TryGetValue(string key, out HybInstance value)
         {
             if (values.ContainsKey(key))
             {
@@ -41,14 +41,14 @@ namespace Slowsharp
             return parent.TryGetValue(key, out value);
         }
 
-        public void SetValue(string key, object value)
+        public void SetValue(string key, HybInstance value)
         {
             Console.WriteLine($"{key} = {value}");
 
             if (SetValueUpwards(key, value) == false)
                 values[key] = value;
         }
-        private bool SetValueUpwards(string key, object value)
+        private bool SetValueUpwards(string key, HybInstance value)
         {
             if (values.ContainsKey(key))
             {

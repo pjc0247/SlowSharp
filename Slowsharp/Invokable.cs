@@ -29,7 +29,7 @@ namespace Slowsharp
             this.compiledMethod = method;
         }
 
-        public object Invoke(object _this, object[] args)
+        public HybInstance Invoke(HybInstance _this, HybInstance[] args)
         {
             if (isCompiled)
                 Console.WriteLine($"Invoke {compiledMethod.Name}");
@@ -38,11 +38,16 @@ namespace Slowsharp
 
             if (isCompiled)
             {
-                return compiledMethod.Invoke(_this, args);
+                return HybInstance.Object(compiledMethod.Invoke(
+                    _this?.innerObject, args.Unwrap()));
             }
             else
             {
-                return runner.RunMethod(_this as HybInstance, interpretMethod);
+                var ps = interpretMethod.ParameterList.Parameters;
+                if (args.Length != ps.Count)
+                    throw new SemanticViolationException($"Parameters.Count does not match");
+
+                return runner.RunMethod(_this as HybInstance, interpretMethod, args);
             }
         }
     }

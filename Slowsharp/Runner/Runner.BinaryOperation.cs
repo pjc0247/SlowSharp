@@ -10,17 +10,17 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        private object RunBinaryExpression(BinaryExpressionSyntax node)
+        private HybInstance RunBinaryExpression(BinaryExpressionSyntax node)
         {
             var op = node.OperatorToken.ValueText;
             var left = RunExpression(node.Left);
             var right = RunExpression(node.Right);
 
-            if (left is string)
-                return (string)left + (string)right;
+            if (left.Is<string>())
+                return HybInstance.String(left.As<string>() + right.As<string>());
 
-            var decLeft = Convert.ToDecimal(left);
-            var decRight = Convert.ToDecimal(right);
+            var decLeft = Convert.ToDecimal(left.innerObject);
+            var decRight = Convert.ToDecimal(right.innerObject);
             decimal result = 0;
 
             if (op == "+") result = decLeft + decRight;
@@ -28,20 +28,22 @@ namespace Slowsharp
             else if (op == "*") result = decLeft * decRight;
             else if (op == "/") result = decLeft / decRight;
             else if (op == "%") result = decLeft % decRight;
-            else if (op == ">") return decLeft > decRight;
-            else if (op == ">=") return decLeft >= decRight;
-            else if (op == "<") return decLeft < decRight;
-            else if (op == "<=") return decLeft <= decRight;
+            else if (op == ">") return HybInstance.Bool(decLeft > decRight);
+            else if (op == ">=") return HybInstance.Bool(decLeft >= decRight);
+            else if (op == "<") return HybInstance.Bool(decLeft < decRight);
+            else if (op == "<=") return HybInstance.Bool(decLeft <= decRight);
 
-            if (left is Int16) return Convert.ToInt16(result);
-            else if (left is Int32) return Convert.ToInt32(result);
-            else if (left is Int64) return Convert.ToInt64(result);
-            else if (left is UInt16) return Convert.ToUInt16(result);
-            else if (left is UInt32) return Convert.ToUInt32(result);
-            else if (left is UInt64) return Convert.ToUInt64(result);
-            else if (left is float) return Convert.ToSingle(result);
-            else if (left is double) return Convert.ToDouble(result);
-            else if (left is decimal) return Convert.ToDecimal(result);
+            //if (left.Is<Int16>()) return Convert.ToInt16(result);
+            else if (left.Is<Int32>()) return HybInstance.Int(Convert.ToInt32(result));
+            /*
+            else if (left.Is<Int64>()) return Convert.ToInt64(result);
+            else if (left.Is<UInt16>()) return Convert.ToUInt16(result);
+            else if (left.Is<UInt32>()) return Convert.ToUInt32(result);
+            else if (left.Is<UInt64>()) return Convert.ToUInt64(result);
+            else if (left.Is<float>()) return Convert.ToSingle(result);
+            else if (left.Is<double>()) return Convert.ToDouble(result);
+            else if (left.Is<decimal>()) return Convert.ToDecimal(result);
+            */
 
             return null;
         }

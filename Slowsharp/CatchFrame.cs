@@ -24,14 +24,14 @@ namespace Slowsharp
             foreach (var c in tryNode.Catches)
             {
                 var type = $"{c.Declaration.Type}";
-                var rt = runner.name2rt.GetType(type);
+                var rt = runner.resolver.GetType(type);
 
                 if (rt == null)
                     continue;
                 if (e.GetType().IsSubclassOf(rt))
                 {
                     var vf = new VarFrame(runner.vars);
-                    vf.SetValue($"{c.Declaration.Identifier}", e);
+                    vf.SetValue($"{c.Declaration.Identifier}", HybInstance.Object(e));
                     runner.RunBlock(c.Block, vf);
                     return true;
                 }

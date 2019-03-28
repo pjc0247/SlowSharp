@@ -16,14 +16,16 @@ namespace Slowsharp
         private Assembly asm;
 
         private RunContext ctx;
-        internal Name2RT name2rt { get; }
+        internal TypeResolver resolver { get; }
         private IdLookup lookup;
         private Class klass;
         internal VarFrame vars { get; private set; }
         private Stack<CatchFrame> catches;
 
+        private Stack<VarFrame> frames { get; }
+
         private bool methodEnd;
-        private object ret;
+        private HybInstance ret;
 
         private bool halt;
 
@@ -37,13 +39,15 @@ namespace Slowsharp
 
             this.lookup = new IdLookup(assemblies);
             this.catches = new Stack<CatchFrame>();
-            this.name2rt = new Name2RT(ctx, assemblies);
+            this.frames = new Stack<VarFrame>();
+            this.resolver = new TypeResolver(ctx, assemblies);
             //RunMethod(klass.GetMethods("Main")[0]);
         }
 
-        public object RunMain()
+        internal HybInstance RunMain(params object[] args)
         {
-            return klass.GetMethods("Main")[0].Invoke(null, new object[] { });
+            ctx.Reset();
+            return klass.GetMethods("Main")[0].Invoke(null, args.Wrap());
         }
 
         public void Run(SyntaxNode node)
@@ -85,7 +89,8 @@ namespace Slowsharp
             if (treatAsBlock.Contains(node.GetType()))
                 RunChildren(node);
 
-            if (halt) return;
+            if (ctx.IsExpird())
+                halt = true;
         }
 
         private void RunChildren(SyntaxNode node)
@@ -158,17 +163,31 @@ namespace Slowsharp
         {
             klass.AddMethod(node.Identifier.ValueText, node);
         }
-        internal object RunMethod(BaseMethodDeclarationSyntax node)
+        internal HybInstance RunMethod(BaseMethodDeclarationSyntax node, HybInstance[] args)
         {
             ret = null; methodEnd = false;
-            RunBlock(node.Body);
+
+            var vf = new VarFrame(null);
+            var count = 0;
+            foreach (var arg in args)
+            {
+                var paramId = node.ParameterList.Parameters[count++].Identifier.Text;
+                vf.SetValue(paramId, arg);
+            }
+
+            frames.Push(vars);
+            vars = null;
+            RunBlock(node.Body, vf);
+            vars = frames.Pop();
+
             return ret;
         }
-        internal object RunMethod(HybInstance _this, BaseMethodDeclarationSyntax node)
+        internal HybInstance RunMethod(HybInstance _this, BaseMethodDeclarationSyntax node, HybInstance[] args)
         {
             ctx._this = _this;
-            return RunMethod(node);
+            return RunMethod(node, args);
         }
+
         private void RunReturn(ReturnStatementSyntax node)
         {
             Console.WriteLine(node.Expression);
@@ -180,7 +199,10 @@ namespace Slowsharp
         {
             foreach (var v in node.Declaration.Variables)
             {
-                vars.SetValue(v.Identifier.ValueText, RunExpression(v.Initializer.Value));
+                var id = v.Identifier.ValueText;
+                if (vars.TryGetValue(id, out _))
+                    throw new SemanticViolationException($"Local variable redefination: {id}");
+                vars.SetValue(id, RunExpression(v.Initializer.Value));
             }
         }
         private void RunVariableDeclaration(VariableDeclarationSyntax node)
@@ -212,53 +234,23 @@ namespace Slowsharp
                 if (set == false)
                     vars.SetValue(key, right);
             }
-        }
-        private object RunInvocation(InvocationExpressionSyntax node)
-        {
-            object callee = null;
-            Invokable[] callsite = null;
-
-            if (node.Expression is MemberAccessExpressionSyntax ma)
+            else if (node.Left is ElementAccessExpressionSyntax ea)
             {
-                if (ma.Expression is IdentifierNameSyntax id)
-                {
-                    var leftType = name2rt.GetType($"{id.Identifier}");
-                    if (leftType == null)
-                    {
-                        callee = vars.GetValue($"{id.Identifier}");
+                var callee = RunExpression(ea.Expression);
+                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
 
-                        if (callee == null)
-                            throw new NullReferenceException($"{id.Identifier}");
+                var count = 0;
+                foreach (var arg in ea.ArgumentList.Arguments)
+                    args[count++] = RunExpression(arg.Expression);
 
-                        callsite = callee.GetType()
-                            .GetMember($"{ma.Name}")
-                            .OfType<MethodInfo>()
-                            .Select(x => new Invokable(x))
-                            .ToArray();
-                    }
-                    else
-                    {
-                        callsite = leftType.GetMethods($"{ma.Name}");
-                    }
-                }
-                //callsite = ResolveMemberAccess(node.Expression as MemberAccessExpressionSyntax);
+                if (callee.SetIndexer(args, right) == false)
+                    throw new NoSuchMemberException("[]");
             }
-            if (node.Expression is IdentifierNameSyntax)
-                callsite = ResolveLocalMember(node.Expression as IdentifierNameSyntax);
-
-            if (callsite == null)
-                return null;
-
-            var args = ResolveArgumentList(node.ArgumentList);
-            var method = FindMethodWithArguments(callsite, args);
-            var ret = method.Invoke(callee, args);
-            methodEnd = false;
-            return ret;
         }
 
-        private object[] ResolveArgumentList(ArgumentListSyntax node)
+        private HybInstance[] ResolveArgumentList(ArgumentListSyntax node)
         {
-            var args = new object[node.Arguments.Count];
+            var args = new HybInstance[node.Arguments.Count];
 
             for (int i = 0; i < node.Arguments.Count; i++)
                 args[i] = RunExpression(node.Arguments[i].Expression);
@@ -266,9 +258,18 @@ namespace Slowsharp
             return args;
         }
 
-        private object ResolveLiteral(LiteralExpressionSyntax node)
+        private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
-            return node.Token.Value;
+            if (node.Token.Value is string str)
+                return HybInstance.String(str);
+            if (node.Token.Value is bool b)
+                return HybInstance.Bool(b);
+            if (node.Token.Value is int i)
+                return HybInstance.Int(i);
+            if (node.Token.Value is float f)
+                return HybInstance.Float(f);
+
+            throw new InvalidOperationException();
             /*
             if (node.Token.Kind() == SyntaxKind.StringLiteralExpression)
                 return node.Token.Value;
@@ -299,7 +300,7 @@ namespace Slowsharp
 
             return new Invokable[] { };
         }
-        private Invokable FindMethodWithArguments(Invokable[] members, object[] args)
+        private Invokable FindMethodWithArguments(Invokable[] members, HybInstance[] args)
         {
             foreach (var member in members)
             {
@@ -323,7 +324,7 @@ namespace Slowsharp
                             }
                             continue;
                         }
-                        if (!ps[i].ParameterType.IsAssignableFrom(args[i].GetType()))
+                        if (!ps[i].ParameterType.IsAssignableFrom(args[i].GetHybType().compiledType))
                         {
                             skip = true;
                             break;

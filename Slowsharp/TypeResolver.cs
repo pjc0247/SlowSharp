@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class Name2RT
+    internal class TypeResolver
     {
         private RunContext ctx;
         private Assembly[] assemblies;
 
-        public Name2RT(RunContext ctx, Assembly[] assemblies)
+        public TypeResolver(RunContext ctx, Assembly[] assemblies)
         {
             this.ctx = ctx;
             this.assemblies = assemblies;
@@ -44,7 +44,7 @@ namespace Slowsharp
 
             return null;
         }
-        public Type GetGenericType(string id, int n)
+        public HybType GetGenericType(string id, int n)
         {
             id = $"{id}`{n}";
 
@@ -53,9 +53,9 @@ namespace Slowsharp
                 foreach (var type in asm.GetTypes())
                 {
                     if (type.Name.Split('[')[0] == id)
-                        return type;
+                        return new HybType(type);
                     if (type.FullName.Split('[')[0] == id)
-                        return type;
+                        return new HybType(type);
                 }
             }
 

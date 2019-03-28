@@ -11,6 +11,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
+    class Bar
+    {
+        public void Boo()
+        {
+            Console.WriteLine(1234);
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -23,23 +31,32 @@ using System.Text;
  
 namespace HelloWorld
 {
-    class Bar {
-        public int a;
-        public Bar() {
-            Console.WriteLine(a);
+    class Foo {
+        public int aa = 55;
+        public Foo(int b) {
+            aa = b;
+            Console.WriteLine(aa);
         }
     }
     class Program
     {
+static int bb = 1;
 static int Foo() { return 5; }
 
-        static void Main(string[] args)
+        static int Main(int n)
         {
-            var a = new Bar();
+Console.WriteLine(n);
+return 1;
         }
+
+static void Bo() {
+var aa = 1234;
+Console.WriteLin(aa);
+}
     }
 }
 ";
+            
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
@@ -47,7 +64,7 @@ static int Foo() { return 5; }
 
             var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
             r.Run(root);
-            r.RunMain();
+            Console.WriteLine(r.RunMain(5).innerObject);
         }
 
         private static void Dump(SyntaxNode syntax, int depth = 0)

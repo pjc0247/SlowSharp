@@ -26,6 +26,6 @@ namespace Slowsharp
             startsAt = DateTime.Now;
         }
 
-        public bool IsExpird() => (DateTime.Now - startsAt).Milliseconds >= config.timeout;
+        public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= config.timeout;
     }
 }

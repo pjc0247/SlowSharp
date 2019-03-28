@@ -14,6 +14,14 @@ namespace Slowsharp
         public Type compiledType { get; }
         public Class interpretKlass { get; }
 
+        public static HybType Object => HybTypeCache.Object;
+        public static HybType Bool => HybTypeCache.Bool;
+        public static HybType Int => HybTypeCache.Int;
+        public static HybType String => HybTypeCache.String;
+        public static HybType Float => HybTypeCache.Float;
+        public static HybType Double => HybTypeCache.Double;
+        public static HybType Decimal => HybTypeCache.Decimal;
+
         public HybType(Type type)
         {
             this.compiledType = type;
@@ -23,7 +31,16 @@ namespace Slowsharp
             this.interpretKlass = klass;
         }
 
-        public HybInstance CreateInstance(Runner runner, object[] args)
+        public HybType MakeGenericType(HybType[] genericArgs)
+        {
+            if (isCompiledType)
+            {
+                return new HybType(compiledType.MakeGenericType(genericArgs.Unwrap()));
+            }
+            return null;
+        }
+
+        public HybInstance CreateInstance(Runner runner, HybInstance[] args)
         {
             if (isCompiledType)
             {
@@ -34,7 +51,11 @@ namespace Slowsharp
             else
             {
                 var inst = new HybInstance(runner, this, interpretKlass);
-                inst.GetMethods("$_ctor")[0].Invoke(inst, args);
+                var ctor = inst.GetMethods("$_ctor");
+
+                if (ctor.Length > 0)
+                    ctor[0].Invoke(inst, args);
+
                 return inst;
             }
         }

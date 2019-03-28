@@ -18,7 +18,12 @@ namespace Slowsharp
 
             var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
             r.Run(root);
-            return r.RunMain();
+
+            var ret = r.RunMain();
+            if (ret == null) return null;
+            if (ret.isCompiledType)
+                return ret.innerObject;
+            return ret;
         }
     }
 }
