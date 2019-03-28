@@ -92,6 +92,7 @@
     <Compile Include="Hyb\HybTypeCache.cs" />
     <Compile Include="IdLookup.cs" />
     <Compile Include="Invokable.cs" />
+    <Compile Include="Runner\AccessLevel.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="TypeResolver.cs" />

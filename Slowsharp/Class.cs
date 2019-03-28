@@ -57,6 +57,12 @@ namespace Slowsharp
         {
             return fields.ContainsKey(id);
         }
+        public SSFieldInfo GetField(string id)
+        {
+            if (HasField(id) == false)
+                throw new ArgumentException($"No such field: {id}");
+            return fields[id];
+        }
         /*
         public Invokable[] GetMethods(string id)
         {

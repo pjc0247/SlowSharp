@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
@@ -19,8 +20,39 @@ namespace Slowsharp
         Internal = 8
     }
 
+    internal static class AccessModifierEvaluator
+    {
+        public static bool IsAcceesible(this AccessModifier _this, AccessLevel level)
+        {
+            if (_this == AccessModifier.Protected)
+            {
+                if (level == AccessLevel.Outside)
+                    return false;
+            }
+            else if (_this == AccessModifier.Private)
+            {
+                if (level == AccessLevel.Outside ||
+                    level == AccessLevel.Derivered)
+                    return false;
+            }
+            return true;
+        }
+    }
     internal class AccessModifierParser
     {
+        public static AccessModifier Get(MethodBase method)
+        {
+            if (method.IsPublic) return AccessModifier.Public;
+            if (method.IsPrivate) return AccessModifier.Private;
+            return AccessModifier.Protected;
+        }
+        public static AccessModifier Get(FieldInfo field)
+        {
+            if (field.IsPublic) return AccessModifier.Public;
+            if (field.IsPrivate) return AccessModifier.Private;
+            return AccessModifier.Protected;
+        }
+
         public static AccessModifier Parse(SyntaxTokenList list)
         {
             AccessModifier mod = AccessModifier.None;

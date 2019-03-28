@@ -190,7 +190,7 @@ namespace Slowsharp
             return false;
         }
 
-        public bool SetPropertyOrField(string id, HybInstance value)
+        public bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {
@@ -198,6 +198,10 @@ namespace Slowsharp
                    .GetProperty(id);
                 if (p != null)
                 {
+                    var mod = AccessModifierParser.Get(p.SetMethod);
+                    if (mod.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+
                     p.SetValue(obj, value);
                     return true;
                 }
@@ -206,6 +210,10 @@ namespace Slowsharp
                     .GetField(id);
                 if (f != null)
                 {
+                    var mod = AccessModifierParser.Get(f);
+                    if (mod.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+
                     f.SetValue(obj, value);
                     return true;
                 }
@@ -216,6 +224,10 @@ namespace Slowsharp
             {
                 if (klass.HasField(id))
                 {
+                    var f = klass.GetField(id);
+                    if (f.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+
                     fields[id] = value;
                     return true;
                 }
@@ -223,7 +235,7 @@ namespace Slowsharp
                 return false;
             }
         }
-        public bool GetPropertyOrField(string id, out HybInstance value)
+        public bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {
@@ -231,6 +243,10 @@ namespace Slowsharp
                    .GetProperty(id);
                 if (p != null)
                 {
+                    var mod = AccessModifierParser.Get(p.GetMethod);
+                    if (mod.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+
                     value = HybInstance.Object(p.GetValue(obj));
                     return true;
                 }
@@ -239,6 +255,10 @@ namespace Slowsharp
                     .GetField(id);
                 if (f != null)
                 {
+                    var mod = AccessModifierParser.Get(f);
+                    if (mod.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+
                     value = HybInstance.Object(f.GetValue(obj));
                     return true;
                 }
@@ -250,6 +270,9 @@ namespace Slowsharp
             {
                 if (klass.HasField(id))
                 {
+                    var f = klass.GetField(id);
+                    if (f.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
                     value = fields[id];
                     return true;
                 }

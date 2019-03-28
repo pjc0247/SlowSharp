@@ -227,7 +227,7 @@ namespace Slowsharp
                 var set = false;
                 if (ctx._this != null)
                 {
-                    if (ctx._this.SetPropertyOrField(key, right))
+                    if (ctx._this.SetPropertyOrField(key, right, AccessLevel.Outside))
                         set = true;
                 }
 

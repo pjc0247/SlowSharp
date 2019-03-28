@@ -54,7 +54,7 @@ namespace Slowsharp
 
             if (ctx._this != null)
             {
-                if (ctx._this.GetPropertyOrField(id, out v))
+                if (ctx._this.GetPropertyOrField(id, out v, AccessLevel.Outside))
                     return v;
             }
 
@@ -148,13 +148,8 @@ namespace Slowsharp
             var left = RunExpression(node.Expression);
             var right = node.Name.Identifier.Text;
 
-            /*
-            return left.GetType().GetMember(right)
-                .FirstOrDefault()
-                .GetValue(left);
-                */
             HybInstance o;
-            if (left.GetPropertyOrField(right, out o))
+            if (left.GetPropertyOrField(right, out o, AccessLevel.Outside))
                 return o;
 
             throw new NoSuchMemberException(right);
