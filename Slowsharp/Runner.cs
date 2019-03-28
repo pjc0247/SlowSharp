@@ -260,6 +260,8 @@ namespace Slowsharp
 
         private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
+            if (node.Token.Value is char c)
+                return HybInstance.Char(c);
             if (node.Token.Value is string str)
                 return HybInstance.String(str);
             if (node.Token.Value is bool b)
