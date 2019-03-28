@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class\Accessor.cs" />
     <Compile Include="Class\Field.cs" />
     <Compile Include="ControlFlow\For.cs" />
     <Compile Include="ControlFlow\If.cs" />

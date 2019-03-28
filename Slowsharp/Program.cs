@@ -46,7 +46,7 @@ static int Foo() { return 5; }
 
         static int Main(int n)
         {
-(new Bar()).Boo();
+(new Bar()).Boo(5);
         }
 
 static void Bo() {

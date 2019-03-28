@@ -9,6 +9,13 @@ namespace Slowsharp.Test
 {
     public class TestRunner
     {
+        public static object RunRaw(string code)
+        {
+            return CScript.Run(@"
+using System;
+" + code);
+        }
+
         public static object Run(string code)
         {
             return CScript.Run(@"

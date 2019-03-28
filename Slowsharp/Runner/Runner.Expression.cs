@@ -131,6 +131,10 @@ namespace Slowsharp
 
             var args = ResolveArgumentList(node.ArgumentList);
             var method = FindMethodWithArguments(callsite, args);
+
+            if (method == null)
+                throw new SemanticViolationException($"No matching override for `{targetId}`");
+
             var ret = method.Invoke(callee, args);
             methodEnd = false;
             return ret;
