@@ -45,7 +45,8 @@ namespace Slowsharp
         internal HybInstance RunMain(params object[] args)
         {
             ctx.Reset();
-            return klass.GetMethods("Main")[0].Invoke(null, args.Wrap());
+            return klass.GetMethods("Main")[0]
+                .target.Invoke(null, args.Wrap());
         }
 
         public void Run(SyntaxNode node)
@@ -62,11 +63,11 @@ namespace Slowsharp
             if (node is ClassDeclarationSyntax)
                 AddClass(node as ClassDeclarationSyntax);
             if (node is ConstructorDeclarationSyntax)
-                RunConstructorDeclaration(node as ConstructorDeclarationSyntax);
+                AddConstructorMethod(node as ConstructorDeclarationSyntax);
             if (node is FieldDeclarationSyntax)
                 AddField(node as FieldDeclarationSyntax);
             if (node is MethodDeclarationSyntax)
-                RunMethodDeclaration(node as MethodDeclarationSyntax);
+                AddMethod(node as MethodDeclarationSyntax);
             if (node is BlockSyntax)
                 RunBlock(node as BlockSyntax);
             if (node is ArrowExpressionClauseSyntax)
@@ -121,6 +122,14 @@ namespace Slowsharp
                 klass.AddField($"{f.Identifier}", node, f);
             }
         }
+        private void AddConstructorMethod(ConstructorDeclarationSyntax node)
+        {
+            klass.AddMethod("$_ctor", node);
+        }
+        private void AddMethod(MethodDeclarationSyntax node)
+        {
+            klass.AddMethod(node.Identifier.ValueText, node);
+        }
 
         private HybInstance RunArrowExpressionClause(ArrowExpressionClauseSyntax node)
         {
@@ -172,14 +181,6 @@ namespace Slowsharp
             catches.Pop();
         }
 
-        private void RunConstructorDeclaration(ConstructorDeclarationSyntax node)
-        {
-            klass.AddMethod("$_ctor", node);
-        }
-        private void RunMethodDeclaration(MethodDeclarationSyntax node)
-        {
-            klass.AddMethod(node.Identifier.ValueText, node);
-        }
         internal HybInstance RunMethod(BaseMethodDeclarationSyntax node, HybInstance[] args)
         {
             ret = null;
@@ -332,9 +333,7 @@ namespace Slowsharp
             return args;
         }
 
-        
-
-        private Invokable[] ResolveLocalMember(IdentifierNameSyntax node)
+        private SSMethodInfo[] ResolveLocalMember(IdentifierNameSyntax node)
         {
             var id = node.Identifier.ValueText;
             return klass.GetMethods(id);
@@ -357,13 +356,13 @@ namespace Slowsharp
 
             return new Invokable[] { };
         }
-        private Invokable FindMethodWithArguments(Invokable[] members, HybInstance[] args)
+        private SSMethodInfo FindMethodWithArguments(SSMethodInfo[] members, HybInstance[] args)
         {
             foreach (var member in members)
             {
-                if (member.isCompiled)
+                if (member.target.isCompiled)
                 {
-                    var method = member.compiledMethod;
+                    var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
 
                     if (args.Length != ps.Length)
@@ -393,7 +392,7 @@ namespace Slowsharp
                 }
                 else
                 {
-                    var ps = member.interpretMethod.ParameterList.Parameters;
+                    var ps = member.target.interpretMethod.ParameterList.Parameters;
 
                     if (args.Length != ps.Count)
                         continue;

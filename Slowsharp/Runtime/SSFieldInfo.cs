@@ -13,7 +13,6 @@ namespace Slowsharp
     /// </summary>
     internal class SSFieldInfo : SSMemberInfo
     {
-        public string id;
         public VariableDeclaratorSyntax declartor;
         public FieldDeclarationSyntax field;
     }

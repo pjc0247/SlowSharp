@@ -129,7 +129,7 @@ namespace Slowsharp
             string calleeId = "";
             string targetId = "";
             HybInstance callee = null;
-            Invokable[] callsite = null;
+            SSMethodInfo[] callsite = null;
 
             if (node.Expression is MemberAccessExpressionSyntax ma)
             {
@@ -148,7 +148,7 @@ namespace Slowsharp
                     }
                     else
                     {
-                        callsite = leftType.GetMethods($"{ma.Name}");
+                        callsite = leftType.GetStaticMethods($"{ma.Name}");
                     }
 
                     calleeId = $"{id.Identifier}";
@@ -177,7 +177,7 @@ namespace Slowsharp
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
-            var ret = method.Invoke(callee, args);
+            var ret = method.target.Invoke(callee, args);
             return ret;
         }
 

@@ -128,13 +128,17 @@ namespace Slowsharp
             return default(T);
         }
 
-        public Invokable[] GetMethods(string id)
+        public SSMethodInfo[] GetMethods(string id)
         {
             if (isCompiledType)
             {
                 return obj.GetType().GetMethods()
                    .Where(x => x.Name == id)
-                   .Select(x => new Invokable(x))
+                   .Select(x => new SSMethodInfo() {
+                       id = x.Name,
+                       target = new Invokable(x),
+                       accessModifier = AccessModifierParser.Get(x)
+                   })
                    .ToArray();
             }
             else

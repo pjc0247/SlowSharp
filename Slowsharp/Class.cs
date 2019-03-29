@@ -16,7 +16,7 @@ namespace Slowsharp
 
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
         private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
-        private Dictionary<string, Invokable> methods = new Dictionary<string, Invokable>();
+        private Dictionary<string, SSMethodInfo> methods = new Dictionary<string, SSMethodInfo>();
         private Runner runner;
 
         public Class(Runner runner, string id)
@@ -27,7 +27,14 @@ namespace Slowsharp
 
         public void AddMethod(string id, BaseMethodDeclarationSyntax method)
         {
-            methods.Add(id, new Invokable(runner, method));
+            methods.Add(id, new SSMethodInfo()
+            {
+                id = id,
+                method = method,
+                target = new Invokable(runner, method),
+
+                accessModifier = AccessModifierParser.Parse(method.Modifiers)
+            });
         }
         public void AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
@@ -41,7 +48,7 @@ namespace Slowsharp
             });
         }
 
-        public Invokable[] GetMethods(string id)
+        public SSMethodInfo[] GetMethods(string id)
         {
             return methods
                 .Where(x => x.Key == id)

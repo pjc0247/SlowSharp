@@ -8,6 +8,8 @@ namespace Slowsharp
 {
     internal class SSMemberInfo
     {
+        public string id;
+
         public AccessModifier accessModifier;
     }
 }

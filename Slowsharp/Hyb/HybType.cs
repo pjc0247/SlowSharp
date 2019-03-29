@@ -58,19 +58,24 @@ namespace Slowsharp
                 var ctor = inst.GetMethods("$_ctor");
 
                 if (ctor.Length > 0)
-                    ctor[0].Invoke(inst, args);
+                    ctor[0].target.Invoke(inst, args);
 
                 return inst;
             }
         }
 
-        public Invokable[] GetMethods(string id)
+        public SSMethodInfo[] GetStaticMethods(string id)
         {
             if (isCompiledType)
             {
                 return compiledType.GetMethods()
+                   .Where(x => x.IsStatic)
                    .Where(x => x.Name == id)
-                   .Select(x => new Invokable(x))
+                   .Select(x => new SSMethodInfo() {
+                       id = x.Name,
+                       target = new Invokable(x),
+                       accessModifier = AccessModifierParser.Get(x)
+                   })
                    .ToArray();
             }
             else

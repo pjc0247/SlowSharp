@@ -91,7 +91,7 @@
     <Compile Include="Hyb\HybInstance.cs" />
     <Compile Include="Hyb\HybTypeCache.cs" />
     <Compile Include="IdLookup.cs" />
-    <Compile Include="Invokable.cs" />
+    <Compile Include="Hyb\Invokable.cs" />
     <Compile Include="Runner\AccessLevel.cs" />
     <Compile Include="Runner\HaltType.cs" />
     <Compile Include="Runner\MadMath.cs" />
@@ -99,6 +99,7 @@
     <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
+    <Compile Include="Runtime\SSMethodInfo.cs" />
     <Compile Include="TypeResolver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

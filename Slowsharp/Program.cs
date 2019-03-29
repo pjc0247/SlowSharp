@@ -34,6 +34,9 @@ namespace HelloWorld
 {
     class Foo {
         private int aa = 55;
+
+private static int Boo() => 5;
+
         public Foo(int b) {
             aa = b;
             Console.WriteLine(aa);
@@ -44,11 +47,11 @@ namespace HelloWorld
 static int bb = 1;
 static int Foo() { return 5; }
 
-static int Booo() => 5;
+private static int Booo() => 5;
 
         static int Main(int n)
         {
-Console.WriteLine(Booo());
+Console.WriteLine(Foo.Boo());
 return a;
         }
 
