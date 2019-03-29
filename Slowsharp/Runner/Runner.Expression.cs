@@ -67,7 +67,11 @@ namespace Slowsharp
             if (node.Token.Value is bool b)
                 return HybInstance.Bool(b);
             if (node.Token.Value is int i)
+            {
+                if (int.TryParse(node.Token.Text, out _) == false)
+                    throw new SemanticViolationException($"Integer literal out of range");
                 return HybInstance.Int(i);
+            }
             if (node.Token.Value is float f)
                 return HybInstance.Float(f);
             if (node.Token.Value is double d)
