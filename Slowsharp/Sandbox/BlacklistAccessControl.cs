@@ -35,7 +35,9 @@ namespace Slowsharp
             namespaceFilters.Add("System.Threading");
             namespaceFilters.Add("System.Reflection");
             namespaceFilters.Add("System.Diagnostics");
+            namespaceFilters.Add("System.Net");
             klassFilters.Add("System.AppDomain");
+            klassFilters.Add("System.Environment");
         }
 
         public bool IsSafeType(HybType type)
