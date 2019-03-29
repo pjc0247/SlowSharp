@@ -52,13 +52,19 @@ private static int Booo() => 5;
 
         static int Main(int n)
         {
-try {
-}
-finally {
-Console.WriteLine(1234);
-}
+var r = await Task.Run(() => {
+    Thread.Sleep(1000);
+    Console.WriteLine(1234);
+    return 4222;
+});
+var rr = await Task.Run(() => {
+    Thread.Sleep(1000);
+    Console.WriteLine(1234);
+    return 4222;
+});
+Console.WriteLine(r);
 
-return a;
+return r;
         }
 
 static void Bo() {
@@ -76,8 +82,6 @@ Console.WriteLin(aa);
             var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
             r.Run(root);
             var ret = r.RunMain(5).innerObject;
-
-            Console.WriteLine(((Func<int>)ret).Invoke());
 
             Console.WriteLine(ret);
         }

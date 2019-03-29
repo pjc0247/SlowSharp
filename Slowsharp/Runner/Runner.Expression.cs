@@ -48,7 +48,7 @@ namespace Slowsharp
 
             // Runner.ThreadingKeyword.cs
             else if (node is AwaitExpressionSyntax)
-                return RunExpression(node as AwaitExpressionSyntax);
+                return RunAwait(node as AwaitExpressionSyntax);
 
             return null;
         }
@@ -98,6 +98,7 @@ namespace Slowsharp
             return new HybInstance(new HybType(typeof(Action)), new Action(() =>
             {
                 Run(node.Body);
+                halt = HaltType.None;
             }));
         }
 

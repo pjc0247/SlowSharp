@@ -35,7 +35,26 @@ namespace Slowsharp
 
         private HybInstance RunAwait(AwaitExpressionSyntax node)
         {
-            throw new NotImplementedException();
+            var task = RunExpression(node.Expression);
+
+            if (task.isCompiledType &&
+                task.Unwrap() is Task t)
+            {
+                t.Wait();
+                return HybInstance.Null();
+            }
+            else
+            {
+                HybInstance result;
+                if (task.GetPropertyOrField(
+                    nameof(Task<int>.Result),
+                    out result, AccessLevel.Outside))
+                {
+                    Console.WriteLine(result);
+                }
+            }
+
+            throw new SSRuntimeException();
         }
     }
 }
