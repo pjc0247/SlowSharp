@@ -79,7 +79,12 @@ Console.WriteLin(aa);
 
             Dump(root);
 
-            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
+            var ac = new AccessControl();
+            ac.AddDefaultPolicies();
+
+            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig() {
+                accessControl = ac
+            });
             r.Run(root);
             var ret = r.RunMain(5).innerObject;
 

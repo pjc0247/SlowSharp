@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />

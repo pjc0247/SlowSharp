@@ -20,9 +20,17 @@ namespace Slowsharp
             klassFilters.Add("System.AppDomain");
         }
 
-        public bool IsSafeType(Type type)
+        public bool IsSafeType(HybType type)
         {
-            return klassFilters.Contains(type.FullName) == false;
+            // Interpret type is always safe
+            if (type.isCompiledType == false)
+                return true;
+
+            var ct = type.compiledType;
+            if (IsBlockedNamespace(ct.Namespace))
+                return false;
+            return klassFilters.Contains(
+                ct.FullName) == false;
         }
         public bool IsBlockedNamespace(string ns)
         {
