@@ -17,3 +17,23 @@ Since __SlowSharp__ is an interpreter, there're some differences and limitations
 Console.WriteLine("Hello");
 Console.WriteLn("World");
 ```
+
+Sandboxing
+----
+### 
+```cs
+var ac = new AccessControl();
+ac.AddBlockedType("System.Threading.Thread");
+ac.AddBlockedNamespace("System.IO");
+
+new RunConfig() {
+  accessControl = ac
+};
+```
+
+### Timeout
+```cs
+new RunConfig() {
+  timeout = 1000 /* ms */
+};
+```
