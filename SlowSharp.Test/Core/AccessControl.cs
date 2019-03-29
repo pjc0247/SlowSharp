@@ -9,8 +9,7 @@ namespace Slowsharp.Test
         [TestInitialize]
         public static void Setup()
         {
-            var ac = new AccessControl();
-            ac.AddDefaultPolicies();
+            var ac = BlacklistAccessControl.Default;
             TestRunner.config.accessControl = ac;
         }
         [TestCleanup]

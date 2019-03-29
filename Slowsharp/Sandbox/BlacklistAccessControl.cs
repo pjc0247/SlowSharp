@@ -6,8 +6,18 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    public class AccessControl
+    public class BlacklistAccessControl : IAccessFilter
     {
+        public static BlacklistAccessControl Default
+        {
+            get
+            {
+                var ac = new BlacklistAccessControl();
+                ac.AddDefaultPolicies();
+                return ac;
+            }
+        }
+
         private HashSet<string> namespaceFilters = new HashSet<string>();
         private HashSet<string> klassFilters = new HashSet<string>();
 
@@ -35,19 +45,19 @@ namespace Slowsharp
                 return true;
 
             var ct = type.compiledType;
-            if (IsBlockedNamespace(ct.Namespace))
+            if (IsAllowedNamespace(ct.Namespace) == false)
                 return false;
             return klassFilters.Contains(
                 ct.FullName) == false;
         }
-        public bool IsBlockedNamespace(string ns)
+        public bool IsAllowedNamespace(string ns)
         {
             foreach (var filter in namespaceFilters)
             {
                 if (ns.StartsWith(filter))
-                    return true;
+                    return false;
             }
-            return false;
+            return true;
         }
     }
 }
