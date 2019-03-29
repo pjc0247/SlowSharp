@@ -11,6 +11,14 @@ namespace Slowsharp
         private HashSet<string> namespaceFilters = new HashSet<string>();
         private HashSet<string> klassFilters = new HashSet<string>();
 
+        public void AddBlockedType(string id)
+        {
+            klassFilters.Add(id);
+        }
+        public void AddBlockedNamespace(string ns)
+        {
+            namespaceFilters.Add(ns);
+        }
         public void AddDefaultPolicies()
         {
             namespaceFilters.Add("System.IO");
