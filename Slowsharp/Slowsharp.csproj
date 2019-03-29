@@ -79,8 +79,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CatchFrame.cs" />
-    <Compile Include="Class.cs" />
+    <Compile Include="Runner\CatchFrame.cs" />
+    <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />
     <Compile Include="Exception\NoSuchMemberException.cs" />
     <Compile Include="Exception\NoSuchMethodException.cs" />
@@ -92,7 +92,7 @@
     <Compile Include="Hyb\HybType.cs" />
     <Compile Include="Hyb\HybInstance.cs" />
     <Compile Include="Hyb\HybTypeCache.cs" />
-    <Compile Include="IdLookup.cs" />
+    <Compile Include="Runner\IdLookup.cs" />
     <Compile Include="Hyb\Invokable.cs" />
     <Compile Include="Runner\AccessLevel.cs" />
     <Compile Include="Runner\HaltType.cs" />
@@ -106,10 +106,10 @@
     <Compile Include="Runtime\JumpDestination.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="Runtime\SSMethodInfo.cs" />
-    <Compile Include="TypeResolver.cs" />
+    <Compile Include="Runner\TypeResolver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runner.cs" />
+    <Compile Include="Runner\Runner.cs" />
     <Compile Include="Runner\RunConfig.cs" />
     <Compile Include="Runner\RunContext.cs" />
     <Compile Include="Runner\Runner.BinaryOperation.cs" />
@@ -119,7 +119,7 @@
     <Compile Include="Runtime\SSFieldInfo.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="Util\ModifierExt.cs" />
-    <Compile Include="VarFrame.cs" />
+    <Compile Include="Runner\VarFrame.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
