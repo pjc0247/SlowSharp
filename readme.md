@@ -20,7 +20,7 @@ Console.WriteLn("World");
 
 Sandboxing
 ----
-### 
+### Access control
 ```cs
 var ac = new AccessControl();
 ac.AddBlockedType("System.Threading.Thread");
