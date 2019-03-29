@@ -99,6 +99,7 @@
     <Compile Include="Runner\MadMath.cs" />
     <Compile Include="Runner\Runner.ThreadingKeyword.cs" />
     <Compile Include="Runner\Runner.Statement.cs" />
+    <Compile Include="Runner\Runner.TryCatch.cs" />
     <Compile Include="Runner\Runner.TypeConstruct.cs" />
     <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />

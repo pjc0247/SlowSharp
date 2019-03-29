@@ -160,12 +160,6 @@ namespace Slowsharp
         {
             RunBlock(node, new VarFrame(vars));
         }
-        private void RunTry(TryStatementSyntax node)
-        {
-            catches.Push(new CatchFrame(this, node));
-            RunBlock(node.Block);
-            catches.Pop();
-        }
 
         internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
         {

@@ -52,11 +52,11 @@ private static int Booo() => 5;
 
         static int Main(int n)
         {
-var a = 123;
-A:
-Console.WriteLine(a);
-a += 1;
-goto A;
+try {
+}
+finally {
+Console.WriteLine(1234);
+}
 
 return a;
         }
