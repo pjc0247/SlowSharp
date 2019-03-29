@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
+    <Compile Include="Runner\OverloadingResolver.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />
     <Compile Include="Exception\NoSuchMemberException.cs" />
@@ -116,8 +117,11 @@
     <Compile Include="Runner\Runner.BinaryOperation.cs" />
     <Compile Include="Runner\Runner.Expression.cs" />
     <Compile Include="Runner\Runner.FlowControl.cs" />
-    <Compile Include="Sandbox\AccessControl.cs" />
     <Compile Include="Runtime\SSFieldInfo.cs" />
+    <Compile Include="Sandbox\BlacklistAccessControl.cs" />
+    <Compile Include="Sandbox\DefaultAccessControl.cs" />
+    <Compile Include="Sandbox\IAccessFilter.cs" />
+    <Compile Include="Sandbox\WhitelistAccessControl.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="Util\ModifierExt.cs" />
     <Compile Include="Runner\VarFrame.cs" />

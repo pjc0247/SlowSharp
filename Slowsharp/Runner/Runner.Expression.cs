@@ -182,7 +182,7 @@ namespace Slowsharp
                 throw new NoSuchMethodException($"{calleeId}", targetId);
 
             var args = ResolveArgumentList(node.ArgumentList);
-            var method = FindMethodWithArguments(callsite, args);
+            var method = OverloadingResolver.FindMethodWithArguments(callsite, args);
 
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");

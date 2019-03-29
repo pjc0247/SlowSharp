@@ -55,10 +55,14 @@ namespace Slowsharp
             else
             {
                 var inst = new HybInstance(runner, this, interpretKlass);
-                var ctor = inst.GetMethods("$_ctor");
+                var ctors = inst.GetMethods("$_ctor");
 
-                if (ctor.Length > 0)
-                    ctor[0].target.Invoke(inst, args);
+                if (ctors.Length > 0)
+                {
+                    var ctor = OverloadingResolver
+                        .FindMethodWithArguments(ctors, args);
+                    ctor.target.Invoke(inst, args);
+                }
 
                 return inst;
             }
