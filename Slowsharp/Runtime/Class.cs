@@ -37,6 +37,7 @@ namespace Slowsharp
             methods[id].Add(new SSMethodInfo(runner, method) {
                 id = id,
                 isStatic = method.Modifiers.IsStatic(),
+                declaringClass = this,
                 declaration = method,
                 jumps = jumps,
 
@@ -50,6 +51,7 @@ namespace Slowsharp
                 id = id,
                 isStatic = field.Modifiers.IsStatic(),
                 field = field,
+                declaringClass = this,
                 declartor = declarator,
 
                 accessModifier = AccessModifierParser.Parse(field.Modifiers)

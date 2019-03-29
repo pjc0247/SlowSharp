@@ -12,5 +12,7 @@ namespace Slowsharp
         public bool isStatic;
 
         public AccessModifier accessModifier;
+
+        internal Class declaringClass;
     }
 }

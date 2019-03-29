@@ -99,7 +99,10 @@ namespace Slowsharp
                     return v;
             }
 
-            return null;
+            var field = ctx.method.declaringClass.GetField(id);
+            //if (field.)
+
+            throw new NoSuchMemberException($"{id}");
         }
 
         private HybInstance RunParenthesized(ParenthesizedExpressionSyntax node)
