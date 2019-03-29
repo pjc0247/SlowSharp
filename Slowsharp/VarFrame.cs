@@ -41,6 +41,12 @@ namespace Slowsharp
             return parent.TryGetValue(key, out value);
         }
 
+        public bool UpdateValue(string key, HybInstance value)
+        {
+            Console.WriteLine($"{key} = {value}");
+
+            return SetValueUpwards(key, value);
+        }
         public void SetValue(string key, HybInstance value)
         {
             Console.WriteLine($"{key} = {value}");

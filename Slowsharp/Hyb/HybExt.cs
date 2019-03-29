@@ -8,6 +8,10 @@ namespace Slowsharp
 {
     internal static class HybExt
     {
+        public static object Unwrap(this HybInstance _this)
+        {
+            return _this.innerObject;
+        }
         public static Type[] Unwrap(this HybType[] _this)
         {
             var objs = new Type[_this.Length];
@@ -34,6 +38,11 @@ namespace Slowsharp
                 objs[i] = HybInstance.Object(_this[i]);
 
             return objs;
+        }
+        public static HybInstance Wrap(this object _this)
+        {
+            if (_this is HybInstance hyb) return hyb;
+            return HybInstance.Object(_this);
         }
 
         public static bool IsSubclassOf(this Type _this, HybType type)

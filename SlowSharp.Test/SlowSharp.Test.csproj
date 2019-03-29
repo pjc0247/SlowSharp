@@ -54,6 +54,7 @@
     <Compile Include="ControlFlow\For.cs" />
     <Compile Include="ControlFlow\If.cs" />
     <Compile Include="Core\VarFrame.cs" />
+    <Compile Include="DotNet\Collections\Dictionary.cs" />
     <Compile Include="DotNet\Collections\List.cs" />
     <Compile Include="DotNet\Primitive\String.cs" />
     <Compile Include="Hyb\Operator.cs" />

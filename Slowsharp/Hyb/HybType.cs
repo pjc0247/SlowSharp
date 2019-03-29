@@ -16,7 +16,10 @@ namespace Slowsharp
 
         public static HybType Object => HybTypeCache.Object;
         public static HybType Bool => HybTypeCache.Bool;
-        public static HybType Int => HybTypeCache.Int;
+        public static HybType Int16 => HybTypeCache.Int16;
+        public static HybType Int32 => HybTypeCache.Int;
+        public static HybType Int64 => HybTypeCache.Int64;
+        public static HybType Short => HybTypeCache.Short;
         public static HybType Char => HybTypeCache.Char;
         public static HybType String => HybTypeCache.String;
         public static HybType Float => HybTypeCache.Float;
@@ -47,7 +50,7 @@ namespace Slowsharp
             {
                 return new HybInstance(
                     this,
-                    Activator.CreateInstance(compiledType, args));
+                    Activator.CreateInstance(compiledType, args.Unwrap()));
             }
             else
             {
@@ -85,6 +88,13 @@ namespace Slowsharp
                 return HybInstance.Null();
             }
             return HybInstance.Null();
+        }
+
+        public override string ToString()
+        {
+            if (isCompiledType)
+                return compiledType.Name;
+            return interpretKlass.id;
         }
     }
 }

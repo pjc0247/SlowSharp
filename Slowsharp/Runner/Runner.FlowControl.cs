@@ -43,9 +43,6 @@ namespace Slowsharp
         {
             vars = new VarFrame(vars);
 
-            //foreach (var expr in node.Initializers)
-            //RunExpression(expr);
-
             Run(node.Declaration);
 
             while (true)
@@ -58,13 +55,50 @@ namespace Slowsharp
                 }
 
                 Run(node.Statement);
-                if (halt) break;
+
+                if (halt == HaltType.Continue)
+                    halt = HaltType.None;
+                if (halt != HaltType.None) break;
 
                 foreach (var expr in node.Incrementors)
                     RunExpression(expr);
             }
 
+            if (halt == HaltType.Break)
+                halt = HaltType.None;
+
             vars = vars.parent;
+        }
+
+        private void RunForEach(ForEachStatementSyntax node)
+        {
+            var list = RunExpression(node.Expression);
+            var e = list.GetEnumerator();
+
+            vars = new VarFrame(vars);
+            while (true)
+            {
+                if (e.MoveNext() == false)
+                    break;
+                
+                vars.SetValue($"{node.Identifier}", e.Current.Wrap());
+
+                Run(node.Statement);
+
+                if (halt == HaltType.Continue)
+                    halt = HaltType.None;
+                if (halt != HaltType.None) break;
+            }
+            vars = vars.parent;
+        }
+
+        private void RunBreak(BreakStatementSyntax node)
+        {
+            halt = HaltType.Break;
+        }
+        private void RunContinue(ContinueStatementSyntax node)
+        {
+            halt = HaltType.Continue;
         }
     }
 }

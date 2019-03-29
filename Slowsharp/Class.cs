@@ -12,14 +12,17 @@ namespace Slowsharp
 {
     internal class Class
     {
+        public string id { get; }
+
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
         private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
         private Dictionary<string, Invokable> methods = new Dictionary<string, Invokable>();
         private Runner runner;
 
-        public Class(Runner runner)
+        public Class(Runner runner, string id)
         {
             this.runner = runner;
+            this.id = id;
         }
 
         public void AddMethod(string id, BaseMethodDeclarationSyntax method)

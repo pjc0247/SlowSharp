@@ -14,9 +14,10 @@ namespace Slowsharp
         {
             if (node is ParenthesizedExpressionSyntax ps)
                 return RunExpression(ps.Expression);
-
             else if (node is ParenthesizedExpressionSyntax)
                 return RunParenthesized(node as ParenthesizedExpressionSyntax);
+            else if (node is ParenthesizedLambdaExpressionSyntax)
+                return RunParenthesizedLambda(node as ParenthesizedLambdaExpressionSyntax);
             else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
             else if (node is LiteralExpressionSyntax)
@@ -29,6 +30,8 @@ namespace Slowsharp
                 RunAssign(node as AssignmentExpressionSyntax);
             else if (node is DefaultExpressionSyntax)
                 return RunDefault(node as DefaultExpressionSyntax);
+            else if (node is InterpolatedStringExpressionSyntax)
+                return RunInterpolatedString(node as InterpolatedStringExpressionSyntax);
             else if (node is InvocationExpressionSyntax)
                 return RunInvocation(node as InvocationExpressionSyntax);
             else if (node is ConditionalExpressionSyntax)
@@ -46,6 +49,23 @@ namespace Slowsharp
             return null;
         }
 
+        private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
+        {
+            if (node.Token.Value is char c)
+                return HybInstance.Char(c);
+            if (node.Token.Value is string str)
+                return HybInstance.String(str);
+            if (node.Token.Value is bool b)
+                return HybInstance.Bool(b);
+            if (node.Token.Value is int i)
+                return HybInstance.Int(i);
+            if (node.Token.Value is float f)
+                return HybInstance.Float(f);
+            if (node.Token.Value is double d)
+                return HybInstance.Double(d);
+
+            throw new InvalidOperationException();
+        }
         private HybInstance ResolveId(IdentifierNameSyntax node)
         {
             var id = $"{node.Identifier}";
@@ -67,6 +87,13 @@ namespace Slowsharp
         {
             return RunExpression(node.Expression);
         }
+        private HybInstance RunParenthesizedLambda(ParenthesizedLambdaExpressionSyntax node)
+        {
+            return new HybInstance(new HybType(typeof(Action)), new Action(() =>
+            {
+                Run(node.Body);
+            }));
+        }
 
         private HybInstance RunDefault(DefaultExpressionSyntax node)
         {
@@ -80,6 +107,21 @@ namespace Slowsharp
                 return RunExpression(node.WhenTrue);
             else
                 return RunExpression(node.WhenFalse);
+        }
+
+        private HybInstance RunInterpolatedString(InterpolatedStringExpressionSyntax node)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var content in node.Contents)
+            {
+                if (content is InterpolationSyntax s)
+                    sb.Append(RunExpression(s.Expression));
+                else if (content is InterpolatedStringTextSyntax)
+                    sb.Append(content.GetText());
+            }
+
+            return HybInstance.String(sb.ToString());
         }
 
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
@@ -136,7 +178,6 @@ namespace Slowsharp
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
             var ret = method.Invoke(callee, args);
-            methodEnd = false;
             return ret;
         }
 
@@ -191,6 +232,14 @@ namespace Slowsharp
             }
             else
                 type = resolver.GetType($"{node.Type}");
+
+            if (type.isCompiledType)
+            {
+                if (type.compiledType == typeof(Action))
+                    return args[0];
+                if (type.compiledType == typeof(Func<int>))
+                    return args[0];
+            }
 
             return type.CreateInstance(this, args);
         }

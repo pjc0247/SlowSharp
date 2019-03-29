@@ -26,5 +26,15 @@ return ""hello"";
 return ""hello"" + ""world"";
 "));
         }
+
+        [TestMethod]
+        public void Interpolation()
+        {
+            Assert.AreEqual(
+                "helloworld",
+                TestRunner.Run(@"
+return $""{""hello""}{""world""}"";
+"));
+        }
     }
 }

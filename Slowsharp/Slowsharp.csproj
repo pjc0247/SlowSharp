@@ -93,6 +93,10 @@
     <Compile Include="IdLookup.cs" />
     <Compile Include="Invokable.cs" />
     <Compile Include="Runner\AccessLevel.cs" />
+    <Compile Include="Runner\HaltType.cs" />
+    <Compile Include="Runner\MadMath.cs" />
+    <Compile Include="Runner\Runner.Statement.cs" />
+    <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="TypeResolver.cs" />

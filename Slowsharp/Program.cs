@@ -46,7 +46,12 @@ static int Foo() { return 5; }
 
         static int Main(int n)
         {
-(new Bar()).Boo(5);
+       var a = new int []{1,2,3};
+a[1] = 14;
+
+Console.WriteLine(a[1]);
+
+return a;
         }
 
 static void Bo() {
@@ -56,7 +61,7 @@ Console.WriteLin(aa);
     }
 }
 ";
-            
+
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
@@ -64,7 +69,11 @@ Console.WriteLin(aa);
 
             var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
             r.Run(root);
-            Console.WriteLine(r.RunMain(5).innerObject);
+            var ret = r.RunMain(5).innerObject;
+
+            Console.WriteLine(((Func<int>)ret).Invoke());
+
+            Console.WriteLine(ret);
         }
 
         private static void Dump(SyntaxNode syntax, int depth = 0)

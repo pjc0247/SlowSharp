@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,11 +52,19 @@ namespace Slowsharp
         }
         public static HybInstance Int(int n)
         {
-            return new HybInstance(HybType.Int, n);
+            return new HybInstance(HybType.Int32, n);
+        }
+        public static HybInstance Int64(Int64 n)
+        {
+            return new HybInstance(HybType.Int64, n);
         }
         public static HybInstance Float(float f)
         {
             return new HybInstance(HybType.Float, f);
+        }
+        public static HybInstance Double(double f)
+        {
+            return new HybInstance(HybType.Double, f);
         }
 
         public HybInstance(HybType type, object obj)
@@ -141,7 +150,7 @@ namespace Slowsharp
                 if (obj is Array ary)
                 {
                     ary.SetValue(
-                        value,
+                        value.Unwrap(),
                         args.Unwrap()
                             .Select(x => (int)x)
                             .ToArray());
@@ -286,6 +295,26 @@ namespace Slowsharp
             }
         }
 
+        public IEnumerator GetEnumerator()
+        {
+            if (isCompiledType)
+            {
+                if (obj is IEnumerable e)
+                    return e.GetEnumerator();
+                if (obj is IEnumerator et)
+                    return et;
+                throw new InvalidOperationException("Object is not an enumerable.");
+            }
+
+            throw new InvalidOperationException("Object is not an enumerable.");
+        }
+
+        public override string ToString()
+        {
+            if (isCompiledType)
+                return obj.ToString();
+            return type.ToString();
+        }
         public HybInstance Clone()
         {
             if (isCompiledType)

@@ -24,10 +24,8 @@ namespace Slowsharp
 
         private Stack<VarFrame> frames { get; }
 
-        private bool methodEnd;
         private HybInstance ret;
-
-        private bool halt;
+        private HaltType halt;
 
         public Runner(Assembly asm, RunConfig config)
         {
@@ -75,10 +73,16 @@ namespace Slowsharp
                 RunIf(node as IfStatementSyntax);
             if (node is ForStatementSyntax)
                 RunFor(node as ForStatementSyntax);
+            if (node is ForEachStatementSyntax)
+                RunForEach(node as ForEachStatementSyntax);
             if (node is TryStatementSyntax)
                 RunTry(node as TryStatementSyntax);
             if (node is ReturnStatementSyntax)
                 RunReturn(node as ReturnStatementSyntax);
+            if (node is BreakStatementSyntax)
+                RunBreak(node as BreakStatementSyntax);
+            if (node is ContinueStatementSyntax)
+                RunContinue(node as ContinueStatementSyntax);
             if (node is LocalDeclarationStatementSyntax)
                 RunLocalDeclaration(node as LocalDeclarationStatementSyntax);
             if (node is VariableDeclarationSyntax)
@@ -90,7 +94,7 @@ namespace Slowsharp
                 RunChildren(node);
 
             if (ctx.IsExpird())
-                halt = true;
+                halt = HaltType.ForceQuit;
         }
 
         private void RunChildren(SyntaxNode node)
@@ -105,7 +109,7 @@ namespace Slowsharp
         }
         private void AddClass(ClassDeclarationSyntax node)
         {
-            klass = new Class(this);
+            klass = new Class(this, $"{node.Identifier}");
             ctx.types.Add($"{node.Identifier}", klass);
         }
         private void AddField(FieldDeclarationSyntax node)
@@ -138,9 +142,9 @@ namespace Slowsharp
                 }
 
                 if (ctx.IsExpird())
-                    halt = true;
+                    halt = HaltType.ForceQuit;
 
-                if (halt || methodEnd) break;
+                if (halt != HaltType.None) break;
             }
             vars = vars.parent;
         }
@@ -165,7 +169,8 @@ namespace Slowsharp
         }
         internal HybInstance RunMethod(BaseMethodDeclarationSyntax node, HybInstance[] args)
         {
-            ret = null; methodEnd = false;
+            ret = null;
+            ctx.PushMethod(node);
 
             var vf = new VarFrame(null);
             var count = 0;
@@ -180,6 +185,9 @@ namespace Slowsharp
             RunBlock(node.Body, vf);
             vars = frames.Pop();
 
+            if (halt == HaltType.Return)
+                halt = HaltType.None;
+
             return ret;
         }
         internal HybInstance RunMethod(HybInstance _this, BaseMethodDeclarationSyntax node, HybInstance[] args)
@@ -188,13 +196,6 @@ namespace Slowsharp
             return RunMethod(node, args);
         }
 
-        private void RunReturn(ReturnStatementSyntax node)
-        {
-            Console.WriteLine(node.Expression);
-            ret = RunExpression(node.Expression);
-            methodEnd = true;
-            Console.WriteLine($"Return {ret}");
-        }
         private void RunLocalDeclaration(LocalDeclarationStatementSyntax node)
         {
             foreach (var v in node.Declaration.Variables)
@@ -217,8 +218,27 @@ namespace Slowsharp
             RunExpression(node.Expression);
         }
         
+        private void UpdateVariable(string key, HybInstance value)
+        {
+            if (vars.UpdateValue(key, value) == false)
+            {
+                if (ctx._this != null)
+                {
+                    if (ctx._this.SetPropertyOrField(key, value, AccessLevel.Outside))
+                        ;
+                }
+            }
+        }
+
         private void RunAssign(AssignmentExpressionSyntax node)
         {
+            // +=, -=, *=, /=
+            if (IsOpAndAssignToken(node.OperatorToken))
+            {
+                RunAssignWithOp(node);
+                return;
+            }
+
             var right = RunExpression(node.Right);
 
             if (node.Left is IdentifierNameSyntax id)
@@ -247,6 +267,42 @@ namespace Slowsharp
                     throw new NoSuchMemberException("[]");
             }
         }
+        private void RunAssignWithOp(AssignmentExpressionSyntax node)
+        {
+            var right = RunExpression(node.Right);
+
+            if (node.Left is IdentifierNameSyntax id)
+            {
+                var key = id.Identifier.ValueText;
+                var value = MadMath.Add(ResolveId(id), right);
+
+                UpdateVariable(key, value);
+            }
+            else if (node.Left is ElementAccessExpressionSyntax ea)
+            {
+                var callee = RunExpression(ea.Expression);
+                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+
+                var count = 0;
+                foreach (var arg in ea.ArgumentList.Arguments)
+                    args[count++] = RunExpression(arg.Expression);
+
+                HybInstance value;
+                callee.GetIndexer(args, out value);
+
+                value = MadMath.Add(value, right);
+
+                if (callee.SetIndexer(args, value) == false)
+                    throw new NoSuchMemberException("[]");
+            }
+        }
+        private bool IsOpAndAssignToken(SyntaxToken token)
+        {
+            if (token.Text.Length == 2 &&
+                token.Text[1] == '=' && token.Text[0] != '=')
+                return true;
+            return false;
+        }
 
         private HybInstance[] ResolveArgumentList(ArgumentListSyntax node)
         {
@@ -258,26 +314,7 @@ namespace Slowsharp
             return args;
         }
 
-        private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
-        {
-            if (node.Token.Value is char c)
-                return HybInstance.Char(c);
-            if (node.Token.Value is string str)
-                return HybInstance.String(str);
-            if (node.Token.Value is bool b)
-                return HybInstance.Bool(b);
-            if (node.Token.Value is int i)
-                return HybInstance.Int(i);
-            if (node.Token.Value is float f)
-                return HybInstance.Float(f);
-
-            throw new InvalidOperationException();
-            /*
-            if (node.Token.Kind() == SyntaxKind.StringLiteralExpression)
-                return node.Token.Value;
-            return null;
-            */
-        }
+        
 
         private Invokable[] ResolveLocalMember(IdentifierNameSyntax node)
         {
