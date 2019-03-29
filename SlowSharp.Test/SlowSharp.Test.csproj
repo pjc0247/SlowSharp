@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AccessControl.cs" />
     <Compile Include="Core\CScript.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />

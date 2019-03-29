@@ -21,8 +21,10 @@ namespace Slowsharp
         public HybType GetType(string id)
         {
             var type = _GetType(id);
-            var ac = ctx.config.accessControl;
+            if (type == null)
+                return null;
 
+            var ac = ctx.config.accessControl;
             if (ac.IsSafeType(type) == false)
                 throw new SandboxException($"{id} is not allowed to use.");
 

@@ -11,12 +11,15 @@ namespace Slowsharp
 {
     public class CScript
     {
-        public static object Run(string src)
+        public static object Run(string src, RunConfig config = null)
         {
+            if (config == null)
+                config = RunConfig.Default;
+
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
-            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
+            var r = new Runner(Assembly.GetEntryAssembly(), config);
             r.Run(root);
 
             var ret = r.RunMain();
