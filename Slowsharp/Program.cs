@@ -46,12 +46,13 @@ private static int Boo() => 5;
     {
 static int bb = 1;
 static int Foo() { return 5; }
+static int Foo(int n) { return 15; }
 
 private static int Booo() => 5;
 
         static int Main(int n)
         {
-Console.WriteLine(Foo.Boo());
+throw new Exception();
 return a;
         }
 

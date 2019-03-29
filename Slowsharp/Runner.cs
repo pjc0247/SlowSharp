@@ -71,6 +71,8 @@ namespace Slowsharp
                 RunBlock(node as BlockSyntax);
             if (node is ArrowExpressionClauseSyntax)
                 RunArrowExpressionClause(node as ArrowExpressionClauseSyntax);
+            if (node is ThrowStatementSyntax)
+                RunThrow(node as ThrowStatementSyntax);
             if (node is IfStatementSyntax)
                 RunIf(node as IfStatementSyntax);
             if (node is ForStatementSyntax)

@@ -11,11 +11,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    internal class Invokable
+    public class Invokable
     {
         public bool isCompiled => compiledMethod != null;
-        public BaseMethodDeclarationSyntax interpretMethod { get; }
-        public MethodInfo compiledMethod { get; }
+        internal BaseMethodDeclarationSyntax interpretMethod { get; }
+        internal MethodInfo compiledMethod { get; }
 
         private Runner runner;
 

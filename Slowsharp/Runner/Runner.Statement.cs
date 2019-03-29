@@ -10,6 +10,18 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        private void RunThrow(ThrowStatementSyntax node)
+        {
+            var ex = RunExpression(node.Expression);
+
+            if (ex.isCompiledType)
+            {
+                if (ex.innerObject is Exception e)
+                    throw e;
+                throw new SemanticViolationException($"Exception must be derived from System.Exception."); ;
+            }
+            throw new WrappedException(ex);
+        }
         private void RunReturn(ReturnStatementSyntax node)
         {
             if (node.Expression != null)

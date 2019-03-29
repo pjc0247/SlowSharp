@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    internal class SSMethodInfo : SSMemberInfo
+    public class SSMethodInfo : SSMemberInfo
     {
         public Invokable target;
 

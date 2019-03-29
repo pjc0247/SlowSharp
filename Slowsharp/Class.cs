@@ -37,6 +37,7 @@ namespace Slowsharp
             methods[id].Add(new SSMethodInfo()
             {
                 id = id,
+                isStatic = method.Modifiers.IsStatic(),
                 method = method,
                 target = new Invokable(runner, method),
 
@@ -48,6 +49,7 @@ namespace Slowsharp
             fields.Add(id, new SSFieldInfo()
             {
                 id = id,
+                isStatic = field.Modifiers.IsStatic(),
                 field = field,
                 declartor = declarator,
 
@@ -79,11 +81,5 @@ namespace Slowsharp
                 throw new ArgumentException($"No such field: {id}");
             return fields[id];
         }
-        /*
-        public Invokable[] GetMethods(string id)
-        {
-            return new Invokable[] { methods[id] };
-        }
-        */
     }
 }

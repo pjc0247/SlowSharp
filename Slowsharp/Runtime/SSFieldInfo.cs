@@ -11,7 +11,7 @@ namespace Slowsharp
     /// <summary>
     /// SlowSharpFieldInfo
     /// </summary>
-    internal class SSFieldInfo : SSMemberInfo
+    public class SSFieldInfo : SSMemberInfo
     {
         public VariableDeclaratorSyntax declartor;
         public FieldDeclarationSyntax field;

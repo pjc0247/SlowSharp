@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class HybType
+    public class HybType
     {
         public bool isCompiledType => compiledType != null;
 
-        public Type compiledType { get; }
-        public Class interpretKlass { get; }
+        internal Type compiledType { get; }
+        internal Class interpretKlass { get; }
 
         public static HybType Object => HybTypeCache.Object;
         public static HybType Bool => HybTypeCache.Bool;
@@ -26,11 +26,11 @@ namespace Slowsharp
         public static HybType Double => HybTypeCache.Double;
         public static HybType Decimal => HybTypeCache.Decimal;
 
-        public HybType(Type type)
+        internal HybType(Type type)
         {
             this.compiledType = type;
         }
-        public HybType(Class klass)
+        internal HybType(Class klass)
         {
             this.interpretKlass = klass;
         }
@@ -73,6 +73,7 @@ namespace Slowsharp
                    .Where(x => x.Name == id)
                    .Select(x => new SSMethodInfo() {
                        id = x.Name,
+                       isStatic = x.IsStatic,
                        target = new Invokable(x),
                        accessModifier = AccessModifierParser.Get(x)
                    })

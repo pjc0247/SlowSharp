@@ -86,6 +86,7 @@
     <Compile Include="Exception\NoSuchMethodException.cs" />
     <Compile Include="Exception\SemanticViolationException.cs" />
     <Compile Include="Exception\SSRuntimeException.cs" />
+    <Compile Include="Exception\WrappedException.cs" />
     <Compile Include="Hyb\HybExt.cs" />
     <Compile Include="Hyb\HybType.cs" />
     <Compile Include="Hyb\HybInstance.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Sandbox\AccessControl.cs" />
     <Compile Include="Runtime\SSFieldInfo.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
+    <Compile Include="Util\ModifierExt.cs" />
     <Compile Include="VarFrame.cs" />
   </ItemGroup>
   <ItemGroup>

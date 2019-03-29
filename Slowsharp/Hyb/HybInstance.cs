@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class HybInstance
+    public class HybInstance
     {
         public bool isCompiledType => obj != null;
 
@@ -67,12 +67,12 @@ namespace Slowsharp
             return new HybInstance(HybType.Double, f);
         }
 
-        public HybInstance(HybType type, object obj)
+        internal HybInstance(HybType type, object obj)
         {
             this.type = type;
             this.obj = obj;
         }
-        public HybInstance(Runner runner, HybType type, Class klass)
+        internal HybInstance(Runner runner, HybType type, Class klass)
         {
             this.runner = runner;
             this.type = type;
@@ -136,6 +136,7 @@ namespace Slowsharp
                    .Where(x => x.Name == id)
                    .Select(x => new SSMethodInfo() {
                        id = x.Name,
+                       isStatic = x.IsStatic,
                        target = new Invokable(x),
                        accessModifier = AccessModifierParser.Get(x)
                    })
@@ -207,7 +208,7 @@ namespace Slowsharp
             return false;
         }
 
-        public bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
+        internal bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {
@@ -252,7 +253,7 @@ namespace Slowsharp
                 return false;
             }
         }
-        public bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
+        internal bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {

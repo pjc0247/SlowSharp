@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 namespace Slowsharp
 {
     [Flags]
-    internal enum AccessModifier
+    public enum AccessModifier
     {
         None = 0,
 
