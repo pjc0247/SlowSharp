@@ -98,7 +98,7 @@ namespace Slowsharp
                 RunChildren(node);
 
             if (ctx.IsExpird())
-                halt = HaltType.ForceQuit;
+                throw new TimeoutException();
         }
 
         private void RunChildren(SyntaxNode node)
@@ -140,7 +140,7 @@ namespace Slowsharp
                 }
 
                 if (ctx.IsExpird())
-                    halt = HaltType.ForceQuit;
+                    throw new TimeoutException();
 
                 if (halt != HaltType.None) break;
             }
