@@ -41,6 +41,9 @@ namespace Slowsharp
             else if (node is PostfixUnaryExpressionSyntax)
                 return RunPostfixUnary(node as PostfixUnaryExpressionSyntax);
 
+            else if (node is SizeOfExpressionSyntax)
+                RunSizeof(node as SizeOfExpressionSyntax);
+
             else if (node is ObjectCreationExpressionSyntax)
                 return RunObjectCreation(node as ObjectCreationExpressionSyntax);
             else if (node is ArrayCreationExpressionSyntax)
@@ -292,6 +295,39 @@ namespace Slowsharp
             }
 
             return null;
+        }
+
+        private HybInstance RunSizeof(SizeOfExpressionSyntax node)
+        {
+            var type = $"{node.Type}";
+            var size = 0;
+
+            if (type == "byte") size = sizeof(byte);
+            else if (type == "sbyte") size = sizeof(sbyte);
+            else if (type == "char") size = sizeof(char);
+            else if (type == "int") size = sizeof(int);
+            else if (type == "uint") size = sizeof(uint);
+            else if (type == "short") size = sizeof(short);
+            else if (type == "ushort") size = sizeof(ushort);
+            else if (type == "long") size = sizeof(long);
+            else if (type == "ulong") size = sizeof(ulong);
+            else if (type == "float") size = sizeof(float);
+            else if (type == "double") size = sizeof(double);
+            else if (type == "decimal") size = sizeof(decimal);
+            else if (type == "Int16") size = sizeof(Int16);
+            else if (type == "Int32") size = sizeof(Int32);
+            else if (type == "Int64") size = sizeof(Int64);
+            else if (type == "UInt16") size = sizeof(UInt16);
+            else if (type == "UInt32") size = sizeof(UInt32);
+            else if (type == "UInt64") size = sizeof(UInt64);
+            else if (type == "Byte") size = sizeof(Byte);
+            else if (type == "SByte") size = sizeof(SByte);
+            else if (type == "Double") size = sizeof(Double);
+            else if (type == "Decimal") size = sizeof(Decimal);
+            else
+                throw new SemanticViolationException($"sizeof cannot be used with {type}");
+
+            return HybInstance.Int(size);
         }
     }
 }
