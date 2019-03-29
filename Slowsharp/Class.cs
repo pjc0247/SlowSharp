@@ -16,7 +16,7 @@ namespace Slowsharp
 
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
         private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
-        private Dictionary<string, SSMethodInfo> methods = new Dictionary<string, SSMethodInfo>();
+        private Dictionary<string, List<SSMethodInfo>> methods = new Dictionary<string, List<SSMethodInfo>>();
         private Runner runner;
 
         public Class(Runner runner, string id)
@@ -25,9 +25,16 @@ namespace Slowsharp
             this.id = id;
         }
 
+        private void EnsureMethodKey(string id)
+        {
+            if (methods.ContainsKey(id) == false)
+                methods[id] = new List<SSMethodInfo>();
+        }
         public void AddMethod(string id, BaseMethodDeclarationSyntax method)
         {
-            methods.Add(id, new SSMethodInfo()
+            EnsureMethodKey(id);
+
+            methods[id].Add(new SSMethodInfo()
             {
                 id = id,
                 method = method,
@@ -50,12 +57,11 @@ namespace Slowsharp
 
         public SSMethodInfo[] GetMethods(string id)
         {
-            return methods
-                .Where(x => x.Key == id)
-                .Select(x => x.Value)
-                .ToArray();
-        }
+            if (methods.ContainsKey(id) == false)
+                return new SSMethodInfo[] { };
 
+            return methods[id].ToArray();
+        }
         public SSFieldInfo[] GetFields()
         {
             return fields
