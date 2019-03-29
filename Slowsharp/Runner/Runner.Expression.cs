@@ -12,6 +12,9 @@ namespace Slowsharp
     {
         internal HybInstance RunExpression(ExpressionSyntax node)
         {
+            if (node == null)
+                throw new SemanticViolationException("Invalid syntax");
+
             if (node is ParenthesizedExpressionSyntax ps)
                 return RunExpression(ps.Expression);
             else if (node is ParenthesizedExpressionSyntax)
@@ -81,6 +84,9 @@ namespace Slowsharp
         }
         private HybInstance ResolveId(IdentifierNameSyntax node)
         {
+            if (string.IsNullOrEmpty(node.Identifier.Text))
+                throw new SemanticViolationException($"Invalid syntax: {node.Parent}");
+
             var id = $"{node.Identifier}";
             HybInstance v = null;
 
