@@ -39,7 +39,6 @@ namespace Slowsharp
             this.catches = new Stack<CatchFrame>();
             this.frames = new Stack<VarFrame>();
             this.resolver = new TypeResolver(ctx, assemblies);
-            //RunMethod(klass.GetMethods("Main")[0]);
         }
 
         internal HybInstance RunMain(params object[] args)
@@ -104,31 +103,6 @@ namespace Slowsharp
         {
             foreach (var child in node.ChildNodes())
                 Run(child);
-        }
-
-        private void AddUsing(UsingDirectiveSyntax node)
-        {
-            lookup.Add($"{node.Name}");
-        }
-        private void AddClass(ClassDeclarationSyntax node)
-        {
-            klass = new Class(this, $"{node.Identifier}");
-            ctx.types.Add($"{node.Identifier}", klass);
-        }
-        private void AddField(FieldDeclarationSyntax node)
-        {
-            foreach (var f in node.Declaration.Variables)
-            {
-                klass.AddField($"{f.Identifier}", node, f);
-            }
-        }
-        private void AddConstructorMethod(ConstructorDeclarationSyntax node)
-        {
-            klass.AddMethod("$_ctor", node);
-        }
-        private void AddMethod(MethodDeclarationSyntax node)
-        {
-            klass.AddMethod(node.Identifier.ValueText, node);
         }
 
         private HybInstance RunArrowExpressionClause(ArrowExpressionClauseSyntax node)

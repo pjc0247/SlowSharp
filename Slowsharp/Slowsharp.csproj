@@ -96,6 +96,7 @@
     <Compile Include="Runner\HaltType.cs" />
     <Compile Include="Runner\MadMath.cs" />
     <Compile Include="Runner\Runner.Statement.cs" />
+    <Compile Include="Runner\Runner.TypeConstruct.cs" />
     <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
