@@ -73,6 +73,8 @@ namespace Slowsharp
                 RunArrowExpressionClause(node as ArrowExpressionClauseSyntax);
             if (node is ThrowStatementSyntax)
                 RunThrow(node as ThrowStatementSyntax);
+            if (node is GotoStatementSyntax)
+                RunGoto(node as GotoStatementSyntax);
             if (node is IfStatementSyntax)
                 RunIf(node as IfStatementSyntax);
             if (node is ForStatementSyntax)
@@ -89,10 +91,15 @@ namespace Slowsharp
                 RunContinue(node as ContinueStatementSyntax);
             if (node is LocalDeclarationStatementSyntax)
                 RunLocalDeclaration(node as LocalDeclarationStatementSyntax);
+            if (node is LabeledStatementSyntax)
+                RunLabeled(node as LabeledStatementSyntax);
             if (node is VariableDeclarationSyntax)
                 RunVariableDeclaration(node as VariableDeclarationSyntax);
             if (node is ExpressionStatementSyntax)
                 RunExpressionStatement(node as ExpressionStatementSyntax);
+
+            if (node is LockStatementSyntax)
+                RunLock(node as LockStatementSyntax);
 
             if (treatAsBlock.Contains(node.GetType()))
                 RunChildren(node);
@@ -118,12 +125,15 @@ namespace Slowsharp
             vars = vars.parent;
             return ret;
         }
-        internal void RunBlock(BlockSyntax node, VarFrame vf)
+        internal void RunBlock(BlockSyntax node, VarFrame vf, int pc = 0)
         {
             vars = vf;
 
-            foreach (var child in node.ChildNodes())
+            var children = node.ChildNodes().ToArray();
+            for (int i = pc; i < children.Length; i++)
             {
+                var child = children[i];
+
                 try
                 {
                     Run(child);
@@ -157,11 +167,12 @@ namespace Slowsharp
             catches.Pop();
         }
 
-        internal HybInstance RunMethod(BaseMethodDeclarationSyntax node, HybInstance[] args)
+        internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
         {
             ret = null;
-            ctx.PushMethod(node);
+            ctx.PushMethod(method);
 
+            var node = method.declaration;
             var vf = new VarFrame(null);
             var count = 0;
             foreach (var arg in args)
@@ -185,10 +196,10 @@ namespace Slowsharp
 
             return ret;
         }
-        internal HybInstance RunMethod(HybInstance _this, BaseMethodDeclarationSyntax node, HybInstance[] args)
+        internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
         {
             ctx._this = _this;
-            return RunMethod(node, args);
+            return RunMethod(method, args);
         }
 
         private void RunLocalDeclaration(LocalDeclarationStatementSyntax node)
@@ -269,7 +280,7 @@ namespace Slowsharp
             if (node.Left is IdentifierNameSyntax id)
             {
                 var key = id.Identifier.ValueText;
-                var value = MadMath.Op(ResolveId(id), right, node.OperatorToken.Text[0]);
+                var value = MadMath.Op(ResolveId(id), right, node.OperatorToken.Text.Substring(0, 1));
 
                 UpdateVariable(key, value);
             }
@@ -285,7 +296,7 @@ namespace Slowsharp
                 HybInstance value;
                 callee.GetIndexer(args, out value);
 
-                value = MadMath.Op(value, right, node.OperatorToken.Text[0]);
+                value = MadMath.Op(value, right, node.OperatorToken.Text.Substring(0, 1));
 
                 if (callee.SetIndexer(args, value) == false)
                     throw new NoSuchMemberException("[]");
@@ -314,24 +325,7 @@ namespace Slowsharp
             var id = node.Identifier.ValueText;
             return klass.GetMethods(id);
         }
-        private Invokable[] ResolveMemberAccess(MemberAccessExpressionSyntax node)
-        {
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in asm.GetTypes())
-                {
-                    if (type.Name == $"{node.Expression}")
-                    {
-                        return type.GetMember($"{node.Name}")
-                            .Where(x => x is MethodInfo)
-                            .Select(x => new Invokable(x as MethodInfo))
-                            .ToArray();
-                    }
-                }
-            }
-
-            return new Invokable[] { };
-        }
+    
         private SSMethodInfo FindMethodWithArguments(SSMethodInfo[] members, HybInstance[] args)
         {
             foreach (var member in members)

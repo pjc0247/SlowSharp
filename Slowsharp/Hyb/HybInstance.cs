@@ -134,10 +134,9 @@ namespace Slowsharp
             {
                 return obj.GetType().GetMethods()
                    .Where(x => x.Name == id)
-                   .Select(x => new SSMethodInfo() {
+                   .Select(x => new SSMethodInfo(x) {
                        id = x.Name,
                        isStatic = x.IsStatic,
-                       target = new Invokable(x),
                        accessModifier = AccessModifierParser.Get(x)
                    })
                    .ToArray();
@@ -314,6 +313,11 @@ namespace Slowsharp
             throw new InvalidOperationException("Object is not an enumerable.");
         }
 
+        public bool IsNull()
+        {
+            if (isCompiledType) return obj == null;
+            return false;
+        }
         public override string ToString()
         {
             if (isCompiledType)

@@ -97,10 +97,12 @@
     <Compile Include="Runner\AccessLevel.cs" />
     <Compile Include="Runner\HaltType.cs" />
     <Compile Include="Runner\MadMath.cs" />
+    <Compile Include="Runner\Runner.ThreadingKeyword.cs" />
     <Compile Include="Runner\Runner.Statement.cs" />
     <Compile Include="Runner\Runner.TypeConstruct.cs" />
     <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
+    <Compile Include="Runtime\JumpDestination.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="Runtime\SSMethodInfo.cs" />
     <Compile Include="TypeResolver.cs" />

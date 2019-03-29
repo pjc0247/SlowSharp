@@ -46,11 +46,17 @@ namespace Slowsharp
             else if (node is ArrayCreationExpressionSyntax)
                 return RunArrayCreation(node as ArrayCreationExpressionSyntax);
 
+            // Runner.ThreadingKeyword.cs
+            else if (node is AwaitExpressionSyntax)
+                return RunExpression(node as AwaitExpressionSyntax);
+
             return null;
         }
 
         private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
+            if (node.Token.Value == null)
+                return HybInstance.Null();
             if (node.Token.Value is char c)
                 return HybInstance.Char(c);
             if (node.Token.Value is string str)

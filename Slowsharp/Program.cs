@@ -52,7 +52,12 @@ private static int Booo() => 5;
 
         static int Main(int n)
         {
-throw new Exception();
+var a = 123;
+A:
+Console.WriteLine(a);
+a += 1;
+goto A;
+
 return a;
         }
 
@@ -63,7 +68,6 @@ Console.WriteLin(aa);
     }
 }
 ";
-
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 

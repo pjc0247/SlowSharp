@@ -30,16 +30,15 @@ namespace Slowsharp
             if (methods.ContainsKey(id) == false)
                 methods[id] = new List<SSMethodInfo>();
         }
-        public void AddMethod(string id, BaseMethodDeclarationSyntax method)
+        public void AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
         {
             EnsureMethodKey(id);
 
-            methods[id].Add(new SSMethodInfo()
-            {
+            methods[id].Add(new SSMethodInfo(runner, method) {
                 id = id,
                 isStatic = method.Modifiers.IsStatic(),
-                method = method,
-                target = new Invokable(runner, method),
+                declaration = method,
+                jumps = jumps,
 
                 accessModifier = AccessModifierParser.Parse(method.Modifiers)
             });

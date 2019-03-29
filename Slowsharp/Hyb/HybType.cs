@@ -71,10 +71,9 @@ namespace Slowsharp
                 return compiledType.GetMethods()
                    .Where(x => x.IsStatic)
                    .Where(x => x.Name == id)
-                   .Select(x => new SSMethodInfo() {
+                   .Select(x => new SSMethodInfo(x) {
                        id = x.Name,
                        isStatic = x.IsStatic,
-                       target = new Invokable(x),
                        accessModifier = AccessModifierParser.Get(x)
                    })
                    .ToArray();

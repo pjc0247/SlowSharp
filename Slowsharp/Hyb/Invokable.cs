@@ -18,14 +18,17 @@ namespace Slowsharp
         internal MethodInfo compiledMethod { get; }
 
         private Runner runner;
+        private SSMethodInfo methodInfo;
 
-        public Invokable(Runner runner, BaseMethodDeclarationSyntax method)
+        public Invokable(SSMethodInfo methodInfo, Runner runner, BaseMethodDeclarationSyntax declaration)
         {
+            this.methodInfo = methodInfo;
             this.runner = runner;
-            this.interpretMethod = method;
+            this.interpretMethod = declaration;
         }
-        public Invokable(MethodInfo method)
+        public Invokable(SSMethodInfo methodInfo, MethodInfo method)
         {
+            this.methodInfo = methodInfo;
             this.compiledMethod = method;
         }
 
@@ -47,7 +50,8 @@ namespace Slowsharp
                 if (args.Length != ps.Count)
                     throw new SemanticViolationException($"Parameters.Count does not match");
 
-                return runner.RunMethod(_this as HybInstance, interpretMethod, args);
+                return runner.RunMethod(
+                    _this as HybInstance, methodInfo, args);
             }
         }
     }

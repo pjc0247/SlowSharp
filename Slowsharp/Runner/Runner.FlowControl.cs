@@ -10,6 +10,21 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        private void RunGoto(GotoStatementSyntax node)
+        {
+            var label = $"{node.Expression.GetText()}";
+            var dst = ctx.method.jumps
+                .Where(x => x.label == label)
+                .FirstOrDefault();
+
+            if (dst == null)
+                throw new SemanticViolationException($"goto destination not found: {label}");
+
+            // TODO: frame unwinding
+            //   goto is very unstalbe in current implementation
+            RunBlock((BlockSyntax)dst.statement, vars, dst.pc);
+        }
+
         private void RunIf(IfStatementSyntax node)
         {
             var v = RunExpression(node.Condition);

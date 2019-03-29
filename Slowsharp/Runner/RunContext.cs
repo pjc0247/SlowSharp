@@ -14,17 +14,17 @@ namespace Slowsharp
         public Dictionary<string, Class> types { get; }
 
         public HybInstance _this { get; set; }
-        public BaseMethodDeclarationSyntax method { get; }
+        public SSMethodInfo method { get; private set; }
 
         private DateTime startsAt;
-        private Stack<BaseMethodDeclarationSyntax> methodStack;
+        private Stack<SSMethodInfo> methodStack;
 
         public RunContext(RunConfig config)
         {
             this.config = config;
 
             this.types = new Dictionary<string, Class>();
-            this.methodStack = new Stack<BaseMethodDeclarationSyntax>();
+            this.methodStack = new Stack<SSMethodInfo>();
 
             // This prevents bug
             Reset();
@@ -35,9 +35,10 @@ namespace Slowsharp
         }
         public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= config.timeout;
 
-        public void PushMethod(BaseMethodDeclarationSyntax node)
+        public void PushMethod(SSMethodInfo methodInfo)
         {
-            methodStack.Push(node);
+            methodStack.Push(methodInfo);
+            method = methodInfo;
         }
     }
 }

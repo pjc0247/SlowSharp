@@ -16,7 +16,7 @@ namespace Slowsharp
             var left = RunExpression(node.Left);
             var right = RunExpression(node.Right);
 
-            return MadMath.Add(left, right);
+            return MadMath.Op(left, right, op);
 
             if (left.Is<string>())
                 return HybInstance.String(left.As<string>() + right.As<string>());

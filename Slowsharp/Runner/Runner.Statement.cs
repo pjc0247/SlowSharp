@@ -10,6 +10,10 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        private void RunLabeled(LabeledStatementSyntax node)
+        {
+            Run(node.Statement);
+        }
         private void RunThrow(ThrowStatementSyntax node)
         {
             var ex = RunExpression(node.Expression);
