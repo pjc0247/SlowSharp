@@ -49,10 +49,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class\Accessor.cs" />
-    <Compile Include="Class\Field.cs" />
-    <Compile Include="ControlFlow\For.cs" />
-    <Compile Include="ControlFlow\If.cs" />
+    <Compile Include="Core\CScript.cs" />
+    <Compile Include="Syntax\Class\Accessor.cs" />
+    <Compile Include="Syntax\Class\Field.cs" />
+    <Compile Include="Syntax\Class\Method.cs" />
+    <Compile Include="Syntax\ControlFlow\For.cs" />
+    <Compile Include="Syntax\ControlFlow\ForEach.cs" />
+    <Compile Include="Syntax\ControlFlow\If.cs" />
     <Compile Include="Core\VarFrame.cs" />
     <Compile Include="DotNet\Collections\Dictionary.cs" />
     <Compile Include="DotNet\Collections\List.cs" />
@@ -60,6 +63,7 @@
     <Compile Include="Hyb\Operator.cs" />
     <Compile Include="Hyb\TypeComparision.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Syntax\Op\OpAndAssign.cs" />
     <Compile Include="TestRunner.cs" />
   </ItemGroup>
   <ItemGroup>

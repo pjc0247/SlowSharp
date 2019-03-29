@@ -44,13 +44,11 @@ namespace HelloWorld
 static int bb = 1;
 static int Foo() { return 5; }
 
+static int Booo() => 5;
+
         static int Main(int n)
         {
-       var a = new int []{1,2,3};
-a[1] = 14;
-
-Console.WriteLine(a[1]);
-
+Console.WriteLine(Booo());
 return a;
         }
 

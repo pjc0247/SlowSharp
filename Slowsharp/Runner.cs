@@ -69,6 +69,8 @@ namespace Slowsharp
                 RunMethodDeclaration(node as MethodDeclarationSyntax);
             if (node is BlockSyntax)
                 RunBlock(node as BlockSyntax);
+            if (node is ArrowExpressionClauseSyntax)
+                RunArrowExpressionClause(node as ArrowExpressionClauseSyntax);
             if (node is IfStatementSyntax)
                 RunIf(node as IfStatementSyntax);
             if (node is ForStatementSyntax)
@@ -120,6 +122,17 @@ namespace Slowsharp
             }
         }
 
+        private HybInstance RunArrowExpressionClause(ArrowExpressionClauseSyntax node)
+        {
+            return RunExpression(node.Expression);
+        }
+        private HybInstance RunArrowExpressionClause(ArrowExpressionClauseSyntax node, VarFrame vf)
+        {
+            vars = vf;
+            var ret = RunExpression(node.Expression);
+            vars = vars.parent;
+            return ret;
+        }
         internal void RunBlock(BlockSyntax node, VarFrame vf)
         {
             vars = vf;
@@ -182,7 +195,12 @@ namespace Slowsharp
 
             frames.Push(vars);
             vars = null;
-            RunBlock(node.Body, vf);
+
+            if (node.Body != null)
+                RunBlock(node.Body, vf);
+            else
+                ret = RunArrowExpressionClause(node.ExpressionBody, vf);
+
             vars = frames.Pop();
 
             if (halt == HaltType.Return)
@@ -274,7 +292,7 @@ namespace Slowsharp
             if (node.Left is IdentifierNameSyntax id)
             {
                 var key = id.Identifier.ValueText;
-                var value = MadMath.Add(ResolveId(id), right);
+                var value = MadMath.Op(ResolveId(id), right, node.OperatorToken.Text[0]);
 
                 UpdateVariable(key, value);
             }
@@ -290,7 +308,7 @@ namespace Slowsharp
                 HybInstance value;
                 callee.GetIndexer(args, out value);
 
-                value = MadMath.Add(value, right);
+                value = MadMath.Op(value, right, node.OperatorToken.Text[0]);
 
                 if (callee.SetIndexer(args, value) == false)
                     throw new NoSuchMemberException("[]");
