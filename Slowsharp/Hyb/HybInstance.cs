@@ -95,6 +95,12 @@ namespace Slowsharp
 
         public HybType GetHybType() => type;
 
+        public bool Is(HybType type)
+        {
+            if (type.isCompiledType)
+                return Is(type.compiledType);
+            return false;
+        }
         public bool Is(Type type)
         {
             if (isCompiledType)

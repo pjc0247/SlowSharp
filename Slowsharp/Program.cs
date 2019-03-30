@@ -37,9 +37,11 @@ namespace HelloWorld
 
 private static int Boo() => 5;
 
+        public Foo() {
+            Console.WriteLine(1234);
+        }
         public Foo(int b) {
-            aa = b;
-            Console.WriteLine(aa);
+            Console.WriteLine(11);
         }
     }
     class Program
@@ -52,17 +54,8 @@ private static int Booo() => 5;
 
         static int Main(int n)
         {
-var r = await Task.Run(() => {
-    Thread.Sleep(1000);
-    Console.WriteLine(1234);
-    return 4222;
-});
-var rr = await Task.Run(() => {
-    Thread.Sleep(1000);
-    Console.WriteLine(1234);
-    return 4222;
-});
-Console.WriteLine(r);
+var a = 44;
+Console.WriteLine(a is string);
 
 return r;
         }
@@ -79,11 +72,7 @@ Console.WriteLin(aa);
 
             Dump(root);
 
-            var ac = new AccessControl();
-            ac.AddDefaultPolicies();
-
             var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig() {
-                accessControl = ac
             });
             r.Run(root);
             var ret = r.RunMain(5).innerObject;
