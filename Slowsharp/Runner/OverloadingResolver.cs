@@ -50,6 +50,10 @@ namespace Slowsharp
                     //if (args.Length != ps.Count)
                     //    continue;
 
+                    if (member.isVaArg == false &&
+                        args.Length > ps.Count)
+                        continue;
+
                     var match = true;
                     var count = 0;
                     foreach (var p in ps)
