@@ -47,8 +47,8 @@ namespace Slowsharp
             else
             {
                 var ps = interpretMethod.ParameterList.Parameters;
-                if (args.Length != ps.Count)
-                    throw new SemanticViolationException($"Parameters.Count does not match");
+                //if (args.Length != ps.Count)
+                    //throw new SemanticViolationException($"Parameters.Count does not match");
 
                 return runner.RunMethod(
                     _this as HybInstance, methodInfo, args);

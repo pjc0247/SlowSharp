@@ -53,11 +53,13 @@ static int Foo(int n) { return 15; }
 private static int Booo() => 5;
 
 static void Bbb(params object[] obj) {
+foreach (var b in obj)
+Console.WriteLine(b);
 }
 
         static int Main(int n)
         {
-Bbb(1, 2,3 );
+Bbb(1,2,3);
 
 return r;
         }

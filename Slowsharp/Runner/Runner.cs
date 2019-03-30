@@ -171,8 +171,22 @@ namespace Slowsharp
             var count = 0;
             foreach (var arg in args)
             {
-                var paramId = node.ParameterList.Parameters[count++].Identifier.Text;
+                var p = node.ParameterList.Parameters[count++];
+                var paramId = p.Identifier.Text;
+
+                if (p.Modifiers.IsParams())
+                    break;
+
                 vf.SetValue(paramId, arg);
+            }
+
+            if (method.isVaArg)
+            {
+                var paramId = node.ParameterList.Parameters.Last()
+                    .Identifier.Text;
+
+                var vaArgs = args.Skip(count - 1).ToArray();
+                vf.SetValue(paramId, HybInstance.ObjectArray(vaArgs));
             }
 
             frames.Push(vars);

@@ -14,15 +14,25 @@ namespace Slowsharp
         public Invokable target;
         public BaseMethodDeclarationSyntax declaration;
 
+        public bool isVaArg { get; }
+
         internal JumpDestination[] jumps;
 
         internal SSMethodInfo(Runner runner, BaseMethodDeclarationSyntax declaration)
         {
             target = new Invokable(this, runner, declaration);
+
+            isVaArg =
+                declaration.ParameterList.Parameters.LastOrDefault()
+                ?.Modifiers.IsParams() ?? false;
         }
         internal SSMethodInfo(MethodInfo methodInfo)
         {
             target = new Invokable(this, methodInfo);
+
+            isVaArg =
+                methodInfo.GetParameters().LastOrDefault()
+                ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
         }
     }
 }

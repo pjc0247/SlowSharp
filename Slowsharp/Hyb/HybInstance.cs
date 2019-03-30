@@ -38,6 +38,14 @@ namespace Slowsharp
                 return Null();
             return new HybInstance(new HybType(o.GetType()), o);
         }
+        public static HybInstance ObjectArray(object[] o)
+        {
+            return new HybInstance(new HybType(typeof(object[])), o);
+        }
+        public static HybInstance ObjectArray(HybInstance[] o)
+        {
+            return new HybInstance(new HybType(typeof(object[])), o.Unwrap());
+        }
         public static HybInstance Char(char c)
         {
             return new HybInstance(HybType.Char, c);

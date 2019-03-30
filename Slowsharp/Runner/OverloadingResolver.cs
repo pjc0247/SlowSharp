@@ -55,6 +55,15 @@ namespace Slowsharp
                     foreach (var p in ps)
                     {
                         var paramType = resolver.GetType($"{p.Type}");
+
+                        if (p.Modifiers.IsParams())
+                            break;
+                        if (args.Length <= count)
+                        {
+                            match = false;
+                            break;
+                        }
+
                         var argType = args[count++].GetHybType();
 
                         if (paramType.IsAssignableFrom(argType) == false)
