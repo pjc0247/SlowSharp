@@ -21,6 +21,8 @@ namespace Slowsharp
                 return RunParenthesized(node as ParenthesizedExpressionSyntax);
             else if (node is ParenthesizedLambdaExpressionSyntax)
                 return RunParenthesizedLambda(node as ParenthesizedLambdaExpressionSyntax);
+            else if (node is CastExpressionSyntax)
+                return RunCast(node as CastExpressionSyntax);
             else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
             else if (node is LiteralExpressionSyntax)
@@ -118,6 +120,14 @@ namespace Slowsharp
             }));
         }
 
+        private HybInstance RunCast(CastExpressionSyntax node)
+        {
+            var type = resolver.GetType($"{node.Type}");
+            var value = RunExpression(node.Expression);
+
+            return value.Cast(type);
+        }
+
         private HybInstance RunDefault(DefaultExpressionSyntax node)
         {
             var type = resolver.GetType($"{node.Type}");
@@ -158,8 +168,12 @@ namespace Slowsharp
             {
                 if (ma.Expression is IdentifierNameSyntax id)
                 {
-                    var leftType = resolver.GetType($"{id.Identifier}");
-                    if (leftType == null)
+                    HybType leftType = null;
+                    if (resolver.TryGetType($"{id.Identifier}", out leftType))
+                    {
+                        callsite = leftType.GetStaticMethods($"{ma.Name}");
+                    }
+                    else
                     {
                         callee = vars.GetValue($"{id.Identifier}");
 
@@ -168,10 +182,6 @@ namespace Slowsharp
 
                         callsite = callee
                             .GetMethods($"{ma.Name}");
-                    }
-                    else
-                    {
-                        callsite = leftType.GetStaticMethods($"{ma.Name}");
                     }
 
                     calleeId = $"{id.Identifier}";

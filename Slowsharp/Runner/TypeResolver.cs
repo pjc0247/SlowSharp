@@ -33,16 +33,16 @@ namespace Slowsharp
             return id;
         }
 
-        public HybType GetType(string id)
+        public bool TryGetType(string id, out HybType type)
         {
             var pureName = id;
             var rank = GetArrayRank(id);
             if (rank > 0)
                 pureName = GetPureName(id);
 
-            var type = _GetType(pureName);
+            type = _GetType(pureName);
             if (type == null)
-                return null;
+                return false;    
 
             var ac = ctx.config.accessControl;
             if (ac.IsSafeType(type) == false)
@@ -51,7 +51,15 @@ namespace Slowsharp
             if (rank > 0)
                 type = type.MakeArrayType(rank);
 
-            return type;
+            return true;
+        }
+        public HybType GetType(string id)
+        {
+            HybType type;
+            if (TryGetType(id, out type))
+                return type;
+
+            throw new SemanticViolationException($"Unrecognized type {id}");
         }
         public HybType _GetType(string id)
         {

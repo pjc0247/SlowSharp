@@ -60,7 +60,10 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-Console.WriteLine(Foo(77));
+var a = 4;
+object b = (vve)a;
+
+Console.WriteLine(b.GetType());
 
 return r;
         }
@@ -72,6 +75,7 @@ Console.WriteLin(aa);
     }
 }
 ";
+
             Console.WriteLine();
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
