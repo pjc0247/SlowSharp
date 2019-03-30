@@ -16,6 +16,7 @@ namespace Slowsharp
         private Assembly asm;
 
         private RunContext ctx;
+        internal ExtensionMethodResolver extResolver { get; }
         internal TypeResolver resolver { get; }
         private IdLookup lookup;
         private Class klass;
@@ -38,6 +39,7 @@ namespace Slowsharp
             this.lookup = new IdLookup(assemblies);
             this.catches = new Stack<CatchFrame>();
             this.frames = new Stack<VarFrame>();
+            this.extResolver = new ExtensionMethodResolver(assemblies);
             this.resolver = new TypeResolver(ctx, assemblies);
         }
 

@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
+    <Compile Include="Runner\ExtensionMethodResolver.cs" />
     <Compile Include="Runner\OverloadingResolver.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />

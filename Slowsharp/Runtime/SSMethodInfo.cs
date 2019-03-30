@@ -34,5 +34,17 @@ namespace Slowsharp
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
         }
+
+        public SSMethodInfo MakeGenericMethod(HybType[] genericArgs)
+        {
+            if (target.isCompiled)
+            {
+                var method = target.compiledMethod
+                    .MakeGenericMethod(genericArgs.Unwrap());
+                return new SSMethodInfo(method);
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

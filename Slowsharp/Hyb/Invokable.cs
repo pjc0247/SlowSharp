@@ -41,8 +41,9 @@ namespace Slowsharp
 
             if (isCompiled)
             {
-                return HybInstance.Object(compiledMethod.Invoke(
-                    _this?.innerObject, args.Unwrap()));
+                var ret = compiledMethod.Invoke(
+                    _this?.innerObject, args.Unwrap());
+                return HybInstance.Object(ret);
             }
             else
             {

@@ -60,10 +60,10 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-var a = 4;
-object b = (vve)a;
+var a = new int[] { 1,2,3 };
 
-Console.WriteLine(b.GetType());
+foreach (var b in a.Reverse())
+  Console.WriteLine(b);
 
 return r;
         }
@@ -75,8 +75,7 @@ Console.WriteLin(aa);
     }
 }
 ";
-
-            Console.WriteLine();
+            
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 

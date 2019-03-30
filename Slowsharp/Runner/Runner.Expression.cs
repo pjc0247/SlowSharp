@@ -164,13 +164,18 @@ namespace Slowsharp
             HybInstance callee = null;
             SSMethodInfo[] callsite = null;
 
+            var args = ResolveArgumentList(node.ArgumentList);
+
             if (node.Expression is MemberAccessExpressionSyntax ma)
             {
+                var leftIsType = false;
+
                 if (ma.Expression is IdentifierNameSyntax id)
                 {
                     HybType leftType = null;
                     if (resolver.TryGetType($"{id.Identifier}", out leftType))
                     {
+                        leftIsType = true;
                         callsite = leftType.GetStaticMethods($"{ma.Name}");
                     }
                     else
@@ -182,6 +187,14 @@ namespace Slowsharp
 
                         callsite = callee
                             .GetMethods($"{ma.Name}");
+                    }
+
+                    if (leftIsType == false &&
+                        callsite.Length == 0)
+                    {
+                        callsite = extResolver.GetCallablegExtensions(callee, $"{ma.Name}");
+
+                        args = (new HybInstance[] { callee }).Concat(args).ToArray();
                     }
 
                     calleeId = $"{id.Identifier}";
@@ -203,8 +216,7 @@ namespace Slowsharp
 
             if (callsite.Length == 0)
                 throw new NoSuchMethodException($"{calleeId}", targetId);
-
-            var args = ResolveArgumentList(node.ArgumentList);
+            
             var method = OverloadingResolver.FindMethodWithArguments(
                 resolver,
                 callsite, args);

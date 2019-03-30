@@ -15,32 +15,49 @@ namespace Slowsharp
             {
                 if (member.target.isCompiled)
                 {
+                    var genericArgs = new List<HybType>();
                     var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
 
                     if (args.Length != ps.Length)
                         continue;
 
-                    bool skip = false;
+                    bool match = true;
                     for (int i = 0; i < ps.Length; i++)
                     {
+                        var p = ps[i].ParameterType;
+
                         if (args[i] == null)
                         {
-                            if (ps[i].ParameterType.IsValueType)
+                            if (p.IsValueType)
                             {
-                                skip = true;
+                                match = false;
                                 break;
                             }
                             continue;
                         }
-                        if (!ps[i].ParameterType.IsAssignableFrom(args[i].GetHybType().compiledType))
+
+                        Type genericBound = null;
+                        var argType = args[i].GetHybType();
+                        if (!p.IsAssignableFromEx(argType, out genericBound))
                         {
-                            skip = true;
+                            match = false;
                             break;
                         }
-                    }
-                    if (skip) continue;
 
+                        if (p.IsGenericType || p.IsGenericTypeDefinition)
+                        {
+                            if (argType.isCompiledType)
+                                genericArgs.Add(new HybType(genericBound));
+                            else
+                                genericArgs.Add(new HybType(typeof(HybInstance)));
+                        }
+                    }
+                    if (match == false)
+                        continue;
+
+                    if (genericArgs.Count > 0)
+                        return member.MakeGenericMethod(genericArgs.ToArray());
                     return member;
                 }
                 else
