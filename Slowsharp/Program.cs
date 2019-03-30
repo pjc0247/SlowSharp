@@ -52,10 +52,12 @@ static int Foo(int n) { return 15; }
 
 private static int Booo() => 5;
 
+static void Bbb(params object[] obj) {
+}
+
         static int Main(int n)
         {
-var a = 44;
-Console.WriteLine(a is string);
+Bbb(1, 2,3 );
 
 return r;
         }

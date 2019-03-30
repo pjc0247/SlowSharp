@@ -18,15 +18,38 @@ namespace Slowsharp
             this.assemblies = assemblies;
         }
 
+        private int GetArrayRank(string id)
+        {
+            if (!(id.Contains("[") && id.Contains("]")))
+                return 0;
+            return id.Count(x => x == ',') + 1;
+        }
+        private string GetPureName(string id)
+        {
+            if (id.Contains("<"))
+                return id.Split('<')[0];
+            if (id.Contains("["))
+                return id.Split('[')[0];
+            return id;
+        }
+
         public HybType GetType(string id)
         {
-            var type = _GetType(id);
+            var pureName = id;
+            var rank = GetArrayRank(id);
+            if (rank > 0)
+                pureName = GetPureName(id);
+
+            var type = _GetType(pureName);
             if (type == null)
                 return null;
 
             var ac = ctx.config.accessControl;
             if (ac.IsSafeType(type) == false)
                 throw new SandboxException($"{id} is not allowed to use.");
+
+            if (rank > 0)
+                type = type.MakeArrayType(rank);
 
             return type;
         }

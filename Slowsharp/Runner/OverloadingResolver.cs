@@ -8,7 +8,8 @@ namespace Slowsharp
 {
     internal class OverloadingResolver
     {
-        public static SSMethodInfo FindMethodWithArguments(SSMethodInfo[] members, HybInstance[] args)
+        public static SSMethodInfo FindMethodWithArguments(
+            TypeResolver resolver, SSMethodInfo[] members, HybInstance[] args)
         {
             foreach (var member in members)
             {
@@ -46,14 +47,25 @@ namespace Slowsharp
                 {
                     var ps = member.target.interpretMethod.ParameterList.Parameters;
 
-                    if (args.Length != ps.Count)
-                        continue;
+                    //if (args.Length != ps.Count)
+                    //    continue;
 
+                    var match = true;
+                    var count = 0;
                     foreach (var p in ps)
                     {
-                        Console.WriteLine(p.Type);
-                        //p.Type
+                        var paramType = resolver.GetType($"{p.Type}");
+                        var argType = args[count++].GetHybType();
+
+                        if (paramType.IsAssignableFrom(argType) == false)
+                        {
+                            match = false;
+                            break;
+                        }
                     }
+
+                    if (match == false)
+                        continue;
 
                     return member;
                 }

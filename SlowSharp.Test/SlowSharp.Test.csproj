@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Core\AccessControl.cs" />
     <Compile Include="Core\CScript.cs" />
+    <Compile Include="Core\TypeResolution.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />
     <Compile Include="Syntax\Class\Method.cs" />

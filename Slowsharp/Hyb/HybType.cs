@@ -35,6 +35,16 @@ namespace Slowsharp
             this.interpretKlass = klass;
         }
 
+        public HybType MakeArrayType(int rank)
+        {
+            if (isCompiledType)
+            {
+                if (rank == 1)
+                    return new HybType(compiledType.MakeArrayType());
+                return new HybType(compiledType.MakeArrayType(rank));
+            }
+            return null;
+        }
         public HybType MakeGenericType(HybType[] genericArgs)
         {
             if (isCompiledType)
@@ -43,7 +53,6 @@ namespace Slowsharp
             }
             return null;
         }
-
         public HybInstance CreateInstance(Runner runner, HybInstance[] args)
         {
             if (isCompiledType)
@@ -60,7 +69,7 @@ namespace Slowsharp
                 if (ctors.Length > 0)
                 {
                     var ctor = OverloadingResolver
-                        .FindMethodWithArguments(ctors, args);
+                        .FindMethodWithArguments(runner.resolver, ctors, args);
                     ctor.target.Invoke(inst, args);
                 }
 
@@ -97,6 +106,20 @@ namespace Slowsharp
                 return HybInstance.Null();
             }
             return HybInstance.Null();
+        }
+
+        public bool IsAssignableFrom(HybType other)
+        {
+            if (other.isCompiledType)
+            {
+                if (isCompiledType)
+                {
+                    return compiledType
+                        .IsAssignableFrom(other.compiledType);
+                }
+                return false;
+            }
+            return false;
         }
 
         public override string ToString()
