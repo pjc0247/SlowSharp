@@ -47,9 +47,6 @@ namespace Slowsharp
                 {
                     var ps = member.target.interpretMethod.ParameterList.Parameters;
 
-                    //if (args.Length != ps.Count)
-                    //    continue;
-
                     if (member.isVaArg == false &&
                         args.Length > ps.Count)
                         continue;

@@ -59,7 +59,8 @@ Console.WriteLine(b);
 
         static int Main(int n)
         {
-Bbb(1,2,3);
+
+Console.WriteLine(Foo(77));
 
 return r;
         }
@@ -71,6 +72,7 @@ Console.WriteLin(aa);
     }
 }
 ";
+            Console.WriteLine();
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
