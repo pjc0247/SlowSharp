@@ -37,7 +37,7 @@ namespace Slowsharp
                             continue;
                         }
 
-                        Type genericBound = null;
+                        Type[] genericBound = null;
                         var argType = args[i].GetHybType();
                         if (!p.IsAssignableFromEx(argType, out genericBound))
                         {
@@ -48,7 +48,10 @@ namespace Slowsharp
                         if (p.IsGenericType || p.IsGenericTypeDefinition)
                         {
                             if (argType.isCompiledType)
-                                genericArgs.Add(new HybType(genericBound));
+                            {
+                                genericArgs.AddRange(
+                                    genericBound.Select(x => new HybType(x)));
+                            }
                             else
                                 genericArgs.Add(new HybType(typeof(HybInstance)));
                         }

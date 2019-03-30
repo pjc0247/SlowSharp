@@ -62,8 +62,7 @@ Console.WriteLine(b);
 
 var a = new int[] { 1,2,3 };
 
-foreach (var b in a.Reverse())
-  Console.WriteLine(b);
+Console.WriteLine(a.Reverse().ToArray());
 
 return r;
         }

@@ -50,27 +50,35 @@ namespace Slowsharp
             return IsAssignableFromEx(_this, type, out _);
         }
         public static bool IsAssignableFromEx(
-            this Type _this, HybType type, out Type genericBound)
+            this Type _this, HybType type, out Type[] genericBound)
         {
             genericBound = null;
 
             if (type.isCompiledType == false)
                 return false;
 
+            var cType = type.compiledType;
             if (_this.IsGenericType)
             {
-                genericBound = type.compiledType;
+                genericBound = new Type[] { cType };
                 var gs = _this.GetGenericArguments();
-                if (gs.Length == 1)
+
+                if (cType.IsGenericType &&
+                    gs.Length == cType.GetGenericArguments().Length)
+                {
+                    _this = _this.GetGenericTypeDefinition()
+                        .MakeGenericType(cType.GetGenericArguments());
+
+                    genericBound = cType.GetGenericArguments();
+                }
+                else if (gs.Length == 1)
                 {
                     _this = _this.GetGenericTypeDefinition();
 
                     if (_this == typeof(IEnumerable<>))
                     {
-                        if (genericBound.IsArray == false)
-                            return false;
-
-                        genericBound = genericBound.GetElementType();
+                        if (cType.IsArray)
+                            genericBound = new Type[] { cType.GetElementType() };
                     }
 
                     _this = _this.MakeGenericType(genericBound);

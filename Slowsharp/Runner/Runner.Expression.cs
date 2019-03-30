@@ -189,20 +189,20 @@ namespace Slowsharp
                             .GetMethods($"{ma.Name}");
                     }
 
-                    if (leftIsType == false &&
-                        callsite.Length == 0)
-                    {
-                        callsite = extResolver.GetCallablegExtensions(callee, $"{ma.Name}");
-
-                        args = (new HybInstance[] { callee }).Concat(args).ToArray();
-                    }
-
                     calleeId = $"{id.Identifier}";
                 }
                 else if (ma.Expression is ExpressionSyntax expr)
                 {
                     callee = RunExpression(expr);
                     callsite = callee.GetMethods($"{ma.Name}");
+                }
+
+                if (leftIsType == false &&
+                        callsite.Length == 0)
+                {
+                    callsite = extResolver.GetCallablegExtensions(callee, $"{ma.Name}");
+
+                    args = (new HybInstance[] { callee }).Concat(args).ToArray();
                 }
 
                 targetId = $"{ma.Name}";

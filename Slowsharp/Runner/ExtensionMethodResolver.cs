@@ -16,6 +16,8 @@ namespace Slowsharp
         {
             foreach (var asm in assemblies)
             {
+                if (asm.IsDynamic) continue;
+
                 foreach (var type in asm.GetExportedTypes()
                     .Where(x => x.IsSealed && x.IsAbstract))
                 {

@@ -21,5 +21,20 @@ foreach (var b in a)
 return sum;
 "));
         }
+
+        [TestMethod]
+        public void NotEnumerable()
+        {
+            Assert.ThrowsException<InvalidOperationException>(() => {
+                TestRunner.Run(@"
+var sum = 0;
+
+foreach (var b in sum) 
+    sum += b;
+    
+return sum;
+");
+            });
+        }
     }
 }
