@@ -66,7 +66,7 @@ Console.WriteLine(b);
         {
 
 var a = new St();
-a.a = 11;
+a.a = int.Parse(""11"");
 
 Console.WriteLine(a.a);
 

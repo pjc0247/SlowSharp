@@ -171,7 +171,14 @@ namespace Slowsharp
             {
                 var leftIsType = false;
 
-                if (ma.Expression is IdentifierNameSyntax id)
+                if (ma.Expression is PredefinedTypeSyntax pd)
+                {
+                    HybType leftType = null;
+                    leftIsType = true;
+                    leftType = resolver.GetType($"{pd}");
+                    callsite = leftType.GetStaticMethods($"{ma.Name}");
+                }
+                else if (ma.Expression is IdentifierNameSyntax id)
                 {
                     HybType leftType = null;
                     if (resolver.TryGetType($"{id.Identifier}", out leftType))
