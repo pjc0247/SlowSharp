@@ -53,6 +53,7 @@
     <Compile Include="Core\CScript.cs" />
     <Compile Include="Core\TypeResolution.cs" />
     <Compile Include="DotNet\LINQ.cs" />
+    <Compile Include="MinOpt\AndOr.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />

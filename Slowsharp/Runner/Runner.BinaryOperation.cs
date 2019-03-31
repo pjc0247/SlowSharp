@@ -17,6 +17,17 @@ namespace Slowsharp
                 return RunIs(node);
 
             var left = RunExpression(node.Left);
+
+            if (op == "||") {
+                if (IsTrueOrEquivalent(left))
+                    return HybInstance.Bool(true);
+            }
+            else if (op == "&&")
+            {
+                if (IsTrueOrEquivalent(left) == false)
+                    return HybInstance.Bool(false);
+            }
+
             var right = RunExpression(node.Right);
 
             return MadMath.Op(left, right, op);
