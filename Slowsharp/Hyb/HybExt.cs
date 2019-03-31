@@ -10,7 +10,9 @@ namespace Slowsharp
     {
         public static object Unwrap(this HybInstance _this)
         {
-            return _this.innerObject;
+            if (_this.isCompiledType)
+                return _this.innerObject;
+            return _this;
         }
         public static Type[] Unwrap(this HybType[] _this)
         {

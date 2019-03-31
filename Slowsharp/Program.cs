@@ -37,8 +37,8 @@ using System.Text;
  
 namespace HelloWorld
 {
-    class Foo : object {
-        private int aa = 55;
+    class Fooo {
+        public int aa = 55;
 
 private static int Boo() => 5;
 
@@ -65,7 +65,11 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-var a = new List<int>() {4,3,2,1};
+var a = new Fooo[5];
+
+a[0] = new Fooo();
+
+Console.WriteLine(a[0].aa);
 
 return r;
         }

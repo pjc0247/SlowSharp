@@ -37,6 +37,8 @@ namespace Slowsharp
         {
             if (o == null)
                 return Null();
+            if (o is HybInstance hyb)
+                return hyb;
             return new HybInstance(new HybType(o.GetType()), o);
         }
         public static HybInstance ObjectArray(object[] o)

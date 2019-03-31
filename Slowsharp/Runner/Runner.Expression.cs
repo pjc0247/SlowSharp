@@ -372,18 +372,29 @@ namespace Slowsharp
             else
                 elemType = typeof(HybInstance);
 
-            ary = Array.CreateInstance(
-                elemType, node.Initializer.Expressions.Count);
-
-            var count = 0;
-            foreach (var expr in node.Initializer.Expressions)
+            if (node.Initializer != null)
             {
-                var value = RunExpression(expr);
+                ary = Array.CreateInstance(
+                    elemType, node.Initializer.Expressions.Count);
 
-                if (rtAry.isCompiledType)
-                    ary.SetValue(value.innerObject, count++);
-                else
-                    ary.SetValue(value, count++);
+                var count = 0;
+                foreach (var expr in node.Initializer.Expressions)
+                {
+                    var value = RunExpression(expr);
+
+                    if (rtAry.isCompiledType)
+                        ary.SetValue(value.innerObject, count++);
+                    else
+                        ary.SetValue(value, count++);
+                }
+            }
+            else
+            {
+                var ranks = node.Type.RankSpecifiers
+                    .SelectMany(x => x.Sizes)
+                    .Select(x => RunExpression(x).As<int>())
+                    .ToArray();
+                ary = Array.CreateInstance(elemType, ranks);
             }
 
             return HybInstance.Object(ary);

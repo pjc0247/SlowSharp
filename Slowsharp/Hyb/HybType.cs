@@ -30,6 +30,10 @@ namespace Slowsharp
 
         public bool isCompiledType => compiledType != null;
         public bool isInterface { get; }
+        
+        public bool isArray { get; }
+        public int arrayRank { get; }
+        public HybType elementType { get; }
 
         internal Type compiledType { get; }
         internal Class interpretKlass { get; }
@@ -44,6 +48,13 @@ namespace Slowsharp
             this.isInterface = false;
             this.interpretKlass = klass;
         }
+        internal HybType(Class klass, HybType elementType, int arrayRank) :
+            this(klass)
+        {
+            this.isArray = true;
+            this.elementType = elementType;
+            this.arrayRank = arrayRank;
+        }
 
         public HybType MakeArrayType(int rank)
         {
@@ -53,7 +64,7 @@ namespace Slowsharp
                     return new HybType(compiledType.MakeArrayType());
                 return new HybType(compiledType.MakeArrayType(rank));
             }
-            return null;
+            return new HybType(interpretKlass, this, arrayRank);
         }
         public HybType MakeGenericType(HybType[] genericArgs)
         {
@@ -71,6 +82,14 @@ namespace Slowsharp
                     this,
                     Activator.CreateInstance(compiledType, args.Unwrap()));
             }
+            // Array with interpret type
+            else if (isArray)
+            {
+                var inst = Array.CreateInstance(typeof(HybInstance),
+                    args.Unwrap().Select(x => (int)x).ToArray());
+                return HybInstance.Object(inst);
+            }
+            // Interpret type object
             else
             {
                 var inst = new HybInstance(runner, this, interpretKlass);

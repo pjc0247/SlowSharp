@@ -19,6 +19,8 @@ namespace Slowsharp
             klass = new Class(this, $"{node.Identifier}");
             ctx.types.Add($"{node.Identifier}", klass);
 
+            if (node.BaseList == null)
+                return;
             foreach (var b in node.BaseList.Types)
             {
                 var type = resolver.GetType($"{b.Type}");
