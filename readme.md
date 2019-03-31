@@ -13,9 +13,15 @@ Limitation
 ----
 Since __SlowSharp__ is an interpreter, there're some differences and limitations.
 
+__Lazy semantic validation__
 ```cs
 Console.WriteLine("Hello");
 Console.WriteLn("World");
+```
+```cs
+var a = 1234;
+Console.WriteLine(a);
+var a = 4556; // redefination
 ```
 
 Sandboxing
