@@ -108,6 +108,19 @@ namespace Slowsharp
             return HybInstance.Null();
         }
 
+        public bool IsSubclassOf(HybType other)
+        {
+            if (other.isCompiledType)
+            {
+                if (isCompiledType)
+                {
+                    return compiledType
+                        .IsSubclassOf(other.compiledType);
+                }
+                return false;
+            }
+            return false;
+        }
         public bool IsAssignableFrom(HybType other)
         {
             if (other.isCompiledType)

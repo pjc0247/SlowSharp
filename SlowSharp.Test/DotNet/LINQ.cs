@@ -21,11 +21,22 @@ return a.Count();
         [TestMethod]
         public void Reverse()
         {
-            Assert.AreSame(
+            CollectionAssert.AreEqual(
                 new int[] { 4, 3, 2, 1 },
-                TestRunner.Run(@"
+                (int[])TestRunner.Run(@"
 var a = new int[] {1,2,3,4}
 return a.Reverse().ToArray();
+"));
+        }
+
+        [TestMethod]
+        public void ToArray()
+        {
+            CollectionAssert.AreEqual(
+                new int[] { 4, 3, 2, 1 },
+                (int[])TestRunner.Run(@"
+var a = new List<int>() {4,3,2,1}
+return a.ToArray();
 "));
         }
     }

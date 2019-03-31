@@ -60,9 +60,12 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-var a = new int[] { 1,2,3 };
+var a = new Dictionary<int, int>() { [1] = 1, [2] = 3 };
 
-Console.WriteLine(a.Reverse().ToArray());
+foreach (var b in a) 
+Console.WriteLine(b);
+
+Console.WriteLine(a.ToArray());
 
 return r;
         }
@@ -74,7 +77,6 @@ Console.WriteLin(aa);
     }
 }
 ";
-            
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 

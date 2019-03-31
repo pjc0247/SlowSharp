@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Slowsharp
@@ -175,6 +176,25 @@ namespace Slowsharp
                 return klass.GetMethods(id);
             }
         }
+        public SSMethodInfo GetSetIndexerMethod()
+        {
+            var idxer = GetIndexerProperty();
+            if (idxer == null) return null;
+            return new SSMethodInfo(idxer.GetSetMethod());
+        }
+        public SSMethodInfo GetGetIndexerMethod()
+        {
+            var idxer = GetIndexerProperty();
+            if (idxer == null) return null;
+            return new SSMethodInfo(idxer.GetGetMethod());
+        }
+        private PropertyInfo GetIndexerProperty()
+        {
+            return obj.GetType()
+               .GetProperties()
+               .Where(x => x.GetIndexParameters().Length > 0)
+               .FirstOrDefault();
+        }
 
         public bool SetIndexer(HybInstance[] args, HybInstance value)
         {
@@ -190,11 +210,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                var idxer = obj.GetType()
-                   .GetProperties()
-                   .Where(x => x.GetIndexParameters().Length > 0)
-                   .FirstOrDefault();
-
+                var idxer = GetIndexerProperty();
                 if (idxer == null)
                     return false;
 
@@ -220,11 +236,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                var idxer = obj.GetType()
-                   .GetProperties()
-                   .Where(x => x.GetIndexParameters().Length > 0)
-                   .FirstOrDefault();
-
+                var idxer = GetIndexerProperty();
                 if (idxer == null)
                     return false;
 

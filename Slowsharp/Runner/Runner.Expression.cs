@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -288,8 +289,66 @@ namespace Slowsharp
                     return args[0];
             }
 
-            return type.CreateInstance(this, args);
+            var inst = type.CreateInstance(this, args);
+            if (node.Initializer != null)
+                ProcessInitializer(inst, node.Initializer);
+            return inst;
         }
+        private void ProcessInitializer(HybInstance inst, InitializerExpressionSyntax init)
+        {
+            if (IsDictionaryAddible(inst))
+            {
+                var setMethod = inst.GetSetIndexerMethod();
+
+                foreach (var expr in init.Expressions)
+                {
+                    if (!(expr is AssignmentExpressionSyntax))
+                        throw new SemanticViolationException("");
+
+                    var assign = (AssignmentExpressionSyntax)expr;
+                    var right = RunExpression(assign.Right);
+                    if (assign.Left is ImplicitElementAccessSyntax ea)
+                    {
+                        var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+                        var count = 0;
+                        foreach (var arg in ea.ArgumentList.Arguments)
+                            args[count++] = RunExpression(arg.Expression);
+
+                        inst.SetIndexer(args, right);
+                    }
+                }
+            }
+            else if (IsArrayAddible(inst))
+            {
+                var addMethods = inst.GetMethods("Add");
+                foreach (var expr in init.Expressions)
+                {
+                    if (expr is AssignmentExpressionSyntax)
+                        throw new SemanticViolationException("");
+
+                    var value = RunExpression(expr);
+                    var addArgs = new HybInstance[] { value };
+                    var method = OverloadingResolver.FindMethodWithArguments(
+                        resolver, addMethods, addArgs);
+
+                    method.target.Invoke(inst, addArgs);
+                }
+            }
+        }
+
+        private bool IsArrayAddible(HybInstance obj)
+        {
+            if (obj.GetMethods("Add").Length == 0)
+                return false;
+            return typeof(IEnumerable).IsAssignableFrom(obj.GetHybType());
+        }
+        private bool IsDictionaryAddible(HybInstance obj)
+        {
+            if (obj.GetSetIndexerMethod() == null)
+                return false;
+            return true;
+        }
+
         private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)
         {
             var typeId = $"{node.Type.ElementType}";
