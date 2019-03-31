@@ -260,7 +260,7 @@ namespace Slowsharp
                     if (mod.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
 
-                    p.SetValue(obj, value);
+                    p.SetValue(obj, value.Unwrap());
                     return true;
                 }
 
@@ -272,7 +272,7 @@ namespace Slowsharp
                     if (mod.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
 
-                    f.SetValue(obj, value);
+                    f.SetValue(obj, value.Unwrap());
                     return true;
                 }
 

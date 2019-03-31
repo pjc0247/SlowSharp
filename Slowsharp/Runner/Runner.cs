@@ -270,6 +270,11 @@ namespace Slowsharp
                 if (set == false)
                     vars.SetValue(key, right);
             }
+            else if (node.Left is MemberAccessExpressionSyntax ma)
+            {
+                var left = RunExpression(ma.Expression);
+                left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
+            }
             else if (node.Left is ElementAccessExpressionSyntax ea)
             {
                 var callee = RunExpression(ea.Expression);

@@ -19,6 +19,11 @@ namespace Slowsharp
         }
     }
 
+    struct St
+    {
+        public int a;
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -60,8 +65,10 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
+var a = new St();
+a.a = 11;
 
-Console.WriteLine(true || true);
+Console.WriteLine(a.a);
 
 return r;
         }
