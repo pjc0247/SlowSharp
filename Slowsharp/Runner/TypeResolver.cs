@@ -63,13 +63,20 @@ namespace Slowsharp
         }
         public HybType _GetType(string id)
         {
-            if (id == "int") return new HybType(typeof(int));
-            else if (id == "string") return new HybType(typeof(string));
-            else if (id == "float") return new HybType(typeof(float));
-            else if (id == "double") return new HybType(typeof(double));
-            else if (id == "decimal") return new HybType(typeof(decimal));
-            else if (id == "uint") return new HybType(typeof(uint));
-            else if (id == "object") return new HybType(typeof(object));
+            if (id == "void") return HybType.Void;
+            else if (id == "int") return HybType.Int32;
+            else if (id == "char") return HybType.Char;
+            else if (id == "byte") return HybType.Byte;
+            else if (id == "sbyte") return HybType.Sbyte;
+            else if (id == "bool") return HybType.Bool;
+            else if (id == "short") return HybType.Short;
+            else if (id == "ushort") return HybType.Ushort;
+            else if (id == "string") return HybType.String;
+            else if (id == "float") return HybType.Float;
+            else if (id == "double") return HybType.Double;
+            else if (id == "decimal") return HybType.Decimal;
+            else if (id == "uint") return HybType.Uint32;
+            else if (id == "object") return HybType.Object;
 
             foreach (var asm in assemblies)
             {

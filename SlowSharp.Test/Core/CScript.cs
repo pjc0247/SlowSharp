@@ -19,5 +19,13 @@ public static int Main() {
 }
 "));
         }
+
+        [TestMethod]
+        public void RunSimpleExpression()
+        {
+            Assert.AreEqual(
+                10,
+                CScript.RunSimple("5 + 5"));
+        }
     }
 }

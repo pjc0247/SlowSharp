@@ -14,13 +14,20 @@ namespace Slowsharp
         internal Type compiledType { get; }
         internal Class interpretKlass { get; }
 
+        public static HybType Void => HybTypeCache.Void;
         public static HybType Object => HybTypeCache.Object;
         public static HybType Bool => HybTypeCache.Bool;
         public static HybType Int16 => HybTypeCache.Int16;
         public static HybType Int32 => HybTypeCache.Int;
         public static HybType Int64 => HybTypeCache.Int64;
+        public static HybType Uint16 => HybTypeCache.Uint16;
+        public static HybType Uint32 => HybTypeCache.Uint;
+        public static HybType Uint64 => HybTypeCache.Uint64;
         public static HybType Short => HybTypeCache.Short;
+        public static HybType Ushort => HybTypeCache.Ushort;
         public static HybType Char => HybTypeCache.Char;
+        public static HybType Byte => HybTypeCache.Byte;
+        public static HybType Sbyte => HybTypeCache.Sbyte;
         public static HybType String => HybTypeCache.String;
         public static HybType Float => HybTypeCache.Float;
         public static HybType Double => HybTypeCache.Double;
