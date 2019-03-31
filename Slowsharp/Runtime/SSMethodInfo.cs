@@ -14,7 +14,11 @@ namespace Slowsharp
         public Invokable target;
         public BaseMethodDeclarationSyntax declaration;
 
+        /// <summary>
+        /// Whether method has `params` modifier in last parameter.
+        /// </summary>
         public bool isVaArg { get; }
+        public HybType returnType { get; }
 
         internal JumpDestination[] jumps;
 
@@ -22,6 +26,8 @@ namespace Slowsharp
         {
             target = new Invokable(this, runner, declaration);
 
+            if (declaration is MethodDeclarationSyntax md)
+                returnType = runner.resolver.GetType($"{md.ReturnType}");
             isVaArg =
                 declaration.ParameterList.Parameters.LastOrDefault()
                 ?.Modifiers.IsParams() ?? false;
@@ -30,6 +36,7 @@ namespace Slowsharp
         {
             target = new Invokable(this, methodInfo);
 
+            returnType = new HybType(methodInfo.ReturnType);
             isVaArg =
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;

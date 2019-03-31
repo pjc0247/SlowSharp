@@ -18,7 +18,7 @@ using System;
 
 class CScript__ {
 public static object Main() {
-    " + src + @"
+    return " + src + @";
 }
 }
 ", config);
