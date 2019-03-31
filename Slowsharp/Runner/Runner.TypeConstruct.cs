@@ -18,6 +18,11 @@ namespace Slowsharp
         {
             klass = new Class(this, $"{node.Identifier}");
             ctx.types.Add($"{node.Identifier}", klass);
+
+            foreach (var b in node.BaseList.Types)
+            {
+                var type = resolver.GetType($"{b.Type}");
+            }
         }
         private void AddField(FieldDeclarationSyntax node)
         {

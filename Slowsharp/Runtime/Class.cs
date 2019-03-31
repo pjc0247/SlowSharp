@@ -14,6 +14,8 @@ namespace Slowsharp
     {
         public string id { get; }
 
+        public HybType parent { get; }
+
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
         private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
         private Dictionary<string, List<SSMethodInfo>> methods = new Dictionary<string, List<SSMethodInfo>>();
@@ -23,6 +25,29 @@ namespace Slowsharp
         {
             this.runner = runner;
             this.id = id;
+        }
+        public Class(Runner runner, string id, HybType parent)
+        {
+            this.runner = runner;
+            this.id = id;
+            this.parent = parent;
+
+            InheritFrom(parent);
+        }
+
+        private void InheritFrom(HybType parent)
+        {
+            if (parent.isCompiledType)
+            {
+            }
+            else
+            {
+                var klass = parent.interpretKlass;
+                foreach (var f in klass.fields)
+                    fields.Add(f.Key, f.Value);
+                foreach (var m in klass.methods)
+                    methods.Add(m.Key, m.Value);
+            }
         }
 
         private void EnsureMethodKey(string id)

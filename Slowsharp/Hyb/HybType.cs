@@ -9,11 +9,6 @@ namespace Slowsharp
 {
     public class HybType
     {
-        public bool isCompiledType => compiledType != null;
-
-        internal Type compiledType { get; }
-        internal Class interpretKlass { get; }
-
         public static HybType Void => HybTypeCache.Void;
         public static HybType Object => HybTypeCache.Object;
         public static HybType Bool => HybTypeCache.Bool;
@@ -33,12 +28,20 @@ namespace Slowsharp
         public static HybType Double => HybTypeCache.Double;
         public static HybType Decimal => HybTypeCache.Decimal;
 
+        public bool isCompiledType => compiledType != null;
+        public bool isInterface { get; }
+
+        internal Type compiledType { get; }
+        internal Class interpretKlass { get; }
+
         internal HybType(Type type)
         {
+            this.isInterface = type.IsInterface;
             this.compiledType = type;
         }
         internal HybType(Class klass)
         {
+            this.isInterface = false;
             this.interpretKlass = klass;
         }
 

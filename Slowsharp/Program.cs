@@ -37,7 +37,7 @@ using System.Text;
  
 namespace HelloWorld
 {
-    class Foo {
+    class Foo : object {
         private int aa = 55;
 
 private static int Boo() => 5;
