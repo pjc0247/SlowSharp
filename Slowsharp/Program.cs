@@ -65,10 +65,7 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-var a = new St();
-a.a = int.Parse(""11"");
-
-Console.WriteLine(a.a);
+var a = new List<int>() {4,3,2,1};
 
 return r;
         }

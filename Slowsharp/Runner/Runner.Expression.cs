@@ -303,7 +303,7 @@ namespace Slowsharp
         }
         private void ProcessInitializer(HybInstance inst, InitializerExpressionSyntax init)
         {
-            if (IsDictionaryAddible(inst))
+            if (IsDictionaryAddible(inst, init))
             {
                 var setMethod = inst.GetSetIndexerMethod();
 
@@ -349,11 +349,15 @@ namespace Slowsharp
                 return false;
             return typeof(IEnumerable).IsAssignableFrom(obj.GetHybType());
         }
-        private bool IsDictionaryAddible(HybInstance obj)
+        private bool IsDictionaryAddible(HybInstance obj, InitializerExpressionSyntax init)
         {
-            if (obj.GetSetIndexerMethod() == null)
-                return false;
-            return true;
+            if (init.Expressions.Count > 0 &&
+                init.Expressions[0] is AssignmentExpressionSyntax)
+            {
+                if (obj.GetSetIndexerMethod() != null)
+                    return true;
+            }
+            return false;
         }
 
         private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)

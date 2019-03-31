@@ -35,7 +35,7 @@ return a.Reverse().ToArray();
             CollectionAssert.AreEqual(
                 new int[] { 4, 3, 2, 1 },
                 (int[])TestRunner.Run(@"
-var a = new List<int>() {4,3,2,1}
+var a = new List<int>() {4,3,2,1};
 return a.ToArray();
 "));
         }
