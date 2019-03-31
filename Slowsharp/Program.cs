@@ -60,12 +60,8 @@ Console.WriteLine(b);
         static int Main(int n)
         {
 
-var a = new Dictionary<int, int>() { [1] = 1, [2] = 3 };
 
-foreach (var b in a) 
-Console.WriteLine(b);
-
-Console.WriteLine(a.ToArray());
+Console.WriteLine(true || true);
 
 return r;
         }

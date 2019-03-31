@@ -19,6 +19,8 @@ namespace Slowsharp
             if (op == "<") return L(a, b);
             if (op == "<=") return LE(a, b);
             if (op == "==") return Eq(a, b);
+            if (op == "||") return Or(a, b);
+            if (op == "&&") return And(a, b);
 
             throw new ArgumentException($"Unrecognized operator: '{op}'.");
         }
@@ -87,6 +89,20 @@ namespace Slowsharp
 
             throw new NotImplementedException();
         }
+        public static HybInstance Or(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+                return HybInstance.Object(_Or(a.innerObject, b.innerObject));
+
+            throw new NotImplementedException();
+        }
+        public static HybInstance And(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+                return HybInstance.Object(_And(a.innerObject, b.innerObject));
+
+            throw new NotImplementedException();
+        }
 
         private static dynamic _Add(dynamic a, dynamic b ) => a + b;
         private static dynamic _Sub(dynamic a, dynamic b)  => a - b;
@@ -97,6 +113,8 @@ namespace Slowsharp
         private static dynamic _L(dynamic a, dynamic b) => a < b;
         private static dynamic _LE(dynamic a, dynamic b) => a <= b;
         private static dynamic _Eq(dynamic a, dynamic b) => a == b;
+        private static dynamic _Or(dynamic a, dynamic b) => a || b;
+        private static dynamic _And(dynamic a, dynamic b) => a && b;
 
         private static HybInstance AddInt32(HybInstance a, HybInstance b)
         {
