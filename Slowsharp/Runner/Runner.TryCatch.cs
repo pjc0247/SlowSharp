@@ -12,12 +12,21 @@ namespace Slowsharp
     {
         private void RunTry(TryStatementSyntax node)
         {
-            catches.Push(new CatchFrame(this, node));
-            RunBlock(node.Block);
-            catches.Pop();
+            bool hasCatches = node.Catches.Count > 0;
 
-            if (node.Finally != null)
-                Run(node.Finally.Block);
+            if (hasCatches)
+                catches.Push(new CatchFrame(this, node));
+            try
+            {
+                RunBlock(node.Block);
+            }
+            finally
+            {
+                if (node.Finally != null)
+                    Run(node.Finally.Block);
+            }
+            if (hasCatches)
+                catches.Pop();
         }
     }
 }
