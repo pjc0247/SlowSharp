@@ -30,7 +30,8 @@ namespace Slowsharp
 
         public bool isCompiledType => compiledType != null;
         public bool isInterface { get; }
-        
+        public bool isSealed { get; }
+
         public bool isArray { get; }
         public int arrayRank { get; }
         public HybType elementType { get; }
@@ -40,11 +41,13 @@ namespace Slowsharp
 
         internal HybType(Type type)
         {
+            this.isSealed = type.IsSealed;
             this.isInterface = type.IsInterface;
             this.compiledType = type;
         }
         internal HybType(Class klass)
         {
+            this.isSealed = false;
             this.isInterface = false;
             this.interpretKlass = klass;
         }

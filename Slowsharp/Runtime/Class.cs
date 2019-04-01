@@ -38,8 +38,12 @@ namespace Slowsharp
 
         private void InheritFrom(HybType parent)
         {
+            if (parent.isSealed)
+                throw new SemanticViolationException($"Sealed class cannot be inherited.");
+
             if (parent.isCompiledType)
             {
+
             }
             else
             {
