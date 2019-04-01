@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,13 +13,21 @@ namespace Slowsharp
     {
         internal HybInstance RunExpression(ExpressionSyntax node)
         {
+            if (node == null)
+                throw new SemanticViolationException("Invalid syntax");
+
             if (node is ParenthesizedExpressionSyntax ps)
                 return RunExpression(ps.Expression);
-
             else if (node is ParenthesizedExpressionSyntax)
                 return RunParenthesized(node as ParenthesizedExpressionSyntax);
+            else if (node is ParenthesizedLambdaExpressionSyntax)
+                return RunParenthesizedLambda(node as ParenthesizedLambdaExpressionSyntax);
+            else if (node is CastExpressionSyntax)
+                return RunCast(node as CastExpressionSyntax);
             else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
+            else if (node is ThisExpressionSyntax)
+                return ResolveThis(node as ThisExpressionSyntax);
             else if (node is LiteralExpressionSyntax)
                 return ResolveLiteral(node as LiteralExpressionSyntax);
             else if (node is ElementAccessExpressionSyntax)
@@ -29,6 +38,8 @@ namespace Slowsharp
                 RunAssign(node as AssignmentExpressionSyntax);
             else if (node is DefaultExpressionSyntax)
                 return RunDefault(node as DefaultExpressionSyntax);
+            else if (node is InterpolatedStringExpressionSyntax)
+                return RunInterpolatedString(node as InterpolatedStringExpressionSyntax);
             else if (node is InvocationExpressionSyntax)
                 return RunInvocation(node as InvocationExpressionSyntax);
             else if (node is ConditionalExpressionSyntax)
@@ -38,16 +49,53 @@ namespace Slowsharp
             else if (node is PostfixUnaryExpressionSyntax)
                 return RunPostfixUnary(node as PostfixUnaryExpressionSyntax);
 
+            else if (node is SizeOfExpressionSyntax)
+                RunSizeof(node as SizeOfExpressionSyntax);
+
             else if (node is ObjectCreationExpressionSyntax)
                 return RunObjectCreation(node as ObjectCreationExpressionSyntax);
             else if (node is ArrayCreationExpressionSyntax)
                 return RunArrayCreation(node as ArrayCreationExpressionSyntax);
 
+            // Runner.ThreadingKeyword.cs
+            else if (node is AwaitExpressionSyntax)
+                return RunAwait(node as AwaitExpressionSyntax);
+
             return null;
         }
 
+        private HybInstance ResolveThis(ThisExpressionSyntax node)
+        {
+            return ctx._this;
+        }
+        private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
+        {
+            if (node.Token.Value == null)
+                return HybInstance.Null();
+            if (node.Token.Value is char c)
+                return HybInstance.Char(c);
+            if (node.Token.Value is string str)
+                return HybInstance.String(str);
+            if (node.Token.Value is bool b)
+                return HybInstance.Bool(b);
+            if (node.Token.Value is int i)
+            {
+                if (int.TryParse(node.Token.Text, out _) == false)
+                    throw new SemanticViolationException($"Integer literal out of range");
+                return HybInstance.Int(i);
+            }
+            if (node.Token.Value is float f)
+                return HybInstance.Float(f);
+            if (node.Token.Value is double d)
+                return HybInstance.Double(d);
+
+            throw new InvalidOperationException();
+        }
         private HybInstance ResolveId(IdentifierNameSyntax node)
         {
+            if (string.IsNullOrEmpty(node.Identifier.Text))
+                throw new SemanticViolationException($"Invalid syntax: {node.Parent}");
+
             var id = $"{node.Identifier}";
             HybInstance v = null;
 
@@ -60,12 +108,31 @@ namespace Slowsharp
                     return v;
             }
 
-            return null;
+            var field = ctx.method.declaringClass.GetField(id);
+            //if (field.)
+
+            throw new NoSuchMemberException($"{id}");
         }
 
         private HybInstance RunParenthesized(ParenthesizedExpressionSyntax node)
         {
             return RunExpression(node.Expression);
+        }
+        private HybInstance RunParenthesizedLambda(ParenthesizedLambdaExpressionSyntax node)
+        {
+            return new HybInstance(new HybType(typeof(Action)), new Action(() =>
+            {
+                Run(node.Body);
+                halt = HaltType.None;
+            }));
+        }
+
+        private HybInstance RunCast(CastExpressionSyntax node)
+        {
+            var type = resolver.GetType($"{node.Type}");
+            var value = RunExpression(node.Expression);
+
+            return value.Cast(type);
         }
 
         private HybInstance RunDefault(DefaultExpressionSyntax node)
@@ -82,19 +149,50 @@ namespace Slowsharp
                 return RunExpression(node.WhenFalse);
         }
 
+        private HybInstance RunInterpolatedString(InterpolatedStringExpressionSyntax node)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var content in node.Contents)
+            {
+                if (content is InterpolationSyntax s)
+                    sb.Append(RunExpression(s.Expression));
+                else if (content is InterpolatedStringTextSyntax)
+                    sb.Append(content.GetText());
+            }
+
+            return HybInstance.String(sb.ToString());
+        }
+
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
         {
             string calleeId = "";
             string targetId = "";
             HybInstance callee = null;
-            Invokable[] callsite = null;
+            SSMethodInfo[] callsite = null;
+
+            var args = ResolveArgumentList(node.ArgumentList);
 
             if (node.Expression is MemberAccessExpressionSyntax ma)
             {
-                if (ma.Expression is IdentifierNameSyntax id)
+                var leftIsType = false;
+
+                if (ma.Expression is PredefinedTypeSyntax pd)
                 {
-                    var leftType = resolver.GetType($"{id.Identifier}");
-                    if (leftType == null)
+                    HybType leftType = null;
+                    leftIsType = true;
+                    leftType = resolver.GetType($"{pd}");
+                    callsite = leftType.GetStaticMethods($"{ma.Name}");
+                }
+                else if (ma.Expression is IdentifierNameSyntax id)
+                {
+                    HybType leftType = null;
+                    if (resolver.TryGetType($"{id.Identifier}", out leftType))
+                    {
+                        leftIsType = true;
+                        callsite = leftType.GetStaticMethods($"{ma.Name}");
+                    }
+                    else
                     {
                         callee = vars.GetValue($"{id.Identifier}");
 
@@ -104,10 +202,6 @@ namespace Slowsharp
                         callsite = callee
                             .GetMethods($"{ma.Name}");
                     }
-                    else
-                    {
-                        callsite = leftType.GetMethods($"{ma.Name}");
-                    }
 
                     calleeId = $"{id.Identifier}";
                 }
@@ -115,6 +209,14 @@ namespace Slowsharp
                 {
                     callee = RunExpression(expr);
                     callsite = callee.GetMethods($"{ma.Name}");
+                }
+
+                if (leftIsType == false &&
+                        callsite.Length == 0)
+                {
+                    callsite = extResolver.GetCallablegExtensions(callee, $"{ma.Name}");
+
+                    args = (new HybInstance[] { callee }).Concat(args).ToArray();
                 }
 
                 targetId = $"{ma.Name}";
@@ -128,15 +230,15 @@ namespace Slowsharp
 
             if (callsite.Length == 0)
                 throw new NoSuchMethodException($"{calleeId}", targetId);
-
-            var args = ResolveArgumentList(node.ArgumentList);
-            var method = FindMethodWithArguments(callsite, args);
+            
+            var method = OverloadingResolver.FindMethodWithArguments(
+                resolver,
+                callsite, args);
 
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
-            var ret = method.Invoke(callee, args);
-            methodEnd = false;
+            var ret = method.target.Invoke(callee, args);
             return ret;
         }
 
@@ -192,8 +294,78 @@ namespace Slowsharp
             else
                 type = resolver.GetType($"{node.Type}");
 
-            return type.CreateInstance(this, args);
+            if (type.isCompiledType)
+            {
+                if (type.compiledType == typeof(Action))
+                    return args[0];
+                if (type.compiledType == typeof(Func<int>))
+                    return args[0];
+            }
+
+            var inst = type.CreateInstance(this, args);
+            if (node.Initializer != null)
+                ProcessInitializer(inst, node.Initializer);
+            return inst;
         }
+        private void ProcessInitializer(HybInstance inst, InitializerExpressionSyntax init)
+        {
+            if (IsDictionaryAddible(inst, init))
+            {
+                var setMethod = inst.GetSetIndexerMethod();
+
+                foreach (var expr in init.Expressions)
+                {
+                    if (!(expr is AssignmentExpressionSyntax))
+                        throw new SemanticViolationException("");
+
+                    var assign = (AssignmentExpressionSyntax)expr;
+                    var right = RunExpression(assign.Right);
+                    if (assign.Left is ImplicitElementAccessSyntax ea)
+                    {
+                        var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+                        var count = 0;
+                        foreach (var arg in ea.ArgumentList.Arguments)
+                            args[count++] = RunExpression(arg.Expression);
+
+                        inst.SetIndexer(args, right);
+                    }
+                }
+            }
+            else if (IsArrayAddible(inst))
+            {
+                var addMethods = inst.GetMethods("Add");
+                foreach (var expr in init.Expressions)
+                {
+                    if (expr is AssignmentExpressionSyntax)
+                        throw new SemanticViolationException("");
+
+                    var value = RunExpression(expr);
+                    var addArgs = new HybInstance[] { value };
+                    var method = OverloadingResolver.FindMethodWithArguments(
+                        resolver, addMethods, addArgs);
+
+                    method.target.Invoke(inst, addArgs);
+                }
+            }
+        }
+
+        private bool IsArrayAddible(HybInstance obj)
+        {
+            if (obj.GetMethods("Add").Length == 0)
+                return false;
+            return typeof(IEnumerable).IsAssignableFrom(obj.GetHybType());
+        }
+        private bool IsDictionaryAddible(HybInstance obj, InitializerExpressionSyntax init)
+        {
+            if (init.Expressions.Count > 0 &&
+                init.Expressions[0] is AssignmentExpressionSyntax)
+            {
+                if (obj.GetSetIndexerMethod() != null)
+                    return true;
+            }
+            return false;
+        }
+
         private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)
         {
             var typeId = $"{node.Type.ElementType}";
@@ -206,18 +378,29 @@ namespace Slowsharp
             else
                 elemType = typeof(HybInstance);
 
-            ary = Array.CreateInstance(
-                elemType, node.Initializer.Expressions.Count);
-
-            var count = 0;
-            foreach (var expr in node.Initializer.Expressions)
+            if (node.Initializer != null)
             {
-                var value = RunExpression(expr);
+                ary = Array.CreateInstance(
+                    elemType, node.Initializer.Expressions.Count);
 
-                if (rtAry.isCompiledType)
-                    ary.SetValue(value.innerObject, count++);
-                else
-                    ary.SetValue(value, count++);
+                var count = 0;
+                foreach (var expr in node.Initializer.Expressions)
+                {
+                    var value = RunExpression(expr);
+
+                    if (rtAry.isCompiledType)
+                        ary.SetValue(value.innerObject, count++);
+                    else
+                        ary.SetValue(value, count++);
+                }
+            }
+            else
+            {
+                var ranks = node.Type.RankSpecifiers
+                    .SelectMany(x => x.Sizes)
+                    .Select(x => RunExpression(x).As<int>())
+                    .ToArray();
+                ary = Array.CreateInstance(elemType, ranks);
             }
 
             return HybInstance.Object(ary);
@@ -236,6 +419,39 @@ namespace Slowsharp
             }
 
             return null;
+        }
+
+        private HybInstance RunSizeof(SizeOfExpressionSyntax node)
+        {
+            var type = $"{node.Type}";
+            var size = 0;
+
+            if (type == "byte") size = sizeof(byte);
+            else if (type == "sbyte") size = sizeof(sbyte);
+            else if (type == "char") size = sizeof(char);
+            else if (type == "int") size = sizeof(int);
+            else if (type == "uint") size = sizeof(uint);
+            else if (type == "short") size = sizeof(short);
+            else if (type == "ushort") size = sizeof(ushort);
+            else if (type == "long") size = sizeof(long);
+            else if (type == "ulong") size = sizeof(ulong);
+            else if (type == "float") size = sizeof(float);
+            else if (type == "double") size = sizeof(double);
+            else if (type == "decimal") size = sizeof(decimal);
+            else if (type == "Int16") size = sizeof(Int16);
+            else if (type == "Int32") size = sizeof(Int32);
+            else if (type == "Int64") size = sizeof(Int64);
+            else if (type == "UInt16") size = sizeof(UInt16);
+            else if (type == "UInt32") size = sizeof(UInt32);
+            else if (type == "UInt64") size = sizeof(UInt64);
+            else if (type == "Byte") size = sizeof(Byte);
+            else if (type == "SByte") size = sizeof(SByte);
+            else if (type == "Double") size = sizeof(Double);
+            else if (type == "Decimal") size = sizeof(Decimal);
+            else
+                throw new SemanticViolationException($"sizeof cannot be used with {type}");
+
+            return HybInstance.Int(size);
         }
     }
 }

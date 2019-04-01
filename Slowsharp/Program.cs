@@ -19,6 +19,11 @@ namespace Slowsharp
         }
     }
 
+    struct St
+    {
+        public int a;
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -32,21 +37,39 @@ using System.Text;
  
 namespace HelloWorld
 {
-    class Foo {
-        private int aa = 55;
-        public Foo(int b) {
-            aa = b;
-            Console.WriteLine(aa);
+    class Fooo {
+        public int aa = 55;
+
+public int Boo { get; set; }
+
+        public void Foo() {
+            Console.WriteLine(this);
+        }
+        public void Foo(int b) {
+            Console.WriteLine(11);
         }
     }
     class Program
     {
 static int bb = 1;
 static int Foo() { return 5; }
+static int Foo(int n) { return 15; }
+
+private static int Booo() => 5;
+
+static void Bbb(params object[] obj) {
+foreach (var b in obj)
+Console.WriteLine(b);
+}
 
         static int Main(int n)
         {
-(new Bar()).Boo(5);
+
+var a = new Fooo();
+
+a.Foo();
+
+return r;
         }
 
 static void Bo() {
@@ -56,15 +79,17 @@ Console.WriteLin(aa);
     }
 }
 ";
-            
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
             Dump(root);
 
-            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig());
+            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig() {
+            });
             r.Run(root);
-            Console.WriteLine(r.RunMain(5).innerObject);
+            var ret = r.RunMain(5).innerObject;
+
+            Console.WriteLine(ret);
         }
 
         private static void Dump(SyntaxNode syntax, int depth = 0)

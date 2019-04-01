@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class HybInstance
+    public class HybInstance
     {
-        public bool isCompiledType => obj != null;
+        public bool isCompiledType => type.isCompiledType;
 
         public object innerObject
         {
@@ -35,7 +37,17 @@ namespace Slowsharp
         {
             if (o == null)
                 return Null();
+            if (o is HybInstance hyb)
+                return hyb;
             return new HybInstance(new HybType(o.GetType()), o);
+        }
+        public static HybInstance ObjectArray(object[] o)
+        {
+            return new HybInstance(new HybType(typeof(object[])), o);
+        }
+        public static HybInstance ObjectArray(HybInstance[] o)
+        {
+            return new HybInstance(new HybType(typeof(object[])), o.Unwrap());
         }
         public static HybInstance Char(char c)
         {
@@ -51,19 +63,27 @@ namespace Slowsharp
         }
         public static HybInstance Int(int n)
         {
-            return new HybInstance(HybType.Int, n);
+            return new HybInstance(HybType.Int32, n);
+        }
+        public static HybInstance Int64(Int64 n)
+        {
+            return new HybInstance(HybType.Int64, n);
         }
         public static HybInstance Float(float f)
         {
             return new HybInstance(HybType.Float, f);
         }
+        public static HybInstance Double(double f)
+        {
+            return new HybInstance(HybType.Double, f);
+        }
 
-        public HybInstance(HybType type, object obj)
+        internal HybInstance(HybType type, object obj)
         {
             this.type = type;
             this.obj = obj;
         }
-        public HybInstance(Runner runner, HybType type, Class klass)
+        internal HybInstance(Runner runner, HybType type, Class klass)
         {
             this.runner = runner;
             this.type = type;
@@ -71,10 +91,9 @@ namespace Slowsharp
 
             foreach (var field in klass.GetFields())
             {
-                if (field.declartor.Initializer == null)
+                if (field.declartor == null || field.declartor.Initializer == null)
                 {
-                    var hybType = runner.resolver.GetType($"{field.field.Declaration.Type}");
-                    fields.Add(field.id, HybInstance.Object(hybType.GetDefault()));
+                    fields.Add(field.id, HybInstance.Object(field.fieldType.GetDefault()));
                 }
                 else
                 {
@@ -86,6 +105,27 @@ namespace Slowsharp
 
         public HybType GetHybType() => type;
 
+        public HybInstance Cast(HybType type)
+        {
+            if (isCompiledType) {
+                if (type.isCompiledType)
+                {
+                    var casted = Convert.ChangeType(obj, type.compiledType);
+                    return HybInstance.Object(casted);
+                }
+                throw new InvalidCastException(
+                    $"{obj} cannot be casted to {type.interpretKlass.id}");
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public bool Is(HybType type)
+        {
+            if (type.isCompiledType)
+                return Is(type.compiledType);
+            return false;
+        }
         public bool Is(Type type)
         {
             if (isCompiledType)
@@ -119,19 +159,42 @@ namespace Slowsharp
             return default(T);
         }
 
-        public Invokable[] GetMethods(string id)
+        public SSMethodInfo[] GetMethods(string id)
         {
             if (isCompiledType)
             {
                 return obj.GetType().GetMethods()
                    .Where(x => x.Name == id)
-                   .Select(x => new Invokable(x))
+                   .Select(x => new SSMethodInfo(x) {
+                       id = x.Name,
+                       isStatic = x.IsStatic,
+                       accessModifier = AccessModifierParser.Get(x)
+                   })
                    .ToArray();
             }
             else
             {
                 return klass.GetMethods(id);
             }
+        }
+        public SSMethodInfo GetSetIndexerMethod()
+        {
+            var idxer = GetIndexerProperty();
+            if (idxer == null) return null;
+            return new SSMethodInfo(idxer.GetSetMethod());
+        }
+        public SSMethodInfo GetGetIndexerMethod()
+        {
+            var idxer = GetIndexerProperty();
+            if (idxer == null) return null;
+            return new SSMethodInfo(idxer.GetGetMethod());
+        }
+        private PropertyInfo GetIndexerProperty()
+        {
+            return obj.GetType()
+               .GetProperties()
+               .Where(x => x.GetIndexParameters().Length > 0)
+               .FirstOrDefault();
         }
 
         public bool SetIndexer(HybInstance[] args, HybInstance value)
@@ -141,18 +204,14 @@ namespace Slowsharp
                 if (obj is Array ary)
                 {
                     ary.SetValue(
-                        value,
+                        value.Unwrap(),
                         args.Unwrap()
                             .Select(x => (int)x)
                             .ToArray());
                     return true;
                 }
 
-                var idxer = obj.GetType()
-                   .GetProperties()
-                   .Where(x => x.GetIndexParameters().Length > 0)
-                   .FirstOrDefault();
-
+                var idxer = GetIndexerProperty();
                 if (idxer == null)
                     return false;
 
@@ -178,11 +237,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                var idxer = obj.GetType()
-                   .GetProperties()
-                   .Where(x => x.GetIndexParameters().Length > 0)
-                   .FirstOrDefault();
-
+                var idxer = GetIndexerProperty();
                 if (idxer == null)
                     return false;
 
@@ -194,7 +249,7 @@ namespace Slowsharp
             return false;
         }
 
-        public bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
+        internal bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {
@@ -206,7 +261,7 @@ namespace Slowsharp
                     if (mod.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
 
-                    p.SetValue(obj, value);
+                    p.SetValue(obj, value.Unwrap());
                     return true;
                 }
 
@@ -218,7 +273,7 @@ namespace Slowsharp
                     if (mod.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
 
-                    f.SetValue(obj, value);
+                    f.SetValue(obj, value.Unwrap());
                     return true;
                 }
 
@@ -226,6 +281,16 @@ namespace Slowsharp
             }
             else
             {
+                if (klass.HasProperty(id))
+                {
+                    var p = klass.GetProperty(id);
+                    if (p.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+                    runner.BindThis(this);
+                    value = p.setMethod.Invoke(this, new HybInstance[] { value });
+                    return true;
+                }
+
                 if (klass.HasField(id))
                 {
                     var f = klass.GetField(id);
@@ -239,7 +304,7 @@ namespace Slowsharp
                 return false;
             }
         }
-        public bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
+        internal bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
             {
@@ -272,6 +337,16 @@ namespace Slowsharp
             }
             else
             {
+                if (klass.HasProperty(id))
+                {
+                    var p = klass.GetProperty(id);
+                    if (p.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+                    runner.BindThis(this);
+                    value = p.getMethod.Invoke(this, new HybInstance[] { });
+                    return true;
+                }
+
                 if (klass.HasField(id))
                 {
                     var f = klass.GetField(id);
@@ -286,6 +361,35 @@ namespace Slowsharp
             }
         }
 
+        public IEnumerator GetEnumerator()
+        {
+            if (isCompiledType)
+            {
+                if (obj is IEnumerable e)
+                    return e.GetEnumerator();
+                if (obj is IEnumerator et)
+                    return et;
+                throw new InvalidOperationException("Object is not an enumerable.");
+            }
+
+            throw new InvalidOperationException("Object is not an enumerable.");
+        }
+
+        public bool IsNull()
+        {
+            if (isCompiledType) return obj == null;
+            return false;
+        }
+        public override string ToString()
+        {
+            if (isCompiledType)
+            {
+                if (obj == null)
+                    return "null";
+                return obj.ToString();
+            }
+            return type.ToString();
+        }
         public HybInstance Clone()
         {
             if (isCompiledType)

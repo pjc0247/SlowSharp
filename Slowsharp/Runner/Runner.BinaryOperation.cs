@@ -13,8 +13,24 @@ namespace Slowsharp
         private HybInstance RunBinaryExpression(BinaryExpressionSyntax node)
         {
             var op = node.OperatorToken.ValueText;
+            if (op == "is")
+                return RunIs(node);
+
             var left = RunExpression(node.Left);
+
+            if (op == "||") {
+                if (IsTrueOrEquivalent(left))
+                    return HybInstance.Bool(true);
+            }
+            else if (op == "&&")
+            {
+                if (IsTrueOrEquivalent(left) == false)
+                    return HybInstance.Bool(false);
+            }
+
             var right = RunExpression(node.Right);
+
+            return MadMath.Op(left, right, op);
 
             if (left.Is<string>())
                 return HybInstance.String(left.As<string>() + right.As<string>());
@@ -47,6 +63,17 @@ namespace Slowsharp
             */
 
             return null;
+        }
+
+        private HybInstance RunIs(BinaryExpressionSyntax node)
+        {
+            var left = RunExpression(node.Left);
+            var type = resolver.GetType($"{node.Right}");
+
+            if (type == null)
+                throw new SemanticViolationException($"Unrecognized type: {node.Right}");
+
+            return left.Is(type) ? HybInstance.Bool(true) : HybInstance.Bool(false);
         }
     }
 }

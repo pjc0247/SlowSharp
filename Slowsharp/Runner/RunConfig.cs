@@ -8,7 +8,14 @@ namespace Slowsharp
 {
     public class RunConfig
     {
-        public AccessControl accessControl { get; set; }
+        public static RunConfig Default => new RunConfig();
+
+        public IAccessFilter accessControl { get; set; }
         public int timeout { get; set; } = int.MaxValue;
+
+        public RunConfig()
+        {
+            accessControl = new DefaultAccessControl();
+        }
     }
 }

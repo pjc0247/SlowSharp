@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class SSMemberInfo
+    public class SSMemberInfo
     {
+        public string id;
+        public bool isStatic;
+
         public AccessModifier accessModifier;
+
+        internal Class declaringClass;
     }
 }

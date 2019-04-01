@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 namespace Slowsharp
 {
     [Flags]
-    internal enum AccessModifier
+    public enum AccessModifier
     {
         None = 0,
 
@@ -20,7 +20,7 @@ namespace Slowsharp
         Internal = 8
     }
 
-    internal static class AccessModifierEvaluator
+    internal static class AccessEvaluator
     {
         public static bool IsAcceesible(this AccessModifier _this, AccessLevel level)
         {
