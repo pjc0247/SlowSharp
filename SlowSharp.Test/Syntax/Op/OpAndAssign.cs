@@ -5,35 +5,53 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Slowsharp.Test
 {
     [TestClass]
-    public class StringTest
+    public class OpAndAssignTest
     {
         [TestMethod]
-        public void Instantiate()
+        public void Plus()
         {
             Assert.AreEqual(
-                "hello",
+                3,
                 TestRunner.Run(@"
-return ""hello"";
+var a = 1;
+a += 2;
+return a;
 "));
         }
 
         [TestMethod]
-        public void Concat()
+        public void Minus()
         {
             Assert.AreEqual(
-                "helloworld",
+                -1,
                 TestRunner.Run(@"
-return ""hello"" + ""world"";
+var a = 1;
+a -= 2;
+return a;
 "));
         }
 
         [TestMethod]
-        public void Interpolation()
+        public void Mul()
         {
             Assert.AreEqual(
-                "helloworld",
+                6,
                 TestRunner.Run(@"
-return $""{""hello""}{""world""}"";
+var a = 3;
+a *= 2;
+return a;
+"));
+        }
+
+        [TestMethod]
+        public void Div()
+        {
+            Assert.AreEqual(
+                3,
+                TestRunner.Run(@"
+var a = 6;
+a /= 2;
+return a;
 "));
         }
     }

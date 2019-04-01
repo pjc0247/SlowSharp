@@ -18,6 +18,20 @@ return new List<int>();
         }
 
         [TestMethod]
+        public void InstantiateWithInitializer()
+        {
+            var list = (List<int>)TestRunner.Run(@"
+return new List<int>() { 1,2,3 };
+");
+            Assert.IsInstanceOfType(
+                list,
+                typeof(List<int>));
+            CollectionAssert.AreEqual(
+                new List<int>() { 1, 2, 3 },
+                list);
+        }
+
+        [TestMethod]
         public void Add()
         {
             var list = (List<int>)TestRunner.Run(@"
