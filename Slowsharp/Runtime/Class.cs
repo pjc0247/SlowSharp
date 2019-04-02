@@ -16,10 +16,12 @@ namespace Slowsharp
 
         public HybType parent { get; }
 
+        internal Runner runner;
+
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
         private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
+        private Dictionary<string, SSPropertyInfo> properties = new Dictionary<string, SSPropertyInfo>();
         private Dictionary<string, List<SSMethodInfo>> methods = new Dictionary<string, List<SSMethodInfo>>();
-        private Runner runner;
 
         public Class(Runner runner, string id)
         {
@@ -69,11 +71,24 @@ namespace Slowsharp
                 accessModifier = AccessModifierParser.Parse(method.Modifiers)
             });
         }
+        public void AddProperty(string id, PropertyDeclarationSyntax property)
+        {
+            properties.Add(id, new SSPropertyInfo(this, runner, property)
+            {
+                id = id,
+                isStatic = property.Modifiers.IsStatic(),
+                property = property,
+                declaringClass = this,
+
+                accessModifier = AccessModifierParser.Parse(property.Modifiers)
+            });
+        }
         public void AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
             fields.Add(id, new SSFieldInfo()
             {
                 id = id,
+                fieldType = runner.resolver.GetType($"{field.Declaration.Type}"),
                 isStatic = field.Modifiers.IsStatic(),
                 field = field,
                 declaringClass = this,
@@ -81,6 +96,10 @@ namespace Slowsharp
 
                 accessModifier = AccessModifierParser.Parse(field.Modifiers)
             });
+        }
+        public void AddField(SSFieldInfo field)
+        {
+            fields.Add(field.id, field);
         }
 
         public SSMethodInfo[] GetMethods(string id)
@@ -96,16 +115,49 @@ namespace Slowsharp
                 .Select(x => x.Value)
                 .ToArray();
         }
+        public SSPropertyInfo[] GetProperties()
+        {
+            return properties
+                .Select(x => x.Value)
+                .ToArray();
+        }
 
+        public bool HasStaticField(string id)
+        {
+            if (fields.ContainsKey(id) == false)
+                return false;
+            return fields[id].isStatic == true;
+        }
         public bool HasField(string id)
         {
-            return fields.ContainsKey(id);
+            if (fields.ContainsKey(id) == false)
+                return false;
+            return fields[id].isStatic == false;
+        }
+        public bool TryGetField(string id, out SSFieldInfo field)
+        {
+            field = null;
+            if (HasField(id) == false)
+                return false;
+            field = fields[id];
+            return true;
         }
         public SSFieldInfo GetField(string id)
         {
             if (HasField(id) == false)
                 throw new ArgumentException($"No such field: {id}");
             return fields[id];
+        }
+
+        public bool HasProperty(string id)
+        {
+            return properties.ContainsKey(id);
+        }
+        public SSPropertyInfo GetProperty(string id)
+        {
+            if (HasProperty(id) == false)
+                throw new ArgumentException($"No such property: {id}");
+            return properties[id];
         }
     }
 }

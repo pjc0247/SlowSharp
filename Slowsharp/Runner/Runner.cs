@@ -13,9 +13,8 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        private Assembly asm;
-
-        private RunContext ctx;
+        internal RunContext ctx;
+        internal GlobalStorage globals { get; }
         internal ExtensionMethodResolver extResolver { get; }
         internal TypeResolver resolver { get; }
         private IdLookup lookup;
@@ -25,14 +24,13 @@ namespace Slowsharp
 
         private Stack<VarFrame> frames { get; }
 
-        private HybInstance ret;
+        internal HybInstance ret;
         private HaltType halt;
 
-        public Runner(Assembly asm, RunConfig config)
+        public Runner(RunConfig config)
         {
-            this.asm = asm;
-
             this.ctx = new RunContext(config);
+            this.globals = new GlobalStorage();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -43,11 +41,21 @@ namespace Slowsharp
             this.resolver = new TypeResolver(ctx, assemblies);
         }
 
+        internal void BindThis(HybInstance _this)
+        {
+            ctx._this = _this;
+        }
+
         internal HybInstance RunMain(params object[] args)
         {
             ctx.Reset();
             return klass.GetMethods("Main")[0]
                 .target.Invoke(null, args.Wrap());
+        }
+
+        public HybInstance Instantiate(string id, params object[] args)
+        {
+            return resolver.GetType(id).CreateInstance(this, args.Wrap());
         }
 
         public void Run(SyntaxNode node)
@@ -65,6 +73,8 @@ namespace Slowsharp
                 AddClass(node as ClassDeclarationSyntax);
             if (node is ConstructorDeclarationSyntax)
                 AddConstructorMethod(node as ConstructorDeclarationSyntax);
+            if (node is PropertyDeclarationSyntax)
+                AddProperty(node as PropertyDeclarationSyntax);
             if (node is FieldDeclarationSyntax)
                 AddField(node as FieldDeclarationSyntax);
             if (node is MethodDeclarationSyntax)
@@ -260,6 +270,7 @@ namespace Slowsharp
             if (node.Left is IdentifierNameSyntax id)
             {
                 var key = id.Identifier.ValueText;
+
                 var set = false;
                 if (ctx._this != null)
                 {
@@ -272,6 +283,17 @@ namespace Slowsharp
             }
             else if (node.Left is MemberAccessExpressionSyntax ma)
             {
+                if (ma.Expression is IdentifierNameSyntax idNode)
+                {
+                    var key = $"{idNode.Identifier}";
+                    HybType leftType;
+                    if (resolver.TryGetType(key, out leftType))
+                    {
+                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", right);
+                        return;
+                    }
+                }
+
                 var left = RunExpression(ma.Expression);
                 left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
             }

@@ -55,6 +55,7 @@
     <Compile Include="DotNet\LINQ.cs" />
     <Compile Include="DotNet\Primitive\Integer.cs" />
     <Compile Include="MinOpt\AndOr.cs" />
+    <Compile Include="Syntax\Class\Property.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />

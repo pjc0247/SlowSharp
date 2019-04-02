@@ -12,10 +12,14 @@ namespace Slowsharp
         private RunContext ctx;
         private Assembly[] assemblies;
 
+        private TypeCache typeCache;
+
         public TypeResolver(RunContext ctx, Assembly[] assemblies)
         {
             this.ctx = ctx;
             this.assemblies = assemblies;
+
+            this.typeCache = new TypeCache(ctx, assemblies);
         }
 
         private int GetArrayRank(string id)
@@ -40,7 +44,7 @@ namespace Slowsharp
             if (rank > 0)
                 pureName = GetPureName(id);
 
-            type = _GetType(pureName);
+            type = typeCache.GetType(pureName);
             if (type == null)
                 return false;    
 
@@ -61,39 +65,7 @@ namespace Slowsharp
 
             throw new SemanticViolationException($"Unrecognized type {id}");
         }
-        public HybType _GetType(string id)
-        {
-            if (id == "void") return HybType.Void;
-            else if (id == "int") return HybType.Int32;
-            else if (id == "char") return HybType.Char;
-            else if (id == "byte") return HybType.Byte;
-            else if (id == "sbyte") return HybType.Sbyte;
-            else if (id == "bool") return HybType.Bool;
-            else if (id == "short") return HybType.Short;
-            else if (id == "ushort") return HybType.Ushort;
-            else if (id == "string") return HybType.String;
-            else if (id == "float") return HybType.Float;
-            else if (id == "double") return HybType.Double;
-            else if (id == "decimal") return HybType.Decimal;
-            else if (id == "uint") return HybType.Uint32;
-            else if (id == "object") return HybType.Object;
-
-            foreach (var asm in assemblies)
-            {
-                foreach (var type in asm.GetTypes())
-                {
-                    if (type.Name == id)
-                        return new HybType(type);
-                    if (type.FullName == id)
-                        return new HybType(type);
-                }
-            }
-
-            if (ctx.types.ContainsKey(id))
-                return new HybType(ctx.types[id]);
-
-            return null;
-        }
+        
         public HybType GetGenericType(string id, int n)
         {
             id = $"{id}`{n}";

@@ -31,7 +31,7 @@ public static object Main() {
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
-            var r = new Runner(Assembly.GetEntryAssembly(), config);
+            var r = new Runner(config);
             r.Run(root);
 
             var ret = r.RunMain();

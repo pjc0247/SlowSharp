@@ -79,10 +79,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicHybInstance.cs" />
     <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
     <Compile Include="Runner\ExtensionMethodResolver.cs" />
+    <Compile Include="Runner\GlobalStorage.cs" />
     <Compile Include="Runner\OverloadingResolver.cs" />
+    <Compile Include="Runner\TypeCache.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />
     <Compile Include="Exception\NoSuchMemberException.cs" />
@@ -119,6 +122,7 @@
     <Compile Include="Runner\Runner.Expression.cs" />
     <Compile Include="Runner\Runner.FlowControl.cs" />
     <Compile Include="Runtime\SSFieldInfo.cs" />
+    <Compile Include="Runtime\SSPropertyInfo.cs" />
     <Compile Include="Sandbox\BlacklistAccessControl.cs" />
     <Compile Include="Sandbox\DefaultAccessControl.cs" />
     <Compile Include="Sandbox\IAccessFilter.cs" />

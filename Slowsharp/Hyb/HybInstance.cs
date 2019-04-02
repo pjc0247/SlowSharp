@@ -10,7 +10,7 @@ namespace Slowsharp
 {
     public class HybInstance
     {
-        public bool isCompiledType => obj != null;
+        public bool isCompiledType => type.isCompiledType;
 
         public object innerObject
         {
@@ -91,10 +91,9 @@ namespace Slowsharp
 
             foreach (var field in klass.GetFields())
             {
-                if (field.declartor.Initializer == null)
+                if (field.declartor == null || field.declartor.Initializer == null)
                 {
-                    var hybType = runner.resolver.GetType($"{field.field.Declaration.Type}");
-                    fields.Add(field.id, HybInstance.Object(hybType.GetDefault()));
+                    fields.Add(field.id, HybInstance.Object(field.fieldType.GetDefault()));
                 }
                 else
                 {
@@ -160,6 +159,23 @@ namespace Slowsharp
             return default(T);
         }
 
+        public HybInstance Invoke(string name, params object[] args)
+        {
+            var wrappedArgs = args.Wrap();
+            var methods = GetMethods(name);
+
+            if (methods.Length == 0)
+                throw new ArgumentException($"No such method: {name}");
+
+            var method = OverloadingResolver.FindMethodWithArguments(
+                runner.resolver, methods, wrappedArgs);
+
+            if (method == null)
+                throw new ArgumentException($"No matching override found: {name}");
+
+            return method.target.Invoke(this, wrappedArgs);
+        }
+
         public SSMethodInfo[] GetMethods(string id)
         {
             if (isCompiledType)
@@ -222,6 +238,10 @@ namespace Slowsharp
 
             return false;
         }
+        public bool GetIndexer(object[] args, out HybInstance value)
+        {
+            return GetIndexer(args.Wrap(), out value);
+        }
         public bool GetIndexer(HybInstance[] args, out HybInstance value)
         {
             value = null;
@@ -250,6 +270,10 @@ namespace Slowsharp
             return false;
         }
 
+        public bool SetPropertyOrField(string id, HybInstance value)
+        {
+            return SetPropertyOrField(id, value, AccessLevel.Outside);
+        }
         internal bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
         {
             if (isCompiledType)
@@ -282,6 +306,16 @@ namespace Slowsharp
             }
             else
             {
+                if (klass.HasProperty(id))
+                {
+                    var p = klass.GetProperty(id);
+                    if (p.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+                    runner.BindThis(this);
+                    value = p.setMethod.Invoke(this, new HybInstance[] { value });
+                    return true;
+                }
+
                 if (klass.HasField(id))
                 {
                     var f = klass.GetField(id);
@@ -294,6 +328,11 @@ namespace Slowsharp
 
                 return false;
             }
+        }
+
+        public bool GetPropertyOrField(string id, out HybInstance value)
+        {
+            return GetPropertyOrField(id, out value, AccessLevel.Outside);
         }
         internal bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
         {
@@ -328,6 +367,16 @@ namespace Slowsharp
             }
             else
             {
+                if (klass.HasProperty(id))
+                {
+                    var p = klass.GetProperty(id);
+                    if (p.accessModifier.IsAcceesible(level) == false)
+                        throw new SemanticViolationException($"Invalid access: {id}");
+                    runner.BindThis(this);
+                    value = p.getMethod.Invoke(this, new HybInstance[] { });
+                    return true;
+                }
+
                 if (klass.HasField(id))
                 {
                     var f = klass.GetField(id);
@@ -364,7 +413,11 @@ namespace Slowsharp
         public override string ToString()
         {
             if (isCompiledType)
+            {
+                if (obj == null)
+                    return "null";
                 return obj.ToString();
+            }
             return type.ToString();
         }
         public HybInstance Clone()

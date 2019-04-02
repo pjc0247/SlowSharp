@@ -26,6 +26,8 @@ namespace Slowsharp
                 return RunCast(node as CastExpressionSyntax);
             else if (node is BinaryExpressionSyntax)
                 return RunBinaryExpression(node as BinaryExpressionSyntax);
+            else if (node is ThisExpressionSyntax)
+                return ResolveThis(node as ThisExpressionSyntax);
             else if (node is LiteralExpressionSyntax)
                 return ResolveLiteral(node as LiteralExpressionSyntax);
             else if (node is ElementAccessExpressionSyntax)
@@ -62,6 +64,10 @@ namespace Slowsharp
             return null;
         }
 
+        private HybInstance ResolveThis(ThisExpressionSyntax node)
+        {
+            return ctx._this;
+        }
         private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
             if (node.Token.Value == null)
@@ -102,7 +108,13 @@ namespace Slowsharp
                     return v;
             }
 
-            var field = ctx.method.declaringClass.GetField(id);
+            SSFieldInfo field;
+            Class klass = ctx.method.declaringClass;
+            if (klass.TryGetField(id, out field))
+            {
+                if (field.isStatic)
+                    return globals.GetStaticField(klass, id);
+            }
             //if (field.)
 
             throw new NoSuchMemberException($"{id}");
@@ -253,6 +265,14 @@ namespace Slowsharp
         }
         private HybInstance RunMemberAccess(MemberAccessExpressionSyntax node)
         {
+            if (node.Expression is IdentifierNameSyntax idNode)
+            {
+                HybType type;
+                var id = $"{idNode.Identifier}";
+                if (resolver.TryGetType(id, out type))
+                    return RunStaticMemberAccess(node, type);
+            }
+
             var left = RunExpression(node.Expression);
             var right = node.Name.Identifier.Text;
 
@@ -262,6 +282,17 @@ namespace Slowsharp
 
             throw new NoSuchMemberException(right);
         }
+        private HybInstance RunStaticMemberAccess(MemberAccessExpressionSyntax node, HybType leftType)
+        {
+            var right = node.Name.Identifier.Text;
+
+            HybInstance value;
+            if (leftType.GetStaticPropertyOrField(right, out value))
+                return value;
+
+            throw new SemanticViolationException($"No such static member: {right}");
+        }
+
         private HybInstance RunObjectCreation(ObjectCreationExpressionSyntax node)
         {
             Console.WriteLine("CreateObject");

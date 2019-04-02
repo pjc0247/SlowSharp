@@ -28,7 +28,7 @@ namespace Slowsharp
             var objs = new object[_this.Length];
 
             for (int i = 0; i < _this.Length; i++)
-                objs[i] = _this[i].innerObject;
+                objs[i] = _this[i].Unwrap();
 
             return objs;
         }
@@ -56,6 +56,8 @@ namespace Slowsharp
         {
             genericBound = null;
 
+            if (_this == typeof(object))
+                return true;
             if (type.isCompiledType == false)
                 return false;
 

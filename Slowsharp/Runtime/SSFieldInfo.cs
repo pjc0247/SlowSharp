@@ -13,6 +13,8 @@ namespace Slowsharp
     /// </summary>
     public class SSFieldInfo : SSMemberInfo
     {
+        public HybType fieldType;
+
         public VariableDeclaratorSyntax declartor;
         public FieldDeclarationSyntax field;
     }

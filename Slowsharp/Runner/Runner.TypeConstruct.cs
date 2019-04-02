@@ -26,11 +26,24 @@ namespace Slowsharp
                 var type = resolver.GetType($"{b.Type}");
             }
         }
+        private void AddProperty(PropertyDeclarationSyntax node)
+        {
+            klass.AddProperty($"{node.Identifier}", node);
+        }
         private void AddField(FieldDeclarationSyntax node)
         {
+            var isStatic = node.Modifiers.IsStatic();
+            var type = resolver.GetType($"{node.Declaration.Type}");
+
             foreach (var f in node.Declaration.Variables)
             {
-                klass.AddField($"{f.Identifier}", node, f);
+                var id = $"{f.Identifier}";
+
+                klass.AddField(id, node, f);
+                if (isStatic)
+                {
+                    globals.SetStaticField(klass, id, type.GetDefault());
+                }
             }
         }
         private void AddConstructorMethod(ConstructorDeclarationSyntax node)

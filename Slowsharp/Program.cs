@@ -40,12 +40,12 @@ namespace HelloWorld
     class Fooo {
         public int aa = 55;
 
-private static int Boo() => 5;
+public int Boo { get; set; }
 
-        public Foo() {
-            Console.WriteLine(1234);
+        public void Foo() {
+            Console.WriteLine(this);
         }
-        public Foo(int b) {
+        public void Foo(int b) {
             Console.WriteLine(11);
         }
     }
@@ -64,12 +64,8 @@ Console.WriteLine(b);
 
         static int Main(int n)
         {
-
-var a = new Fooo[5];
-
-a[0] = new Fooo();
-
-Console.WriteLine(a[0].aa);
+Fooo.aa = 5455;
+Console.WriteLine(Fooo.aa);
 
 return r;
         }
@@ -86,12 +82,14 @@ Console.WriteLin(aa);
 
             Dump(root);
 
-            var r = new Runner(Assembly.GetEntryAssembly(), new RunConfig() {
+            var r = new Runner(new RunConfig() {
             });
             r.Run(root);
             var ret = r.RunMain(5).innerObject;
 
-            Console.WriteLine(ret);
+            dynamic d = new DynamicHybInstance(r.Instantiate("Fooo"));
+            d.Foo();
+            //Console.WriteLine(r.Instantiate("Fooo").Invoke("Foo", 1));
         }
 
         private static void Dump(SyntaxNode syntax, int depth = 0)

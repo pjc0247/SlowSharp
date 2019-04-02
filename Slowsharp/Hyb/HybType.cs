@@ -106,6 +106,76 @@ namespace Slowsharp
             }
         }
 
+        public bool SetStaticPropertyOrField(string id, HybInstance value)
+        {
+            if (isCompiledType)
+            {
+                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                    .Where(x => x.Name == id)
+                    .FirstOrDefault();
+                if (property != null)
+                {
+                    property.SetValue(null, value.Unwrap());
+                    return true;
+                }
+
+                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
+                    .Where(x => x.Name == id)
+                    .FirstOrDefault();
+                if (field != null)
+                {
+                    field.SetValue(null, value.Unwrap());
+                    return true;
+                }
+            }
+            else
+            {
+                if (interpretKlass.HasStaticField(id))
+                {
+                    interpretKlass.runner.globals.SetStaticField(
+                        interpretKlass, id, value);
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
+        public bool GetStaticPropertyOrField(string id, out HybInstance value)
+        {
+            if (isCompiledType)
+            {
+                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                    .Where(x => x.Name == id)
+                    .FirstOrDefault();
+                if (property != null)
+                {
+                    value = property.GetValue(null).Wrap();
+                    return true;
+                }
+
+                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
+                    .Where(x => x.Name == id)
+                    .FirstOrDefault();
+                if (field != null)
+                {
+                    value = field.GetValue(null).Wrap();
+                    return true;
+                }
+            }
+            else
+            {
+                if (interpretKlass.HasStaticField(id))
+                {
+                    value = interpretKlass.runner.globals.GetStaticField(
+                        interpretKlass, id);
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
         public SSMethodInfo[] GetStaticMethods(string id)
         {
             if (isCompiledType)
