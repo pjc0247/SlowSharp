@@ -39,16 +39,26 @@ namespace Slowsharp
 
         private void InheritFrom(HybType parent)
         {
+            if (parent.isSealed)
+                throw new SemanticViolationException($"Sealed class cannot be inherited.");
+
             if (parent.isCompiledType)
             {
+
             }
             else
             {
                 var klass = parent.interpretKlass;
-                foreach (var f in klass.fields)
+                foreach (var f in klass.fields
+                    .Where(x => x.Value.accessModifier != AccessModifier.Private))
                     fields.Add(f.Key, f.Value);
                 foreach (var m in klass.methods)
-                    methods.Add(m.Key, m.Value);
+                {
+                    var nonPrivateMethods = m.Value
+                        .Where(x => x.accessModifier != AccessModifier.Private)
+                        .ToList();
+                    methods.Add(m.Key, nonPrivateMethods);
+                }
             }
         }
 

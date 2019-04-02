@@ -20,8 +20,6 @@ namespace Slowsharp
         {
             this.declaringClass = klass;
 
-            this.isStatic = true;
-
             if (node.ExpressionBody != null)
                 InitializeWithExpressionBody(runner, node);
             else InitializeWithAccessor(runner, node);
