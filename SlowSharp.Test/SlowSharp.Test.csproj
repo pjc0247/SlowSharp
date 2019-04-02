@@ -56,6 +56,7 @@
     <Compile Include="DotNet\Primitive\Integer.cs" />
     <Compile Include="MinOpt\AndOr.cs" />
     <Compile Include="Syntax\Class\Property.cs" />
+    <Compile Include="Syntax\Class\RefOrOut.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Hyb\Operator.cs" />
     <Compile Include="Hyb\TypeComparision.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Syntax\ControlFlow\While.cs" />
     <Compile Include="Syntax\Op\OpAndAssign.cs" />
     <Compile Include="TestRunner.cs" />
   </ItemGroup>

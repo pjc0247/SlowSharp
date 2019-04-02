@@ -13,6 +13,9 @@ namespace Slowsharp
 
         public DynamicHybInstance(HybInstance obj)
         {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
             this.obj = obj;
         }
 

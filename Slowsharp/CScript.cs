@@ -36,9 +36,7 @@ public static object Main() {
 
             var ret = r.RunMain();
             if (ret == null) return null;
-            if (ret.isCompiledType)
-                return ret.innerObject;
-            return ret;
+            return ret.Unwrap();
         }
     }
 }

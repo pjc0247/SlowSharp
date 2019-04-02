@@ -79,7 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicHybInstance.cs" />
+    <Compile Include="Hyb\DynamicHybInstance.cs" />
     <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
     <Compile Include="Runner\ExtensionMethodResolver.cs" />

@@ -93,6 +93,8 @@ namespace Slowsharp
                 RunFor(node as ForStatementSyntax);
             if (node is ForEachStatementSyntax)
                 RunForEach(node as ForEachStatementSyntax);
+            if (node is WhileStatementSyntax)
+                RunWhile(node as WhileStatementSyntax);
             if (node is TryStatementSyntax)
                 RunTry(node as TryStatementSyntax);
             if (node is ReturnStatementSyntax)
@@ -218,18 +220,33 @@ namespace Slowsharp
         }
         internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
         {
-            ctx._this = _this;
+            BindThis(_this);
             return RunMethod(method, args);
         }
 
         private void RunLocalDeclaration(LocalDeclarationStatementSyntax node)
         {
+            var typename = $"{node.Declaration.Type}";
+            var isVar = typename == "var";
+            HybType type = null;
+
+            if (isVar == false)
+                type = resolver.GetType(typename);
+
             foreach (var v in node.Declaration.Variables)
             {
                 var id = v.Identifier.ValueText;
                 if (vars.TryGetValue(id, out _))
                     throw new SemanticViolationException($"Local variable redefination: {id}");
-                vars.SetValue(id, RunExpression(v.Initializer.Value));
+                if (isVar && v.Initializer == null)
+                    throw new SemanticViolationException($"`var` should be initialized with declaration.");
+
+                HybInstance value = null;
+                if (v.Initializer != null)
+                    value = RunExpression(v.Initializer.Value);
+                else
+                    value = type.GetDefault();
+                vars.SetValue(id, value);
             }
         }
         private void RunVariableDeclaration(VariableDeclarationSyntax node)
@@ -265,9 +282,11 @@ namespace Slowsharp
                 return;
             }
 
-            var right = RunExpression(node.Right);
-
-            if (node.Left is IdentifierNameSyntax id)
+            RunAssign(node.Left, RunExpression(node.Right));
+        }
+        private void RunAssign(ExpressionSyntax leftNode, HybInstance right)
+        {
+            if (leftNode is IdentifierNameSyntax id)
             {
                 var key = id.Identifier.ValueText;
 
@@ -281,7 +300,7 @@ namespace Slowsharp
                 if (set == false)
                     vars.SetValue(key, right);
             }
-            else if (node.Left is MemberAccessExpressionSyntax ma)
+            else if (leftNode is MemberAccessExpressionSyntax ma)
             {
                 if (ma.Expression is IdentifierNameSyntax idNode)
                 {
@@ -297,7 +316,7 @@ namespace Slowsharp
                 var left = RunExpression(ma.Expression);
                 left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
             }
-            else if (node.Left is ElementAccessExpressionSyntax ea)
+            else if (leftNode is ElementAccessExpressionSyntax ea)
             {
                 var callee = RunExpression(ea.Expression);
                 var args = new HybInstance[ea.ArgumentList.Arguments.Count];
@@ -345,16 +364,6 @@ namespace Slowsharp
                 token.Text[1] == '=' && token.Text[0] != '=')
                 return true;
             return false;
-        }
-
-        private HybInstance[] ResolveArgumentList(ArgumentListSyntax node)
-        {
-            var args = new HybInstance[node.Arguments.Count];
-
-            for (int i = 0; i < node.Arguments.Count; i++)
-                args[i] = RunExpression(node.Arguments[i].Expression);
-
-            return args;
         }
 
         private SSMethodInfo[] ResolveLocalMember(IdentifierNameSyntax node)

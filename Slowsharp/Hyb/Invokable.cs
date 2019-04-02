@@ -49,7 +49,7 @@ namespace Slowsharp
             this.funcMethod = func;
         }
 
-        public HybInstance Invoke(HybInstance _this, HybInstance[] args)
+        public HybInstance Invoke(HybInstance _this, HybInstance[] args, bool hasRefOrOut = false)
         {
             if (isCompiled)
                 Console.WriteLine($"Invoke {compiledMethod.Name}");
@@ -58,8 +58,15 @@ namespace Slowsharp
 
             if (type == InvokeType.ReflectionInvoke)
             {
-                var ret = compiledMethod.Invoke(
-                    _this?.innerObject, args.Unwrap());
+                var unwrappedArgs = args.Unwrap();
+                var ret = compiledMethod.Invoke(_this?.innerObject, unwrappedArgs);
+
+                if (hasRefOrOut)
+                {
+                    for (int i = 0; i < args.Length; i++)
+                        args[i] = HybInstance.Object(unwrappedArgs[i]);
+                }
+
                 return HybInstance.Object(ret);
             }
             else if (type == InvokeType.FuncInvoke)

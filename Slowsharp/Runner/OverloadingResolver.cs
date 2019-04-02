@@ -27,7 +27,10 @@ namespace Slowsharp
                     {
                         var p = ps[i].ParameterType;
 
-                        if (args[i] == null)
+                        if (p.IsByRef)
+                            p = p.GetElementType();
+
+                        if (args[i] == null || args[i].IsNull())
                         {
                             if (p.IsValueType)
                             {

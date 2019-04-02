@@ -13,15 +13,16 @@ namespace Slowsharp
 {
     class Bar
     {
-        public void Boo()
+        public static void Boo(out object b)
         {
+            b = 1122;
             Console.WriteLine(1234);
         }
     }
 
     struct St
     {
-        public int a;
+        public static object a;
     }
 
     class Program
@@ -64,10 +65,18 @@ Console.WriteLine(b);
 
         static int Main(int n)
         {
-Fooo.aa = 5455;
-Console.WriteLine(Fooo.aa);
 
-return r;
+while(true)
+Console.WriteLine(1);
+
+int a = 11;
+Bar.Boo(out a);
+
+Console.WriteLine(a);
+
+return CScript.RunSimple(""55"", null);
+
+//return ""asdf"";
         }
 
 static void Bo() {
@@ -77,6 +86,12 @@ Console.WriteLin(aa);
     }
 }
 ";
+            Bar.Boo(out St.a);
+
+            Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
+
+            Console.WriteLine(src);
+
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
@@ -86,6 +101,8 @@ Console.WriteLin(aa);
             });
             r.Run(root);
             var ret = r.RunMain(5).innerObject;
+
+            Console.WriteLine(ret);
 
             dynamic d = new DynamicHybInstance(r.Instantiate("Fooo"));
             d.Foo();

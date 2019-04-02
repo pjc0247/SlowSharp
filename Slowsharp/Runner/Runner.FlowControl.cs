@@ -106,6 +106,17 @@ namespace Slowsharp
             }
             vars = vars.parent;
         }
+        private void RunWhile(WhileStatementSyntax node)
+        {
+            while (true)
+            {
+                var cond = RunExpression(node.Condition);
+                if (IsTrueOrEquivalent(cond) == false)
+                    break;
+
+                Run(node.Statement);
+            }
+        }
 
         private void RunBreak(BreakStatementSyntax node)
         {

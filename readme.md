@@ -24,6 +24,11 @@ Console.WriteLine(a);
 var a = 4556; // redefination
 ```
 
+Zero-binding
+----
+* No manual assembly references
+* No type or method binding
+
 Sandboxing
 ----
 ### Access control

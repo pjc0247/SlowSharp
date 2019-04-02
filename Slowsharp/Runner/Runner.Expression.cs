@@ -177,7 +177,7 @@ namespace Slowsharp
             HybInstance callee = null;
             SSMethodInfo[] callsite = null;
 
-            var args = ResolveArgumentList(node.ArgumentList);
+            var (args, hasRefOrOut) = ResolveArgumentList(node.ArgumentList);
 
             if (node.Expression is MemberAccessExpressionSyntax ma)
             {
@@ -244,8 +244,35 @@ namespace Slowsharp
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
-            var ret = method.target.Invoke(callee, args);
+            var ret = method.target.Invoke(callee, args, hasRefOrOut);
+
+            // post-invoke
+            if (hasRefOrOut)
+            {
+                var count = 0;
+                foreach (var arg in node.ArgumentList.Arguments)
+                {
+                    if (arg.RefKindKeyword != null)
+                        RunAssign(arg.Expression, args[count]);
+                    count++;
+                }
+            }
+
             return ret;
+        }
+        private (HybInstance[], bool) ResolveArgumentList(ArgumentListSyntax node)
+        {
+            var args = new HybInstance[node.Arguments.Count];
+            var hasRefOrOut = false;
+
+            for (int i = 0; i < node.Arguments.Count; i++)
+            {
+                if (node.Arguments[i].RefKindKeyword != null)
+                    hasRefOrOut = true;
+                args[i] = RunExpression(node.Arguments[i].Expression);
+            }
+
+            return (args, hasRefOrOut);
         }
 
         private HybInstance RunElementAccess(ElementAccessExpressionSyntax node)
