@@ -25,6 +25,15 @@ public static object Main() {
         }
         public static object Run(string src, RunConfig config = null)
         {
+            var r = CreateRunner(src, config);
+
+            var ret = r.RunMain();
+            if (ret == null) return null;
+            return ret.Unwrap();
+        }
+
+        public static Runner CreateRunner(string src, RunConfig config = null)
+        {
             if (config == null)
                 config = RunConfig.Default;
 
@@ -34,9 +43,7 @@ public static object Main() {
             var r = new Runner(config);
             r.Run(root);
 
-            var ret = r.RunMain();
-            if (ret == null) return null;
-            return ret.Unwrap();
+            return r;
         }
     }
 }

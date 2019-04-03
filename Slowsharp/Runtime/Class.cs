@@ -15,6 +15,7 @@ namespace Slowsharp
         public string id { get; }
 
         public HybType parent { get; }
+        public HybType type { get; }
 
         internal Runner runner;
 
@@ -27,14 +28,15 @@ namespace Slowsharp
         {
             this.runner = runner;
             this.id = id;
+            this.type = new HybType(this);
         }
-        public Class(Runner runner, string id, HybType parent)
+        public Class(Runner runner, string id, HybType parent) :
+            this(runner, id)
         {
-            this.runner = runner;
-            this.id = id;
             this.parent = parent;
 
-            InheritFrom(parent);
+            if (parent != null)
+                InheritFrom(parent);
         }
 
         private void InheritFrom(HybType parent)
@@ -71,7 +73,7 @@ namespace Slowsharp
         {
             EnsureMethodKey(id);
 
-            methods[id].Add(new SSMethodInfo(runner, method) {
+            methods[id].Add(new SSMethodInfo(runner, type, method) {
                 id = id,
                 isStatic = method.Modifiers.IsStatic(),
                 declaringClass = this,
@@ -81,9 +83,9 @@ namespace Slowsharp
                 accessModifier = AccessModifierParser.Parse(method.Modifiers)
             });
         }
-        public void AddProperty(string id, PropertyDeclarationSyntax property)
+        public SSPropertyInfo AddProperty(string id, PropertyDeclarationSyntax property)
         {
-            properties.Add(id, new SSPropertyInfo(this, runner, property)
+            var propertyInfo = new SSPropertyInfo(this, runner, property)
             {
                 id = id,
                 isStatic = property.Modifiers.IsStatic(),
@@ -91,11 +93,13 @@ namespace Slowsharp
                 declaringClass = this,
 
                 accessModifier = AccessModifierParser.Parse(property.Modifiers)
-            });
+            };
+            properties.Add(id, propertyInfo);
+            return propertyInfo;
         }
-        public void AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
+        public SSFieldInfo AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
-            fields.Add(id, new SSFieldInfo()
+            var fieldInfo = new SSFieldInfo()
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{field.Declaration.Type}"),
@@ -105,7 +109,9 @@ namespace Slowsharp
                 declartor = declarator,
 
                 accessModifier = AccessModifierParser.Parse(field.Modifiers)
-            });
+            };
+            fields.Add(id, fieldInfo);
+            return fieldInfo;
         }
         public void AddField(SSFieldInfo field)
         {
@@ -138,11 +144,13 @@ namespace Slowsharp
                 return false;
             return fields[id].isStatic == true;
         }
-        public bool HasField(string id)
+        public bool HasField(string id, MemberFlag flag = MemberFlag.None)
         {
             if (fields.ContainsKey(id) == false)
                 return false;
-            return fields[id].isStatic == false;
+
+            var field = fields[id];
+            return field.IsMatch(flag);
         }
         public bool TryGetField(string id, out SSFieldInfo field)
         {
@@ -159,9 +167,27 @@ namespace Slowsharp
             return fields[id];
         }
 
-        public bool HasProperty(string id)
+        public bool HasStaticProperty(string id)
         {
-            return properties.ContainsKey(id);
+            if (properties.ContainsKey(id) == false)
+                return false;
+            return properties[id].isStatic == true;
+        }
+        public bool HasProperty(string id, MemberFlag flag = MemberFlag.None)
+        {
+            if (properties.ContainsKey(id) == false)
+                return false;
+
+            var property = properties[id];
+            return property.IsMatch(flag);
+        }
+        public bool TryGetProperty(string id, out SSPropertyInfo property)
+        {
+            property = null;
+            if (HasProperty(id) == false)
+                return false;
+            property = properties[id];
+            return true;
         }
         public SSPropertyInfo GetProperty(string id)
         {

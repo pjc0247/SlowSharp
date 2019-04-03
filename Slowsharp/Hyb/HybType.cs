@@ -35,6 +35,25 @@ namespace Slowsharp
         public bool isArray { get; }
         public int arrayRank { get; }
         public HybType elementType { get; }
+        public HybType parent
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    if (isCompiledType)
+                    {
+                        _parent = compiledType.BaseType != null ?
+                            new HybType(compiledType.BaseType) :
+                            null;
+                    }
+                    else
+                        _parent = interpretKlass.parent;
+                }
+                return _parent;
+            }
+        }
+        private HybType _parent;
 
         internal Type compiledType { get; }
         internal Class interpretKlass { get; }
@@ -77,6 +96,11 @@ namespace Slowsharp
             }
             return null;
         }
+
+        public HybInstance Override(Runner runner, HybInstance[] args, object parentObject)
+        {
+            return CreateInstanceInterpretType(runner, args, parentObject);
+        }
         public HybInstance CreateInstance(Runner runner, HybInstance[] args)
         {
             if (isCompiledType)
@@ -94,19 +118,22 @@ namespace Slowsharp
             }
             // Interpret type object
             else
+                return CreateInstanceInterpretType(runner, args);
+        }
+        private HybInstance CreateInstanceInterpretType(Runner runner, HybInstance[] args,
+             object parentObject = null)
+        {
+            var inst = new HybInstance(runner, this, interpretKlass, parentObject);
+            var ctors = inst.GetMethods("$_ctor");
+
+            if (ctors.Length > 0)
             {
-                var inst = new HybInstance(runner, this, interpretKlass);
-                var ctors = inst.GetMethods("$_ctor");
-
-                if (ctors.Length > 0)
-                {
-                    var ctor = OverloadingResolver
-                        .FindMethodWithArguments(runner.resolver, ctors, args);
-                    ctor.target.Invoke(inst, args);
-                }
-
-                return inst;
+                var ctor = OverloadingResolver
+                    .FindMethodWithArguments(runner.resolver, ctors, args);
+                ctor.target.Invoke(inst, args);
             }
+
+            return inst;
         }
 
         public bool SetStaticPropertyOrField(string id, HybInstance value)
@@ -133,6 +160,14 @@ namespace Slowsharp
             }
             else
             {
+                if (interpretKlass.HasStaticProperty(id))
+                {
+                    value = interpretKlass
+                        .GetProperty(id)
+                        .setMethod
+                        .Invoke(null, new HybInstance[] { value });
+                    return true;
+                }
                 if (interpretKlass.HasStaticField(id))
                 {
                     interpretKlass.runner.globals.SetStaticField(
@@ -168,6 +203,14 @@ namespace Slowsharp
             }
             else
             {
+                if (interpretKlass.HasStaticProperty(id))
+                {
+                    value = interpretKlass
+                        .GetProperty(id)
+                        .getMethod
+                        .Invoke(null, new HybInstance[] { });
+                    return true;
+                }
                 if (interpretKlass.HasStaticField(id))
                 {
                     value = interpretKlass.runner.globals.GetStaticField(
@@ -195,7 +238,11 @@ namespace Slowsharp
             }
             else
             {
-                return interpretKlass.GetMethods(id);
+                if (parent == null)
+                    return interpretKlass.GetMethods(id);
+                return interpretKlass.GetMethods(id)
+                    .Concat(parent.GetStaticMethods(id))
+                    .ToArray();
             }
         }
 
@@ -242,6 +289,39 @@ namespace Slowsharp
             if (isCompiledType)
                 return compiledType.Name;
             return interpretKlass.id;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            if (obj is HybType type)
+            {
+                if (isCompiledType)
+                {
+                    if (type.isCompiledType == false)
+                        return false;
+                    return compiledType == type.compiledType;
+                }
+                else
+                {
+                    return interpretKlass == type.interpretKlass;
+                }
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            if (isCompiledType) return compiledType.GetHashCode();
+            return interpretKlass.GetHashCode();
+        }
+
+        public static bool operator ==(HybType obj1, HybType obj2)
+        {
+            if (null == (object)obj1) return null == (object)obj2;
+            return obj1.Equals(obj2);
+        }
+        public static bool operator !=(HybType obj1, HybType obj2)
+        {
+            return !(obj1 == obj2);
         }
     }
 }

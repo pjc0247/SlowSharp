@@ -26,6 +26,7 @@ namespace Slowsharp
 
         private HybType type;
         private object obj;
+        private HybInstance parent;
         private Class klass;
         private Runner runner;
 
@@ -83,13 +84,47 @@ namespace Slowsharp
             this.type = type;
             this.obj = obj;
         }
-        internal HybInstance(Runner runner, HybType type, Class klass)
+        internal HybInstance(Runner runner, HybType type, Class klass, object parentObject = null)
         {
             this.runner = runner;
             this.type = type;
             this.klass = klass;
 
-            foreach (var field in klass.GetFields())
+            if (klass.parent != null)
+            {
+                if (parentObject != null)
+                    parent = HybInstance.Object(parentObject);
+                else
+                    InstantiateParent();
+            }
+
+            InitializeFields();
+            InitializeProperties();
+        }
+        private void InstantiateParent()
+        {
+            if (klass.parent.isCompiledType)
+                parent = klass.parent.CreateInstance(runner, new HybInstance[] { });
+        }
+        private void InitializeProperties()
+        {
+            foreach (var property in klass.GetProperties()
+                .Where(x => x.isStatic == false))
+            {
+                if (property.property.Initializer != null)
+                {
+                    runner.BindThis(this);
+                    property.setMethod
+                        .Invoke(this, new HybInstance[] {
+                            runner.RunExpression(property.property.Initializer.Value)
+                        });
+                }
+            }
+        }
+        private void InitializeFields()
+        {
+            foreach (var field in klass.GetFields()
+                .Where(x => x.isStatic == false))
             {
                 if (field.declartor == null || field.declartor.Initializer == null)
                 {
@@ -173,7 +208,9 @@ namespace Slowsharp
             if (method == null)
                 throw new ArgumentException($"No matching override found: {name}");
 
-            return method.target.Invoke(this, wrappedArgs);
+            if (method.declaringType == type)
+                return method.target.Invoke(this, wrappedArgs);
+            return method.target.Invoke(parent, wrappedArgs);
         }
 
         public SSMethodInfo[] GetMethods(string id)
@@ -191,7 +228,12 @@ namespace Slowsharp
             }
             else
             {
-                return klass.GetMethods(id);
+                if (parent == null)
+                    return klass.GetMethods(id);
+
+                return parent.GetMethods(id)
+                    .Concat(klass.GetMethods(id))
+                    .ToArray();
             }
         }
         public SSMethodInfo GetSetIndexerMethod()
@@ -306,7 +348,7 @@ namespace Slowsharp
             }
             else
             {
-                if (klass.HasProperty(id))
+                if (klass.HasProperty(id, MemberFlag.Member))
                 {
                     var p = klass.GetProperty(id);
                     if (p.accessModifier.IsAcceesible(level) == false)
@@ -316,7 +358,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                if (klass.HasField(id))
+                if (klass.HasField(id, MemberFlag.Member))
                 {
                     var f = klass.GetField(id);
                     if (f.accessModifier.IsAcceesible(level) == false)
@@ -325,6 +367,9 @@ namespace Slowsharp
                     fields[id] = value;
                     return true;
                 }
+
+                if (parent != null)
+                    return parent.SetPropertyOrField(id, value);
 
                 return false;
             }
@@ -367,7 +412,7 @@ namespace Slowsharp
             }
             else
             {
-                if (klass.HasProperty(id))
+                if (klass.HasProperty(id, MemberFlag.Member))
                 {
                     var p = klass.GetProperty(id);
                     if (p.accessModifier.IsAcceesible(level) == false)
@@ -377,7 +422,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                if (klass.HasField(id))
+                if (klass.HasField(id, MemberFlag.Member))
                 {
                     var f = klass.GetField(id);
                     if (f.accessModifier.IsAcceesible(level) == false)
@@ -385,6 +430,9 @@ namespace Slowsharp
                     value = fields[id];
                     return true;
                 }
+
+                if (parent != null)
+                    return parent.GetPropertyOrField(id, out value);
 
                 value = null;
                 return false;

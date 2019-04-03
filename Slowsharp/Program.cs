@@ -13,6 +13,17 @@ namespace Slowsharp
 {
     class Bar
     {
+        public int ff = 122;
+
+        public Bar()
+        {
+            Console.WriteLine("I AM INIT");
+        }
+
+        public void SayHello()
+        {
+            Console.WriteLine("hello");
+        }
         public static void Boo(out object b)
         {
             b = 1122;
@@ -38,19 +49,19 @@ using System.Text;
  
 namespace HelloWorld
 {
-    class Fooo {
-        public int aa = 55;
+    class Fooo : Bar {
+        public static int aa = 1;
 
-public int Boo { get; set; }
+public static int Boo { get; set; } = 11;
 
         public void Foo() {
-            Console.WriteLine(this);
+            Console.WriteLine(Boo);
         }
         public void Foo(int b) {
             Console.WriteLine(11);
         }
     }
-    class Program
+    class Program : Bar
     {
 static int bb = 1;
 static int Foo() { return 5; }
@@ -65,9 +76,6 @@ Console.WriteLine(b);
 
         static int Main(int n)
         {
-
-while(true)
-Console.WriteLine(1);
 
 int a = 11;
 Bar.Boo(out a);
@@ -100,12 +108,16 @@ Console.WriteLin(aa);
             var r = new Runner(new RunConfig() {
             });
             r.Run(root);
-            var ret = r.RunMain(5).innerObject;
+            //var ret = r.RunMain(5).innerObject;
 
-            Console.WriteLine(ret);
+            //Console.WriteLine(ret);
 
-            dynamic d = new DynamicHybInstance(r.Instantiate("Fooo"));
-            d.Foo();
+            var bar = new Bar();
+            dynamic d = new DynamicHybInstance(r.Override("Fooo", bar));
+            //d.Foo();
+
+            d.SayHello();
+            Console.WriteLine(d.ff);
             //Console.WriteLine(r.Instantiate("Fooo").Invoke("Foo", 1));
         }
 

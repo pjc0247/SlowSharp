@@ -10,15 +10,20 @@ namespace Slowsharp
 {
     public class SSPropertyInfo : SSMemberInfo
     {
-        public VariableDeclaratorSyntax declartor;
         public PropertyDeclarationSyntax property;
+        public HybType type { get; }
 
         public Invokable setMethod { get; private set; }
         public Invokable getMethod { get; private set; }
 
+        internal SSFieldInfo backingField { get; private set; }
+        internal bool hasBackingField => backingField != null;
+
         internal SSPropertyInfo(Class klass, Runner runner, PropertyDeclarationSyntax node)
         {
+            this.property = node;
             this.declaringClass = klass;
+            this.type = runner.resolver.GetType($"{node.Type}");
 
             if (node.ExpressionBody != null)
                 InitializeWithExpressionBody(runner, node);
@@ -54,6 +59,9 @@ namespace Slowsharp
                     }
                     else
                     {
+                        if (isStatic)
+                            return runner.globals.GetStaticField(declaringClass, backingField.id);
+
                         HybInstance value;
                         if (runner.ctx._this.GetPropertyOrField($"__{node.Identifier}", out value, AccessLevel.This))
                             return value;
@@ -80,6 +88,12 @@ namespace Slowsharp
                     }
                     else
                     {
+                        if (isStatic)
+                        {
+                            runner.globals.SetStaticField(declaringClass, backingField.id, args[0]);
+                            return null;
+                        }
+
                         if (runner.ctx._this.SetPropertyOrField($"__{node.Identifier}", args[0], AccessLevel.This))
                             return null;
                         throw new InvalidOperationException();
@@ -94,12 +108,13 @@ namespace Slowsharp
             if (declaringClass.HasField(id))
                 return;
 
-            declaringClass.AddField(new SSFieldInfo()
+            backingField = new SSFieldInfo()
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{node.Type}"),
                 accessModifier = AccessModifier.Private
-            });
+            };
+            declaringClass.AddField(backingField);
         }
     }
 }

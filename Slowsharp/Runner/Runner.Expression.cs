@@ -108,13 +108,24 @@ namespace Slowsharp
                     return v;
             }
 
-            SSFieldInfo field;
+            if (ctx.method.declaringType.GetStaticPropertyOrField(id, out v))
+                return v;
+
+            /*
             Class klass = ctx.method.declaringClass;
+            SSFieldInfo field;
             if (klass.TryGetField(id, out field))
             {
                 if (field.isStatic)
                     return globals.GetStaticField(klass, id);
             }
+            SSPropertyInfo property;
+            if (klass.TryGetProperty(id, out property))
+            {
+                if (property.isStatic)
+                    return property.getMethod.Invoke(null, new HybInstance[] { });
+            }
+            */
             //if (field.)
 
             throw new NoSuchMemberException($"{id}");

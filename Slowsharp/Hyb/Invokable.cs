@@ -31,7 +31,7 @@ namespace Slowsharp
         private SSMethodInfo methodInfo;
 
         public Invokable(SSMethodInfo methodInfo, Runner runner, BaseMethodDeclarationSyntax declaration)
-        {
+        { 
             this.type = InvokeType.Interpret;
             this.methodInfo = methodInfo;
             this.runner = runner;

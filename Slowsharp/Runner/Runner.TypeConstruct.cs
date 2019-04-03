@@ -16,19 +16,35 @@ namespace Slowsharp
         }
         private void AddClass(ClassDeclarationSyntax node)
         {
-            klass = new Class(this, $"{node.Identifier}");
-            ctx.types.Add($"{node.Identifier}", klass);
+            var id = $"{node.Identifier}";
 
-            if (node.BaseList == null)
-                return;
-            foreach (var b in node.BaseList.Types)
+            if (ctx.types.ContainsKey(id))
+                throw new SemanticViolationException($"Class redefination is not supported: {id}");
+
+            HybType parentType = null;
+            if (node.BaseList != null)
             {
-                var type = resolver.GetType($"{b.Type}");
+                foreach (var b in node.BaseList.Types)
+                {
+                    var type = resolver.GetType($"{b.Type}");
+                    if (type.isInterface == false)
+                        parentType = type;
+                }
             }
+
+            klass = new Class(this, id, parentType);
+            ctx.types.Add(id, klass);
         }
         private void AddProperty(PropertyDeclarationSyntax node)
         {
-            klass.AddProperty($"{node.Identifier}", node);
+            var isStatic = node.Modifiers.IsStatic();
+            var type = resolver.GetType($"{node.Type}");
+            var id = $"{node.Identifier}";
+
+            var propertyInfo = klass.AddProperty(id, node);
+
+            if (propertyInfo.isStatic)
+                InitializeStaticProperty(propertyInfo);
         }
         private void AddField(FieldDeclarationSyntax node)
         {
@@ -41,11 +57,46 @@ namespace Slowsharp
 
                 klass.AddField(id, node, f);
                 if (isStatic)
-                {
-                    globals.SetStaticField(klass, id, type.GetDefault());
-                }
+                    InitializeStaticField(f, id, type);
             }
         }
+
+        private void InitializeStaticProperty(SSPropertyInfo info)
+        {
+            if (info.hasBackingField == false)
+                return;
+
+            var backingField = info.backingField;
+
+            if (info.property.Initializer == null)
+                globals.SetStaticField(klass, backingField.id, info.type.GetDefault());
+            else
+            {
+                var capturedKlass = klass;
+                AddLazyInitializer(() =>
+                {
+                    globals.SetStaticField(
+                        capturedKlass,
+                        backingField.id, RunExpression(info.property.Initializer.Value));
+                });
+            }
+        }
+        private void InitializeStaticField(VariableDeclaratorSyntax field, string id, HybType type)
+        {
+            if (field.Initializer == null)
+                globals.SetStaticField(klass, id, type.GetDefault());
+            else
+            {
+                var capturedKlass = klass;
+                AddLazyInitializer(() =>
+                {
+                    globals.SetStaticField(
+                        capturedKlass,
+                        id, RunExpression(field.Initializer.Value));
+                });
+            }
+        }
+
         private void AddConstructorMethod(ConstructorDeclarationSyntax node)
         {
             klass.AddMethod(

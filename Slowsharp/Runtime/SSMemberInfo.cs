@@ -13,6 +13,7 @@ namespace Slowsharp
 
         public AccessModifier accessModifier;
 
+        public HybType declaringType;
         internal Class declaringClass;
     }
 }

@@ -49,13 +49,20 @@ namespace Slowsharp
         internal HybInstance RunMain(params object[] args)
         {
             ctx.Reset();
+            RunLazyInitializers();
             return klass.GetMethods("Main")[0]
                 .target.Invoke(null, args.Wrap());
         }
 
         public HybInstance Instantiate(string id, params object[] args)
         {
+            RunLazyInitializers();
             return resolver.GetType(id).CreateInstance(this, args.Wrap());
+        }
+        public HybInstance Override(string id, object parentObject, params object[] args)
+        {
+            RunLazyInitializers();
+            return resolver.GetType(id).Override(this, args.Wrap(), parentObject);
         }
 
         public void Run(SyntaxNode node)

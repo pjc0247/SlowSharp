@@ -22,8 +22,9 @@ namespace Slowsharp
 
         internal JumpDestination[] jumps;
 
-        internal SSMethodInfo(Runner runner, BaseMethodDeclarationSyntax declaration)
+        internal SSMethodInfo(Runner runner, HybType declaringType, BaseMethodDeclarationSyntax declaration)
         {
+            this.declaringType = declaringType;
             target = new Invokable(this, runner, declaration);
 
             if (declaration is MethodDeclarationSyntax md)
@@ -34,6 +35,7 @@ namespace Slowsharp
         }
         internal SSMethodInfo(MethodInfo methodInfo)
         {
+            declaringType = new HybType(methodInfo.DeclaringType);
             target = new Invokable(this, methodInfo);
 
             returnType = new HybType(methodInfo.ReturnType);
