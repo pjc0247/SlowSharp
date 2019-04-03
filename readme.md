@@ -9,25 +9,26 @@ Pros
 * __And nothing__
 
 
-Limitation
-----
-Since __SlowSharp__ is an interpreter, there're some differences and limitations.
-
-__Lazy semantic validation__
-```cs
-Console.WriteLine("Hello");
-Console.WriteLn("World");
-```
-```cs
-var a = 1234;
-Console.WriteLine(a);
-var a = 4556; // redefination
-```
-
 Zero-binding
 ----
 * No manual assembly references
 * No type or method binding
+
+Overriding
+----
+Supports virtual inheritance, this is useful with __Unity__.
+```cs
+class MyBehaviour : MonoBehaviour { /* ... */ }
+```
+```cs
+// Error, MonoBehaviour cannot be instantiated by Unity's law
+ss.Instantiate("MyBehaviour");
+
+// Use this when you're not able to create an object yourself.
+ss.Override("MyBehaviour", gameObject);
+```
+
+Finally, there will be two instances, but act as derivered one object.
 
 Sandboxing
 ----
@@ -47,4 +48,20 @@ new RunConfig() {
 new RunConfig() {
   timeout = 1000 /* ms */
 };
+```
+
+
+Limitation
+----
+Since __SlowSharp__ is an interpreter, there're some differences and limitations.
+
+__Lazy semantic validation__
+```cs
+Console.WriteLine("Hello");
+Console.WriteLn("World");
+```
+```cs
+var a = 1234;
+Console.WriteLine(a);
+var a = 4556; // redefination
 ```
