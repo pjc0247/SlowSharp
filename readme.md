@@ -14,6 +14,13 @@ Zero-binding
 * No manual assembly references
 * No type or method binding
 
+Even this can be possible:
+```cs
+CScript.Run(@"
+   CScript.RunSimple("" Console.WriteLine(""hello from inception""); "");
+");
+```
+
 Overriding (Virtual inheritance)
 ----
 Supports virtual inheritance, this is useful with __Unity__.
