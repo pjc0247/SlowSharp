@@ -14,7 +14,7 @@ Zero-binding
 * No manual assembly references
 * No type or method binding
 
-Overriding
+Overriding (Virtual inheritance)
 ----
 Supports virtual inheritance, this is useful with __Unity__.
 ```cs
