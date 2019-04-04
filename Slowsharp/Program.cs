@@ -97,6 +97,8 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
+var a = new 1();
+
     var p = new Boor();
 p.Add(1, 1);
 Console.WriteLine(p[1]);
@@ -125,6 +127,9 @@ Console.WriteLin(aa);
 
             Dump(root);
 
+            var vd = new Validator();
+            vd.Visit(root);
+
             var r = new Runner(new RunConfig() {
             });
             r.Run(root);
@@ -147,7 +152,7 @@ Console.WriteLin(aa);
         private static void Dump(SyntaxNode syntax, int depth = 0)
         {
             for (int i = 0; i < depth; i++) Console.Write("  ");
-            Console.WriteLine(syntax.GetType());
+            Console.WriteLine(syntax.GetType() + " " + syntax);
 
             foreach (var child in syntax.ChildNodes())
                 Dump(child, depth + 1);

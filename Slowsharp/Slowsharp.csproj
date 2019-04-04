@@ -136,6 +136,8 @@
     <Compile Include="Sandbox\DefaultAccessControl.cs" />
     <Compile Include="Sandbox\IAccessFilter.cs" />
     <Compile Include="Sandbox\WhitelistAccessControl.cs" />
+    <Compile Include="SyntaxRule\ValidationRule.cs" />
+    <Compile Include="SyntaxRule\Validator.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="Util\ModifierExt.cs" />
     <Compile Include="Runner\VarFrame.cs" />

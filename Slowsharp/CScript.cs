@@ -40,6 +40,9 @@ public static object Main() {
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
+            var vd = new Validator();
+            vd.Visit(root);
+
             var r = new Runner(config);
             r.Run(root);
 
