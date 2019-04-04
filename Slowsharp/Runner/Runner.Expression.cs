@@ -104,7 +104,7 @@ namespace Slowsharp
 
             if (ctx._this != null)
             {
-                if (ctx._this.GetPropertyOrField(id, out v, AccessLevel.Outside))
+                if (ctx._this.GetPropertyOrField(id, out v, AccessLevel.This))
                     return v;
             }
 
@@ -241,6 +241,7 @@ namespace Slowsharp
             }
             else if (node.Expression is IdentifierNameSyntax id)
             {
+                callee = ctx._this;
                 callsite = ResolveLocalMember(node.Expression as IdentifierNameSyntax);
                 targetId = id.Identifier.Text;
             }
@@ -254,6 +255,9 @@ namespace Slowsharp
 
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
+
+            if (callee != null && method.declaringType != callee.GetHybType())
+                callee = callee.parent;
 
             var ret = method.target.Invoke(callee, args, hasRefOrOut);
 
@@ -375,23 +379,29 @@ namespace Slowsharp
             if (IsDictionaryAddible(inst, init))
             {
                 var setMethod = inst.GetSetIndexerMethod();
-
                 foreach (var expr in init.Expressions)
                 {
-                    if (!(expr is AssignmentExpressionSyntax))
-                        throw new SemanticViolationException("");
-
-                    var assign = (AssignmentExpressionSyntax)expr;
-                    var right = RunExpression(assign.Right);
-                    if (assign.Left is ImplicitElementAccessSyntax ea)
+                    if (expr is AssignmentExpressionSyntax assign)
                     {
-                        var args = new HybInstance[ea.ArgumentList.Arguments.Count];
-                        var count = 0;
-                        foreach (var arg in ea.ArgumentList.Arguments)
-                            args[count++] = RunExpression(arg.Expression);
+                        var right = RunExpression(assign.Right);
+                        if (assign.Left is ImplicitElementAccessSyntax ea)
+                        {
+                            var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+                            var count = 0;
+                            foreach (var arg in ea.ArgumentList.Arguments)
+                                args[count++] = RunExpression(arg.Expression);
 
-                        inst.SetIndexer(args, right);
+                            inst.SetIndexer(args, right);
+                        }
                     }
+                    else if (expr is InitializerExpressionSyntax initializer)
+                    {
+                        var left = RunExpression(initializer.Expressions[0]);
+                        var right = RunExpression(initializer.Expressions[1]);
+                        inst.SetIndexer(new HybInstance[] { left }, right);
+                    }
+                    else
+                        throw new SemanticViolationException("");
                 }
             }
             else if (IsArrayAddible(inst))
@@ -421,7 +431,8 @@ namespace Slowsharp
         private bool IsDictionaryAddible(HybInstance obj, InitializerExpressionSyntax init)
         {
             if (init.Expressions.Count > 0 &&
-                init.Expressions[0] is AssignmentExpressionSyntax)
+                (init.Expressions[0] is AssignmentExpressionSyntax ||
+                 init.Expressions[0] is InitializerExpressionSyntax))
             {
                 if (obj.GetSetIndexerMethod() != null)
                     return true;

@@ -347,6 +347,29 @@ namespace Slowsharp
 
                 UpdateVariable(key, value);
             }
+            else if (node.Left is MemberAccessExpressionSyntax ma)
+            {
+                HybInstance left = null;
+                HybInstance value = null;
+
+                if (ma.Expression is IdentifierNameSyntax idNode)
+                {
+                    var key = $"{idNode.Identifier}";
+                    HybType leftType;
+                    if (resolver.TryGetType(key, out leftType))
+                    {
+                        leftType.GetStaticPropertyOrField($"{ma.Name.Identifier}", out left);
+                        value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
+                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", value);
+                        return;
+                    }
+                }
+
+                var callee = RunExpression(ma.Expression);
+                callee.GetPropertyOrField($"{ma.Name}", out left);
+                value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
+                callee.SetPropertyOrField($"{ma.Name}", value, AccessLevel.Outside);
+            }
             else if (node.Left is ElementAccessExpressionSyntax ea)
             {
                 var callee = RunExpression(ea.Expression);
@@ -376,7 +399,7 @@ namespace Slowsharp
         private SSMethodInfo[] ResolveLocalMember(IdentifierNameSyntax node)
         {
             var id = node.Identifier.ValueText;
-            return klass.GetMethods(id);
+            return ctx.method.declaringClass.GetMethods(id);
         }
     }
 }

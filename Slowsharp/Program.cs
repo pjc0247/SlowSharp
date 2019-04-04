@@ -11,9 +11,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    class Bar
+    public struct Vector3
     {
-        public int ff = 122;
+        public int x, y, z;
+        public Vector3(int x, int y, int z) { this.x = x; this.y = y; this.z = z; }
+        public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
+    }
+    public class Transform
+    {
+        public Vector3 position { get; set; }
+    }
+
+    public class Bar
+    {
+        public Transform transform = new Transform();
+
+        protected int ff = 122;
 
         public Bar()
         {
@@ -22,12 +35,11 @@ namespace Slowsharp
 
         public void SayHello()
         {
-            Console.WriteLine("hello");
+            Console.WriteLine("hello from BAR");
         }
-        public static void Boo(out object b)
+        public static void SayHelloStatic()
         {
-            b = 1122;
-            Console.WriteLine(1234);
+            Console.WriteLine("hello");
         }
     }
 
@@ -52,8 +64,8 @@ namespace HelloWorld
     class Fooo : Bar {
         public static int aa = 1;
 
-public static int Boo { get; set; } = 11;
-
+        public int FF { get { return ff; } }        
+        
         public void Foo() {
             Console.WriteLine(Boo);
         }
@@ -61,6 +73,13 @@ public static int Boo { get; set; } = 11;
             Console.WriteLine(11);
         }
     }
+
+class Boor : Bar {
+public void MoveForward() {  
+    transform.position += new Vector3(11,1,1);
+}
+}
+
     class Program : Bar
     {
 static int bb = 1;
@@ -74,12 +93,15 @@ foreach (var b in obj)
 Console.WriteLine(b);
 }
 
-        static int Main(int n)
-        {
 
-int a = 11;
-Bar.Boo(out a);
 
+        static int Main(int n) {
+
+    var p = new Boor();
+p.Add(1, 1);
+Console.WriteLine(p[1]);
+
+var a = new Dictionary<int, int>() { {1, 1}, {2, 2}, {3, 3} };
 Console.WriteLine(a);
 
 return CScript.RunSimple(""55"", null);
@@ -94,8 +116,6 @@ Console.WriteLin(aa);
     }
 }
 ";
-            Bar.Boo(out St.a);
-
             Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
 
             Console.WriteLine(src);
@@ -113,11 +133,14 @@ Console.WriteLin(aa);
             //Console.WriteLine(ret);
 
             var bar = new Bar();
-            dynamic d = new DynamicHybInstance(r.Override("Fooo", bar));
-            //d.Foo();
+            //dynamic d = new DynamicHybInstance(r.Override("Boor", bar));
+            //d.Boo();
+            //d.SayHello();
+            var boor = r.Override("Boor", bar);
+            boor.Invoke("MoveForward");
 
-            d.SayHello();
-            Console.WriteLine(d.ff);
+            Console.WriteLine(bar.transform.position.x);
+
             //Console.WriteLine(r.Instantiate("Fooo").Invoke("Foo", 1));
         }
 

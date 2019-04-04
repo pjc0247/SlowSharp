@@ -21,6 +21,21 @@ foreach (var b in a)
 return sum;
 "));
         }
+        [TestMethod]
+        public void WithEmptyCollection()
+        {
+            Assert.AreEqual(
+                0,
+                TestRunner.Run(@"
+var a = new int[] {};
+var sum = 0;
+
+foreach (var b in a) 
+    sum += b;
+    
+return sum;
+"));
+        }
 
         [TestMethod]
         public void NotEnumerable()

@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeAnalysis, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeAnalysis.Common.3.0.0-beta4-final\lib\netstandard2.0\Microsoft.CodeAnalysis.dll</HintPath>
@@ -51,6 +54,7 @@
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.1\lib\netstandard2.0\System.Memory.dll</HintPath>
@@ -64,6 +68,9 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Loader, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Loader.4.3.0\lib\netstandard1.5\System.Runtime.Loader.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Encoding.CodePages, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encoding.CodePages.4.5.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
@@ -85,6 +92,7 @@
     <Compile Include="Runner\ExtensionMethodResolver.cs" />
     <Compile Include="Runner\GlobalStorage.cs" />
     <Compile Include="Runner\OverloadingResolver.cs" />
+    <Compile Include="Runner\Runner.LazyInit.cs" />
     <Compile Include="Runner\TypeCache.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />
@@ -110,6 +118,7 @@
     <Compile Include="Runner\TypeDeduction.cs" />
     <Compile Include="Runtime\AccessModifier.cs" />
     <Compile Include="Runtime\JumpDestination.cs" />
+    <Compile Include="Runtime\MemberFlag.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="Runtime\SSMethodInfo.cs" />
     <Compile Include="Runner\TypeResolver.cs" />
@@ -130,6 +139,7 @@
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="Util\ModifierExt.cs" />
     <Compile Include="Runner\VarFrame.cs" />
+    <Compile Include="Util\ReflectionExt.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

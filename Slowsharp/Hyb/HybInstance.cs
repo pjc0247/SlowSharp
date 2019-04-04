@@ -21,12 +21,12 @@ namespace Slowsharp
                 return obj;
             }
         }
+        public HybInstance parent { get; private set; }
 
         private Dictionary<string, HybInstance> fields = new Dictionary<string, HybInstance>();
 
         private HybType type;
         private object obj;
-        private HybInstance parent;
         private Class klass;
         private Runner runner;
 
@@ -277,6 +277,11 @@ namespace Slowsharp
                 idxer.SetValue(obj, value.As(idxer.PropertyType), args.Unwrap());
                 return true;
             }
+            else
+            {
+                if (parent != null)
+                    return parent.SetIndexer(args, value);
+            }
 
             return false;
         }
@@ -308,6 +313,11 @@ namespace Slowsharp
                     idxer.GetValue(obj, args.Unwrap()));
                 return true;
             }
+            else
+            {
+                if (parent != null)
+                    return parent.GetIndexer(args, out value);
+            }
 
             return false;
         }
@@ -321,7 +331,7 @@ namespace Slowsharp
             if (isCompiledType)
             {
                 var p = obj.GetType()
-                   .GetProperty(id);
+                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (p != null)
                 {
                     var mod = AccessModifierParser.Get(p.SetMethod);
@@ -333,7 +343,7 @@ namespace Slowsharp
                 }
 
                 var f = obj.GetType()
-                    .GetField(id);
+                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (f != null)
                 {
                     var mod = AccessModifierParser.Get(f);
@@ -369,7 +379,7 @@ namespace Slowsharp
                 }
 
                 if (parent != null)
-                    return parent.SetPropertyOrField(id, value);
+                    return parent.SetPropertyOrField(id, value, level);
 
                 return false;
             }
@@ -384,7 +394,7 @@ namespace Slowsharp
             if (isCompiledType)
             {
                 var p = obj.GetType()
-                   .GetProperty(id);
+                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (p != null)
                 {
                     var mod = AccessModifierParser.Get(p.GetMethod);
@@ -396,7 +406,7 @@ namespace Slowsharp
                 }
 
                 var f = obj.GetType()
-                    .GetField(id);
+                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (f != null)
                 {
                     var mod = AccessModifierParser.Get(f);
@@ -432,7 +442,7 @@ namespace Slowsharp
                 }
 
                 if (parent != null)
-                    return parent.GetPropertyOrField(id, out value);
+                    return parent.GetPropertyOrField(id, out value, level);
 
                 value = null;
                 return false;

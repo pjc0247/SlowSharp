@@ -47,7 +47,7 @@ namespace Slowsharp
 
             foreach (var asm in assemblies)
             {
-                foreach (var type in asm.GetTypes())
+                foreach (var type in asm.GetTypesSafe())
                 {
                     if (type.Name == id)
                         return new HybType(type);

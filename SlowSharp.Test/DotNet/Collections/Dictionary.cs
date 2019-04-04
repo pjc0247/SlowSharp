@@ -29,6 +29,19 @@ return new Dictionary<int, int>() { [1] = 1, [2] = 2, [3] = 3 };
                 new Dictionary<int, int>() { [1] = 1, [2] = 2, [3] = 3 },
                 dict);
         }
+        [TestMethod]
+        public void InstantiateWithInitializer2()
+        {
+            var dict = (Dictionary<int, int>)TestRunner.Run(@"
+return new Dictionary<int, int>() { {1, 1}, {2, 2}, {3, 3} };
+");
+            Assert.IsInstanceOfType(
+                dict,
+                typeof(Dictionary<int, int>));
+            CollectionAssert.AreEqual(
+                new Dictionary<int, int>() { { 1, 1 }, { 2, 2 }, { 3, 3 } },
+                dict);
+        }
 
         [TestMethod]
         public void Add()

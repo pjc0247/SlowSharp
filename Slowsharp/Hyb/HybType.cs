@@ -222,14 +222,14 @@ namespace Slowsharp
             value = null;
             return false;
         }
-        public SSMethodInfo[] GetStaticMethods(string id)
+        public SSMethodInfo[] GetStaticMethods()
         {
             if (isCompiledType)
             {
-                return compiledType.GetMethods()
+                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.Static)
                    .Where(x => x.IsStatic)
-                   .Where(x => x.Name == id)
-                   .Select(x => new SSMethodInfo(x) {
+                   .Select(x => new SSMethodInfo(x)
+                   {
                        id = x.Name,
                        isStatic = x.IsStatic,
                        accessModifier = AccessModifierParser.Get(x)
@@ -239,9 +239,39 @@ namespace Slowsharp
             else
             {
                 if (parent == null)
-                    return interpretKlass.GetMethods(id);
-                return interpretKlass.GetMethods(id)
-                    .Concat(parent.GetStaticMethods(id))
+                    return interpretKlass.GetMethods();
+                return interpretKlass.GetMethods()
+                    .Concat(parent.GetStaticMethods())
+                    .ToArray();
+            }
+        }
+        public SSMethodInfo[] GetStaticMethods(string id)
+        {
+            return GetStaticMethods()
+                .Where(x => x.id == id)
+                .ToArray();
+        }
+        public SSMethodInfo[] GetMethods()
+        {
+            if (isCompiledType)
+            {
+                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                   .Where(x => x.IsPrivate == false)
+                   .Select(x => new SSMethodInfo(x)
+                   {
+                       id = x.Name,
+                       isStatic = x.IsStatic,
+                       accessModifier = AccessModifierParser.Get(x)
+                   })
+                   .ToArray();
+            }
+            else
+            {
+                if (parent == null)
+                    return interpretKlass.GetMethods();
+
+                return parent.GetMethods()
+                    .Concat(interpretKlass.GetMethods())
                     .ToArray();
             }
         }

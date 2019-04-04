@@ -46,7 +46,15 @@ namespace Slowsharp
 
             if (parent.isCompiledType)
             {
+                foreach (var m in parent.GetMethods())
+                {
+                    if (m.accessModifier == AccessModifier.Private)
+                        continue;
 
+                    if (methods.ContainsKey(m.id) == false)
+                        methods[m.id] = new List<SSMethodInfo>();
+                    methods[m.id].Add(m);
+                }
             }
             else
             {
@@ -118,6 +126,10 @@ namespace Slowsharp
             fields.Add(field.id, field);
         }
 
+        public SSMethodInfo[] GetMethods()
+        {
+            return methods.SelectMany(x => x.Value).ToArray();
+        }
         public SSMethodInfo[] GetMethods(string id)
         {
             if (methods.ContainsKey(id) == false)

@@ -54,7 +54,9 @@
     <Compile Include="Core\TypeResolution.cs" />
     <Compile Include="DotNet\LINQ.cs" />
     <Compile Include="DotNet\Primitive\Integer.cs" />
+    <Compile Include="Hyb\TypeGetMember.cs" />
     <Compile Include="MinOpt\AndOr.cs" />
+    <Compile Include="Snippet\Fibo.cs" />
     <Compile Include="Syntax\Class\Property.cs" />
     <Compile Include="Syntax\Class\RefOrOut.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="TestRunner.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
