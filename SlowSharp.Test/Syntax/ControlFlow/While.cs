@@ -24,5 +24,20 @@ while(false) return false;
 return true;
 "), true);
         }
+
+        [TestMethod]
+        public void Break()
+        {
+            Assert.AreEqual(
+                2,
+                TestRunner.Run(@"
+var a = 0;
+while(true) {
+  if (a == 2) break;
+  a ++;
+}
+return a;
+"));
+        }
     }
 }

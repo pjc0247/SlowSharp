@@ -36,6 +36,23 @@ foreach (var b in a)
 return sum;
 "));
         }
+        [TestMethod]
+        public void Break()
+        {
+            Assert.AreEqual(
+                6,
+                TestRunner.Run(@"
+var a = new int[] {1,2,3,4,5};
+var sum = 0;
+
+foreach (var b in a) {
+    sum += b;
+    if (b == 3) break;
+}
+    
+return sum;
+"));
+        }
 
         [TestMethod]
         public void NotEnumerable()

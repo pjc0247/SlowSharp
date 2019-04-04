@@ -105,6 +105,9 @@ namespace Slowsharp
                 if (halt != HaltType.None) break;
             }
             vars = vars.parent;
+
+            if (halt == HaltType.Break)
+                halt = HaltType.None;
         }
         private void RunWhile(WhileStatementSyntax node)
         {
@@ -115,7 +118,14 @@ namespace Slowsharp
                     break;
 
                 Run(node.Statement);
+
+                if (halt == HaltType.Continue)
+                    halt = HaltType.None;
+                if (halt != HaltType.None) break;
             }
+
+            if (halt == HaltType.Break)
+                halt = HaltType.None;
         }
 
         private void RunBreak(BreakStatementSyntax node)
