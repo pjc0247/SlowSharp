@@ -79,7 +79,7 @@ namespace HelloWorld
         public int FF { get { return ff; } }        
         
         public void Foo() {
-            Console.WriteLine(Boo);
+            Console.WriteLine(1);
         }
         public void Foo(int b) {
             Console.WriteLine(11);
@@ -107,10 +107,8 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-System.Object a = 1;
-
-        if (Input.GetKeyDown(KeyCode.Space)) 
-            Console.WriteLine(1);
+var foo = new Fooo();
+foo.Foo();
 
 return 0;
 //return ""asdf"";
@@ -120,6 +118,14 @@ static void Bo() {
 var aa = 1234;
 Console.WriteLin(aa);
 }
+    }
+}
+";
+
+            var hotReloadSrc = @"
+class Fooo : Bar {
+    public void Foo() {
+        Console.WriteLine(12341234);
     }
 }
 ";
@@ -138,9 +144,15 @@ Console.WriteLin(aa);
             var r = new Runner(new RunConfig() {
             });
             r.Run(root);
-            var ret = r.RunMain(5).innerObject;
 
-            Console.WriteLine(ret);
+            r.RunMain(5);
+            Console.WriteLine("AAA");
+
+            tree = CSharpSyntaxTree.ParseText(hotReloadSrc);
+            root = tree.GetCompilationUnitRoot();
+            r.UpdateMethodsOnly(root);
+
+            r.RunMain(5);
 
             return;
 

@@ -29,6 +29,7 @@ namespace Slowsharp
         public static HybType Decimal => HybTypeCache.Decimal;
 
         public string id { get; }
+        public string fullName { get; }
         public bool isCompiledType => compiledType != null;
         public bool isInterface { get; }
         public bool isSealed { get; }
@@ -62,6 +63,7 @@ namespace Slowsharp
         internal HybType(Type type)
         {
             this.id = type.Name;
+            this.fullName = type.FullName;
             this.isSealed = type.IsSealed;
             this.isInterface = type.IsInterface;
             this.compiledType = type;
@@ -69,6 +71,7 @@ namespace Slowsharp
         internal HybType(Class klass)
         {
             this.id = klass.id;
+            this.fullName = klass.id;
             this.isSealed = false;
             this.isInterface = false;
             this.interpretKlass = klass;

@@ -44,7 +44,7 @@ public static object Main() {
             vd.Visit(root);
 
             var r = new Runner(config);
-            r.Run(root);
+            r.LoadSyntax(root);
 
             return r;
         }

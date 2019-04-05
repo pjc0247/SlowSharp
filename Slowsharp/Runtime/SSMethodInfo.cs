@@ -22,24 +22,29 @@ namespace Slowsharp
 
         internal JumpDestination[] jumps;
 
-        internal SSMethodInfo(Runner runner, HybType declaringType, BaseMethodDeclarationSyntax declaration)
+        internal SSMethodInfo(Runner runner, string id, HybType declaringType, BaseMethodDeclarationSyntax declaration)
         {
+            this.id = id;
+            this.signature = MemberSignature.GetSignature(
+                runner.resolver, id, declaration);
             this.declaringType = declaringType;
-            target = new Invokable(this, runner, declaration);
+            this.target = new Invokable(this, runner, declaration);
 
             if (declaration is MethodDeclarationSyntax md)
-                returnType = runner.resolver.GetType($"{md.ReturnType}");
-            isVaArg =
+                this.returnType = runner.resolver.GetType($"{md.ReturnType}");
+            this.isVaArg =
                 declaration.ParameterList.Parameters.LastOrDefault()
                 ?.Modifiers.IsParams() ?? false;
         }
         internal SSMethodInfo(MethodInfo methodInfo)
         {
-            declaringType = new HybType(methodInfo.DeclaringType);
-            target = new Invokable(this, methodInfo);
+            this.id = methodInfo.Name;
+            this.signature = MemberSignature.GetSignature(methodInfo);
+            this.declaringType = new HybType(methodInfo.DeclaringType);
+            this.target = new Invokable(this, methodInfo);
 
-            returnType = new HybType(methodInfo.ReturnType);
-            isVaArg =
+            this.returnType = new HybType(methodInfo.ReturnType);
+            this.isVaArg =
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
         }

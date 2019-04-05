@@ -81,7 +81,11 @@ namespace Slowsharp
         {
             EnsureMethodKey(id);
 
-            methods[id].Add(new SSMethodInfo(runner, type, method) {
+            var signature = MemberSignature.GetSignature(
+                runner.resolver, id, method);
+
+            methods[id].RemoveAll(x => x.signature == signature);
+            methods[id].Add(new SSMethodInfo(runner, id, type, method) {
                 id = id,
                 isStatic = method.Modifiers.IsStatic(),
                 declaringClass = this,

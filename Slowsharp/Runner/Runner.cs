@@ -27,6 +27,8 @@ namespace Slowsharp
         internal HybInstance ret;
         private HaltType halt;
 
+        private RunMode runMode;
+
         public Runner(RunConfig config)
         {
             this.ctx = new RunContext(config);
@@ -49,6 +51,19 @@ namespace Slowsharp
                 .ToArray();
         }
 
+        public void LoadSyntax(SyntaxNode node)
+        {
+            runMode = RunMode.Preparse;
+            Run(node);
+            runMode = RunMode.Execution;
+        }
+        public void UpdateMethodsOnly(SyntaxNode node)
+        {
+            runMode = RunMode.HotLoadMethodsOnly;
+            Run(node);
+            runMode = RunMode.Execution;
+        }
+
         internal void BindThis(HybInstance _this)
         {
             ctx._this = _this;
@@ -58,8 +73,17 @@ namespace Slowsharp
         {
             ctx.Reset();
             RunLazyInitializers();
-            return klass.GetMethods("Main")[0]
-                .target.Invoke(null, args.Wrap());
+
+            foreach (var type in ctx.types)
+            {
+                var mains = type.Value.GetMethods("Main");
+                if (mains.Length == 0)
+                    continue;
+
+                return mains[0].target.Invoke(null, args.Wrap());
+            }
+
+            throw new InvalidOperationException($"No class found that contains static Main()");
         }
 
         public HybInstance Instantiate(string id, params object[] args)
@@ -82,59 +106,86 @@ namespace Slowsharp
                 typeof(ClassDeclarationSyntax)
             };
 
-            if (node is UsingDirectiveSyntax)
-                AddUsing(node as UsingDirectiveSyntax);
-            if (node is ClassDeclarationSyntax)
-                AddClass(node as ClassDeclarationSyntax);
-            if (node is ConstructorDeclarationSyntax)
-                AddConstructorMethod(node as ConstructorDeclarationSyntax);
-            if (node is PropertyDeclarationSyntax)
-                AddProperty(node as PropertyDeclarationSyntax);
-            if (node is FieldDeclarationSyntax)
-                AddField(node as FieldDeclarationSyntax);
-            if (node is MethodDeclarationSyntax)
-                AddMethod(node as MethodDeclarationSyntax);
-            if (node is BlockSyntax)
-                RunBlock(node as BlockSyntax);
-            if (node is ArrowExpressionClauseSyntax)
-                RunArrowExpressionClause(node as ArrowExpressionClauseSyntax);
-            if (node is ThrowStatementSyntax)
-                RunThrow(node as ThrowStatementSyntax);
-            if (node is GotoStatementSyntax)
-                RunGoto(node as GotoStatementSyntax);
-            if (node is IfStatementSyntax)
-                RunIf(node as IfStatementSyntax);
-            if (node is ForStatementSyntax)
-                RunFor(node as ForStatementSyntax);
-            if (node is ForEachStatementSyntax)
-                RunForEach(node as ForEachStatementSyntax);
-            if (node is WhileStatementSyntax)
-                RunWhile(node as WhileStatementSyntax);
-            if (node is TryStatementSyntax)
-                RunTry(node as TryStatementSyntax);
-            if (node is ReturnStatementSyntax)
-                RunReturn(node as ReturnStatementSyntax);
-            if (node is BreakStatementSyntax)
-                RunBreak(node as BreakStatementSyntax);
-            if (node is ContinueStatementSyntax)
-                RunContinue(node as ContinueStatementSyntax);
-            if (node is LocalDeclarationStatementSyntax)
-                RunLocalDeclaration(node as LocalDeclarationStatementSyntax);
-            if (node is LabeledStatementSyntax)
-                RunLabeled(node as LabeledStatementSyntax);
-            if (node is VariableDeclarationSyntax)
-                RunVariableDeclaration(node as VariableDeclarationSyntax);
-            if (node is ExpressionStatementSyntax)
-                RunExpressionStatement(node as ExpressionStatementSyntax);
-
-            if (node is LockStatementSyntax)
-                RunLock(node as LockStatementSyntax);
+            switch (runMode)
+            {
+                case RunMode.Preparse:
+                    RunAsPreparse(node);
+                    break;
+                case RunMode.HotLoadMethodsOnly:
+                    RunAsHotReloadMethodsOnly(node);
+                    break;
+                case RunMode.Execution:
+                    RunAsExecution(node);
+                    break;
+            }
 
             if (treatAsBlock.Contains(node.GetType()))
                 RunChildren(node);
 
             if (ctx.IsExpird())
                 throw new TimeoutException();
+        }
+        public void RunAsPreparse(SyntaxNode node)
+        {
+            if (node is UsingDirectiveSyntax)
+                AddUsing(node as UsingDirectiveSyntax);
+            else if (node is ClassDeclarationSyntax)
+                AddClass(node as ClassDeclarationSyntax);
+            else if (node is ConstructorDeclarationSyntax)
+                AddConstructorMethod(node as ConstructorDeclarationSyntax);
+            else if (node is PropertyDeclarationSyntax)
+                AddProperty(node as PropertyDeclarationSyntax);
+            else if (node is FieldDeclarationSyntax)
+                AddField(node as FieldDeclarationSyntax);
+            else if (node is MethodDeclarationSyntax)
+                AddMethod(node as MethodDeclarationSyntax);
+        }
+        public void RunAsHotReloadMethodsOnly(SyntaxNode node)
+        {
+            if (node is UsingDirectiveSyntax)
+                AddUsing(node as UsingDirectiveSyntax);
+            else if (node is ClassDeclarationSyntax classDeclaration)
+                klass = ctx.types[classDeclaration.Identifier.Text];
+            else if (node is MethodDeclarationSyntax)
+                AddMethod(node as MethodDeclarationSyntax);
+        }
+        public void RunAsExecution(SyntaxNode node)
+        {
+            if (node is BlockSyntax)
+                RunBlock(node as BlockSyntax);
+            else if (node is ArrowExpressionClauseSyntax)
+                RunArrowExpressionClause(node as ArrowExpressionClauseSyntax);
+            else if (node is ThrowStatementSyntax)
+                RunThrow(node as ThrowStatementSyntax);
+            else if (node is GotoStatementSyntax)
+                RunGoto(node as GotoStatementSyntax);
+            else if (node is IfStatementSyntax)
+                RunIf(node as IfStatementSyntax);
+            else if (node is ForStatementSyntax)
+                RunFor(node as ForStatementSyntax);
+            else if (node is ForEachStatementSyntax)
+                RunForEach(node as ForEachStatementSyntax);
+            else if (node is WhileStatementSyntax)
+                RunWhile(node as WhileStatementSyntax);
+            else if (node is TryStatementSyntax)
+                RunTry(node as TryStatementSyntax);
+            else if (node is ReturnStatementSyntax)
+                RunReturn(node as ReturnStatementSyntax);
+            else if (node is BreakStatementSyntax)
+                RunBreak(node as BreakStatementSyntax);
+            else if (node is ContinueStatementSyntax)
+                RunContinue(node as ContinueStatementSyntax);
+            else if (node is LocalDeclarationStatementSyntax)
+                RunLocalDeclaration(node as LocalDeclarationStatementSyntax);
+            else if (node is LabeledStatementSyntax)
+                RunLabeled(node as LabeledStatementSyntax);
+            else if (node is VariableDeclarationSyntax)
+                RunVariableDeclaration(node as VariableDeclarationSyntax);
+            else if (node is ExpressionStatementSyntax)
+                RunExpressionStatement(node as ExpressionStatementSyntax);
+
+            else if (node is LockStatementSyntax)
+                RunLock(node as LockStatementSyntax);
         }
 
         private void RunChildren(SyntaxNode node)

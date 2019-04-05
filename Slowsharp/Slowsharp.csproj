@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{40CDDE9B-948F-4C53-A846-9C1625B5D192}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Slowsharp</RootNamespace>
     <AssemblyName>Slowsharp</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -91,7 +91,9 @@
     <Compile Include="Runner\CatchFrame.cs" />
     <Compile Include="Runner\ExtensionMethodResolver.cs" />
     <Compile Include="Runner\GlobalStorage.cs" />
+    <Compile Include="Runner\MemberSignature.cs" />
     <Compile Include="Runner\OverloadingResolver.cs" />
+    <Compile Include="Runner\RunMode.cs" />
     <Compile Include="Runner\Runner.LazyInit.cs" />
     <Compile Include="Runner\TypeCache.cs" />
     <Compile Include="Runtime\Class.cs" />

@@ -9,6 +9,7 @@ namespace Slowsharp
     public class SSMemberInfo
     {
         public string id;
+        public string signature;
         public bool isStatic;
 
         public AccessModifier accessModifier;
