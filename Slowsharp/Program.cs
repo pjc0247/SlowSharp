@@ -53,7 +53,17 @@ namespace Slowsharp
             Console.WriteLine("hello");
         }
     }
-
+    public class RefOrOutTest
+    {
+        public static void MakeDoubleOut(int input, out int value)
+        {
+            value = input * 2;
+        }
+        public static void MakeDoubleRef(ref int value)
+        {
+            value *= 2;
+        }
+    }
     struct St
     {
         public static object a;
@@ -107,8 +117,9 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-var foo = new Fooo();
-foo.Foo();
+int v = 10;
+RefOrOutTest.MakeDoubleOut(v, out v);
+return v;
 
 return 0;
 //return ""asdf"";
@@ -137,6 +148,9 @@ class Fooo : Bar {
             var root = tree.GetCompilationUnitRoot();
 
             Dump(root);
+
+            var run = CScript.CreateRunner(src);
+            run.RunMain();
 
             var vd = new Validator();
             vd.Visit(root);

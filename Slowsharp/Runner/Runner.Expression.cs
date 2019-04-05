@@ -211,11 +211,14 @@ namespace Slowsharp
                     }
                     else
                     {
-                        callee = vars.GetValue($"{id.Identifier}");
-
-                        if (callee == null)
-                            throw new NullReferenceException($"{id.Identifier}");
-
+                        if (vars.TryGetValue($"{id.Identifier}", out callee))
+                        {
+                            if (callee == null)
+                                throw new NullReferenceException($"{id.Identifier}");
+                        }
+                        else
+                            throw new SemanticViolationException($"Unrecognized identifier: {id.Identifier}");
+                        
                         callsite = callee
                             .GetMethods($"{ma.Name}");
                     }

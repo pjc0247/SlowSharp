@@ -22,8 +22,11 @@ using System;
         {
             return CScript.Run(@"
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Slowsharp.Test;
 
-public class Foo {
+public class FooTest__ {
 
 public static object Main() {
 "
@@ -38,8 +41,11 @@ config);
         {
             return CScript.Run(@"
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Slowsharp.Test;
 
-public class Foo {"
+public class FooTest__ {"
 + classBody +
 @"
 public static object Main() {
