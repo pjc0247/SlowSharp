@@ -1,7 +1,7 @@
 SlowSharp
 ====
 
-Slow version of C# interpreter because modern JIT is too fast.
+Slow version of C# interpreter because modern JITs are too fast.
 
 Pros
 ----
