@@ -21,6 +21,12 @@ CScript.Run(@"
 ");
 ```
 
+Hot Reloading
+----
+```cs
+ss.UpdateMethodsOnly(src);
+```
+
 Overriding (Virtual inheritance)
 ----
 Supports virtual inheritance, this is useful with __Unity__.
