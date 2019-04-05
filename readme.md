@@ -1,7 +1,7 @@
 SlowSharp
 ====
 
-Slow version of C# interpreter because modern JIT is too fast.
+Slow version of C# interpreter because modern JITs are too fast.
 
 Pros
 ----
@@ -19,6 +19,12 @@ Even this can be possible:
 CScript.Run(@"
    CScript.RunSimple("" Console.WriteLine(""hello from inception""); "");
 ");
+```
+
+Hot Reloading
+----
+```cs
+ss.UpdateMethodsOnly(src);
 ```
 
 Overriding (Virtual inheritance)
