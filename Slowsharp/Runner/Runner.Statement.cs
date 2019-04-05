@@ -10,6 +10,43 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        private void RunLocalDeclaration(LocalDeclarationStatementSyntax node)
+        {
+            var typename = $"{node.Declaration.Type}";
+            var isVar = typename == "var";
+            HybType type = null;
+
+            if (isVar == false)
+                type = resolver.GetType(typename);
+
+            foreach (var v in node.Declaration.Variables)
+            {
+                var id = v.Identifier.ValueText;
+                if (vars.TryGetValue(id, out _))
+                    throw new SemanticViolationException($"Local variable redefination: {id}");
+                if (isVar && v.Initializer == null)
+                    throw new SemanticViolationException($"`var` should be initialized with declaration.");
+
+                HybInstance value = null;
+                if (v.Initializer != null)
+                    value = RunExpression(v.Initializer.Value);
+                else
+                    value = type.GetDefault();
+                vars.SetValue(id, value);
+            }
+        }
+        private void RunVariableDeclaration(VariableDeclarationSyntax node)
+        {
+            foreach (var v in node.Variables)
+            {
+                vars.SetValue(v.Identifier.ValueText, RunExpression(v.Initializer.Value));
+            }
+        }
+        private void RunExpressionStatement(ExpressionStatementSyntax node)
+        {
+            RunExpression(node.Expression);
+        }
+
         private void RunLabeled(LabeledStatementSyntax node)
         {
             Run(node.Statement);

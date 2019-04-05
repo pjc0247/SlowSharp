@@ -13,10 +13,17 @@ namespace Slowsharp
         private RunContext ctx;
         private Assembly[] assemblies;
 
+        private List<string> namespaces = new List<string>();
+
         public TypeCache(RunContext ctx, Assembly[] assemblies)
         {
             this.ctx = ctx;
             this.assemblies = assemblies;
+        }
+
+        public void AddLookupNamespace(string ns)
+        {
+            namespaces.Add(ns);
         }
 
         public HybType GetType(string id)
@@ -49,7 +56,8 @@ namespace Slowsharp
             {
                 foreach (var type in asm.GetTypesSafe())
                 {
-                    if (type.Name == id)
+                    if (type.Name == id &&
+                        namespaces.Contains(type.Namespace))
                         return new HybType(type);
                     if (type.FullName == id)
                         return new HybType(type);

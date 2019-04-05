@@ -11,6 +11,16 @@ namespace Slowsharp
     public class HybInstance
     {
         public bool isCompiledType => type.isCompiledType;
+        public bool isVirtualDerived
+        {
+            get
+            {
+                if (isCompiledType == false &&
+                    parent?.isCompiledType != null)
+                    return true;
+                return false;
+            }
+        }
 
         public object innerObject
         {
@@ -203,7 +213,7 @@ namespace Slowsharp
                 throw new ArgumentException($"No such method: {name}");
 
             var method = OverloadingResolver.FindMethodWithArguments(
-                runner.resolver, methods, wrappedArgs);
+                runner.resolver, methods, ref wrappedArgs);
 
             if (method == null)
                 throw new ArgumentException($"No matching override found: {name}");
@@ -331,7 +341,7 @@ namespace Slowsharp
             if (isCompiledType)
             {
                 var p = obj.GetType()
-                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                 if (p != null)
                 {
                     var mod = AccessModifierParser.Get(p.SetMethod);
@@ -343,7 +353,7 @@ namespace Slowsharp
                 }
 
                 var f = obj.GetType()
-                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                 if (f != null)
                 {
                     var mod = AccessModifierParser.Get(f);
@@ -394,7 +404,7 @@ namespace Slowsharp
             if (isCompiledType)
             {
                 var p = obj.GetType()
-                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                   .GetProperty(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                 if (p != null)
                 {
                     var mod = AccessModifierParser.Get(p.GetMethod);
@@ -406,7 +416,7 @@ namespace Slowsharp
                 }
 
                 var f = obj.GetType()
-                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    .GetField(id, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                 if (f != null)
                 {
                     var mod = AccessModifierParser.Get(f);

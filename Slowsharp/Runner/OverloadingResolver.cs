@@ -9,12 +9,16 @@ namespace Slowsharp
     internal class OverloadingResolver
     {
         public static SSMethodInfo FindMethodWithArguments(
-            TypeResolver resolver, SSMethodInfo[] members, HybInstance[] args)
+            TypeResolver resolver, SSMethodInfo[] members, ref HybInstance[] args)
         {
+            var originalArgs = (HybInstance[])args.Clone();
+
             foreach (var member in members)
             {
                 if (member.target.isCompiled)
                 {
+                    args = originalArgs;
+
                     var genericArgs = new List<HybType>();
                     var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
@@ -44,8 +48,18 @@ namespace Slowsharp
                         var argType = args[i].GetHybType();
                         if (!p.IsAssignableFromEx(argType, out genericBound))
                         {
-                            match = false;
-                            break;
+                            // Second change,
+                            // Check whether parent can be assignable
+                            if (args[i].isVirtualDerived &&
+                                p.IsAssignableFromEx(args[i].parent.GetHybType(), out genericBound))
+                            {
+                                args[i] = args[i].parent;
+                            }
+                            else
+                            {
+                                match = false;
+                                break;
+                            }
                         }
 
                         if (p.IsGenericType || p.IsGenericTypeDefinition)

@@ -9,15 +9,23 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    internal class Validator : CSharpSyntaxWalker
+    internal partial class Validator : CSharpSyntaxWalker
     {
+        public override void VisitIncompleteMember(IncompleteMemberSyntax node)
+        {
+            base.VisitIncompleteMember(node);
+
+            throw new SemanticViolationException($"Unrecognized syntax: {node}");
+        }
+
         public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
             base.VisitAssignmentExpression(node);
 
             node.Left
-                .RuleAccept<MemberAccessExpressionSyntax>()
-                .RuleAccept<IdentifierNameSyntax>()
+                .ShouldBe<MemberAccessExpressionSyntax>()
+                .ShouldBe<ImplicitElementAccessSyntax>()
+                .ShouldBe<IdentifierNameSyntax>()
                 .ThrowIfNot();
         }
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
@@ -25,7 +33,8 @@ namespace Slowsharp
             base.VisitObjectCreationExpression(node);
 
             node.Type
-                .RuleAccept<IdentifierNameSyntax>()
+                .ShouldBe<TypeSyntax>()
+                .ShouldBe<IdentifierNameSyntax>()
                 .ShouldNotEmptyIdent()
                 .ThrowIfNot();
         }

@@ -12,15 +12,16 @@ namespace Slowsharp
     internal static class ValudationRuleExt
     {
         // Method name `Accept` is already taken by Roslyn.
-        public static ValidationRule RuleAccept<TAccept>(this CSharpSyntaxNode _this)
+        public static ValidationRule ShouldBe<TAccept>(this CSharpSyntaxNode _this)
         {
             return new ValidationRule(_this)
-                .RuleAccept<TAccept>();
+                .ShouldBe<TAccept>();
         }
     }
     internal class ValidationRule
     {
         private List<Type> accept = new List<Type>();
+        private List<Type> deny = new List<Type>();
         private object obj;
 
         public ValidationRule(object obj)
@@ -37,9 +38,23 @@ namespace Slowsharp
             }
             return this;
         }
-        public ValidationRule RuleAccept<T>()
+        public ValidationRule ShouldBe<T>()
         {
             accept.Add(typeof(T));
+            return this;
+        }
+        public ValidationRule ShouldNotBe<T>()
+        {
+            deny.Add(typeof(T));
+            return this;
+        }
+        public ValidationRule ShouldNotBeIdent(string ident)
+        {
+            if (obj is IdentifierNameSyntax id &&
+                id.Identifier.Text == ident)
+            {
+                throw new SemanticViolationException($"illigal ident: {ident}");
+            }
             return this;
         }
         public void ThrowIfNot()
@@ -48,16 +63,32 @@ namespace Slowsharp
                 return;
 
             var pass = false;
-            foreach (var acc in accept)
+            foreach (var type in accept)
             {
-                if (obj.GetType().IsAssignableFrom(acc))
+                //if (obj.GetType().IsAssignableFrom(acc))
+                if (type.IsAssignableFrom(obj.GetType()))
                 {
                     pass = true;
                     break;
                 }
             }
+            foreach (var type in deny)
+            {
+                if (type.IsAssignableFrom(obj.GetType()))
+                {
+                    pass = false;
+                    break;
+                }
+            }
+
             if (pass == false)
+            {
+#if DEBUG
+                throw new SemanticViolationException($"{obj}, {obj.GetType()} is not expected");
+#else
                 throw new SemanticViolationException($"{obj} is not expected");
+#endif
+            }
         }
     }
 }

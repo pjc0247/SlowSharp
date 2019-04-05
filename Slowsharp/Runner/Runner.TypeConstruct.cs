@@ -13,6 +13,7 @@ namespace Slowsharp
         private void AddUsing(UsingDirectiveSyntax node)
         {
             lookup.Add($"{node.Name}");
+            resolver.AddLookupNamespace($"{node.Name}");
         }
         private void AddClass(ClassDeclarationSyntax node)
         {

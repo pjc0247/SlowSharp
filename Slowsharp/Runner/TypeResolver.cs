@@ -22,6 +22,11 @@ namespace Slowsharp
             this.typeCache = new TypeCache(ctx, assemblies);
         }
 
+        public void AddLookupNamespace(string ns)
+        {
+            typeCache.AddLookupNamespace(ns);
+        }
+
         private bool IsGeneric(string id)
         {
             return id.Count(x => x == '<') != 0;

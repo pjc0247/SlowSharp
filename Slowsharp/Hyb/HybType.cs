@@ -28,9 +28,13 @@ namespace Slowsharp
         public static HybType Double => HybTypeCache.Double;
         public static HybType Decimal => HybTypeCache.Decimal;
 
+        public string id { get; }
         public bool isCompiledType => compiledType != null;
         public bool isInterface { get; }
         public bool isSealed { get; }
+
+        public Type compiledType { get; }
+        internal Class interpretKlass { get; }
 
         public bool isArray { get; }
         public int arrayRank { get; }
@@ -55,17 +59,16 @@ namespace Slowsharp
         }
         private HybType _parent;
 
-        internal Type compiledType { get; }
-        internal Class interpretKlass { get; }
-
         internal HybType(Type type)
         {
+            this.id = type.Name;
             this.isSealed = type.IsSealed;
             this.isInterface = type.IsInterface;
             this.compiledType = type;
         }
         internal HybType(Class klass)
         {
+            this.id = klass.id;
             this.isSealed = false;
             this.isInterface = false;
             this.interpretKlass = klass;
@@ -129,7 +132,7 @@ namespace Slowsharp
             if (ctors.Length > 0)
             {
                 var ctor = OverloadingResolver
-                    .FindMethodWithArguments(runner.resolver, ctors, args);
+                    .FindMethodWithArguments(runner.resolver, ctors, ref args);
                 ctor.target.Invoke(inst, args);
             }
 
@@ -140,7 +143,7 @@ namespace Slowsharp
         {
             if (isCompiledType)
             {
-                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (property != null)
@@ -149,7 +152,7 @@ namespace Slowsharp
                     return true;
                 }
 
-                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
+                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (field != null)
@@ -183,7 +186,7 @@ namespace Slowsharp
         {
             if (isCompiledType)
             {
-                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (property != null)
@@ -226,8 +229,7 @@ namespace Slowsharp
         {
             if (isCompiledType)
             {
-                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                   .Where(x => x.IsStatic)
+                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                    .Select(x => new SSMethodInfo(x)
                    {
                        id = x.Name,
@@ -255,7 +257,7 @@ namespace Slowsharp
         {
             if (isCompiledType)
             {
-                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
                    .Where(x => x.IsPrivate == false)
                    .Select(x => new SSMethodInfo(x)
                    {

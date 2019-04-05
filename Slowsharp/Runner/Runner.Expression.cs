@@ -242,7 +242,10 @@ namespace Slowsharp
             else if (node.Expression is IdentifierNameSyntax id)
             {
                 callee = ctx._this;
-                callsite = ResolveLocalMember(node.Expression as IdentifierNameSyntax);
+                callsite =
+                    ResolveLocalMember(id)
+                    .Concat(ctx.method.declaringType.GetStaticMethods(id.Identifier.Text))
+                    .ToArray();
                 targetId = id.Identifier.Text;
             }
 
@@ -251,7 +254,7 @@ namespace Slowsharp
             
             var method = OverloadingResolver.FindMethodWithArguments(
                 resolver,
-                callsite, args);
+                callsite, ref args);
 
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
@@ -282,7 +285,8 @@ namespace Slowsharp
 
             for (int i = 0; i < node.Arguments.Count; i++)
             {
-                if (node.Arguments[i].RefKindKeyword != null)
+                var refOrOut = node.Arguments[i].RefKindKeyword.Text ?? "";
+                if (refOrOut == "ref" || refOrOut == "out")
                     hasRefOrOut = true;
                 args[i] = RunExpression(node.Arguments[i].Expression);
             }
@@ -415,7 +419,7 @@ namespace Slowsharp
                     var value = RunExpression(expr);
                     var addArgs = new HybInstance[] { value };
                     var method = OverloadingResolver.FindMethodWithArguments(
-                        resolver, addMethods, addArgs);
+                        resolver, addMethods, ref addArgs);
 
                     method.target.Invoke(inst, addArgs);
                 }

@@ -11,6 +11,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
+    public enum KeyCode
+    {
+        Space
+    }
+    public class Input
+    {
+        public static bool GetKeyDown(KeyCode k)
+        {
+            return true;
+        }
+    }
     public struct Vector3
     {
         public int x, y, z;
@@ -58,6 +69,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Slowsharp;
  
 namespace HelloWorld
 {
@@ -93,21 +105,14 @@ foreach (var b in obj)
 Console.WriteLine(b);
 }
 
-
-
         static int Main(int n) {
 
-var a = new 1();
+System.Object a = 1;
 
-    var p = new Boor();
-p.Add(1, 1);
-Console.WriteLine(p[1]);
+        if (Input.GetKeyDown(KeyCode.Space)) 
+            Console.WriteLine(1);
 
-var a = new Dictionary<int, int>() { {1, 1}, {2, 2}, {3, 3} };
-Console.WriteLine(a);
-
-return CScript.RunSimple(""55"", null);
-
+return 0;
 //return ""asdf"";
         }
 
@@ -133,9 +138,11 @@ Console.WriteLin(aa);
             var r = new Runner(new RunConfig() {
             });
             r.Run(root);
-            //var ret = r.RunMain(5).innerObject;
+            var ret = r.RunMain(5).innerObject;
 
-            //Console.WriteLine(ret);
+            Console.WriteLine(ret);
+
+            return;
 
             var bar = new Bar();
             //dynamic d = new DynamicHybInstance(r.Override("Boor", bar));
