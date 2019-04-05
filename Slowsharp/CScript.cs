@@ -31,11 +31,21 @@ public static object Main() {
             if (ret == null) return null;
             return ret.Unwrap();
         }
-
-        public static Runner CreateRunner(string src, RunConfig config = null)
+        public static CScript CreateRunner(string src, RunConfig config = null)
         {
             if (config == null)
                 config = RunConfig.Default;
+
+            var root = ParseAndValidate(src);
+            var r = new Runner(config);
+            r.LoadSyntax(root);
+
+            return new CScript(r);
+        }
+        private static CSharpSyntaxNode ParseAndValidate(string src)
+        {
+            if (string.IsNullOrEmpty(src))
+                throw new ArgumentException("src is null or empty string");
 
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
@@ -43,10 +53,27 @@ public static object Main() {
             var vd = new Validator();
             vd.Visit(root);
 
-            var r = new Runner(config);
-            r.LoadSyntax(root);
-
-            return r;
+            return root;
         }
+
+        private Runner runner { get; }
+
+        public CScript(Runner runner)
+        {
+            this.runner = runner;
+        }
+
+        public void UpdateMethodsOnly(string src)
+        {
+            var root = ParseAndValidate(src);
+            runner.UpdateMethodsOnly(root);
+        }
+
+        public HybInstance RunMain(params object[] args)
+            => runner.RunMain(args);
+        public HybInstance Instantiate(string id, params object[] args)
+            => runner.Instantiate(id, args);
+        public HybInstance Override(string id, object parentObject, params object[] args)
+            => runner.Override(id, parentObject, args);
     }
 }
