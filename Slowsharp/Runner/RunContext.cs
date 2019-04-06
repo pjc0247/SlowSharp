@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
@@ -15,9 +16,10 @@ namespace Slowsharp
 
         public HybInstance _this { get; set; }
         public SSMethodInfo method { get; private set; }
+        public SyntaxNode lastNode { get; set; }
+        public Stack<SSMethodInfo> methodStack { get; private set; }
 
         private DateTime startsAt;
-        private Stack<SSMethodInfo> methodStack;
 
         public RunContext(RunConfig config)
         {
@@ -39,6 +41,10 @@ namespace Slowsharp
         {
             methodStack.Push(methodInfo);
             method = methodInfo;
+        }
+        public void PopMethod()
+        {
+            methodStack.Pop();
         }
     }
 }

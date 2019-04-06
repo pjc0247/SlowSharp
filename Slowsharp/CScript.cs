@@ -94,5 +94,7 @@ public static object Main() {
 
         public DumpSnapshot GetDebuggerDump()
             => runner.GetDebuggerDump();
+        public HybType[] GetTypes()
+            => runner.GetTypes();
     }
 }

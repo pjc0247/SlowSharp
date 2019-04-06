@@ -55,6 +55,9 @@ namespace Slowsharp
         {
             return new DumpSnapshot(this);
         }
+        public void EndDebug()
+        {
+        }
 
         public void LoadSyntax(SyntaxNode node)
         {
@@ -104,6 +107,8 @@ namespace Slowsharp
 
         public void Run(SyntaxNode node)
         {
+            ctx.lastNode = node;
+
             var treatAsBlock = new Type[]
             {
                 typeof(CompilationUnitSyntax),
@@ -286,6 +291,8 @@ namespace Slowsharp
 
             if (halt == HaltType.Return)
                 halt = HaltType.None;
+
+            ctx.PopMethod();
 
             return ret;
         }
