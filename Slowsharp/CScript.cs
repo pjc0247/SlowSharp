@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
@@ -42,12 +44,15 @@ public static object Main() {
 
             return new CScript(r);
         }
-        private static CSharpSyntaxNode ParseAndValidate(string src)
+        private static CSharpSyntaxNode ParseAndValidate(string src, bool isScript = false)
         {
             if (string.IsNullOrEmpty(src))
                 throw new ArgumentException("src is null or empty string");
 
-            var tree = CSharpSyntaxTree.ParseText(src);
+            CSharpParseOptions options = new CSharpParseOptions(
+                LanguageVersion.Default,
+                kind: isScript ? SourceCodeKind.Script : SourceCodeKind.Regular);
+            var tree = CSharpSyntaxTree.ParseText(src, options);
             var root = tree.GetCompilationUnitRoot();
 
             var vd = new Validator();
@@ -63,6 +68,17 @@ public static object Main() {
             this.runner = runner;
         }
 
+        public HybInstance Eval(string src)
+        {
+            var root = ParseAndValidate(src, isScript: true);
+
+            var glob = root.ChildNodes().First() as GlobalStatementSyntax;
+            if (glob.Statement is ExpressionStatementSyntax expr) {
+                return runner.RunExpression(expr.Expression);
+            }
+
+            throw new ArgumentException("src is not a expression");
+        }
         public void UpdateMethodsOnly(string src)
         {
             var root = ParseAndValidate(src);
@@ -75,5 +91,8 @@ public static object Main() {
             => runner.Instantiate(id, args);
         public HybInstance Override(string id, object parentObject, params object[] args)
             => runner.Override(id, parentObject, args);
+
+        public DumpSnapshot GetDebuggerDump()
+            => runner.GetDebuggerDump();
     }
 }

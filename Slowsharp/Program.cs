@@ -69,6 +69,26 @@ namespace Slowsharp
         public static object a;
     }
 
+    public class SSDebugger
+    {
+        public static CScript runner;
+
+        public static void Stop()
+        {
+            var dump = runner.GetDebuggerDump();
+
+            while (true)
+            {
+                Console.WriteLine("<<");
+                var src = Console.ReadLine();
+                Console.WriteLine(">>");
+                Console.WriteLine(runner.Eval(src));
+            }
+
+            ;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -117,8 +137,11 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-int v = 10;
-RefOrOutTest.MakeDoubleOut(v, out v);
+var a = 11;
+var b = 14;
+
+SSDebugger.Stop();
+
 return v;
 
 return 0;
@@ -144,12 +167,14 @@ class Fooo : Bar {
 
             Console.WriteLine(src);
 
+            CSharpParseOptions options = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
             var tree = CSharpSyntaxTree.ParseText(src);
             var root = tree.GetCompilationUnitRoot();
 
             Dump(root);
 
             var run = CScript.CreateRunner(src);
+            SSDebugger.runner = run;
             run.RunMain();
 
             var vd = new Validator();

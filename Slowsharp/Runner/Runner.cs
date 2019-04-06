@@ -51,6 +51,11 @@ namespace Slowsharp
                 .ToArray();
         }
 
+        public DumpSnapshot GetDebuggerDump()
+        {
+            return new DumpSnapshot(this);
+        }
+
         public void LoadSyntax(SyntaxNode node)
         {
             runMode = RunMode.Preparse;

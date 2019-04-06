@@ -65,5 +65,20 @@ namespace Slowsharp
             if (parent == null) return false;
             return parent.SetValueUpwards(key, value);
         }
+
+        public Dictionary<string, HybInstance> Flatten()
+        {
+            var dict = new Dictionary<string, HybInstance>();
+            FlattenUpwards(dict);
+            return dict;
+        }
+        private void FlattenUpwards(Dictionary<string, HybInstance> dict)
+        {
+            foreach (var pair in values)
+                dict[pair.Key] = pair.Value;
+
+            if (parent != null)
+                parent.FlattenUpwards(dict);
+        }
     }
 }

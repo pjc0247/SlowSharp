@@ -86,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Debugger\DumpSnapshot.cs" />
     <Compile Include="Hyb\DynamicHybInstance.cs" />
     <Compile Include="Exception\SandboxException.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
