@@ -23,8 +23,22 @@ CScript.Run(@"
 
 Hot Reloading
 ----
+Can replace methods after parsing. This also affects already instantiated objects. 
 ```cs
-ss.UpdateMethodsOnly(src);
+var r = CScript.CreateRunner(@"
+class Foo { public int GiveMeNumber() => 10; }
+");
+
+var foo = r.Instantiate("Foo");
+// should be 10
+foo.Invoke("GiveMeNumber");
+```
+```cs
+ss.UpdateMethodsOnly(@"
+class Foo { public int GiveMeNumber() => 20; }
+");
+// should be 20
+foo.Invoke("GiveMeNumber");
 ```
 
 Overriding (Virtual inheritance)
