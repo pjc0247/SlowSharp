@@ -156,6 +156,14 @@ namespace Slowsharp
 
         public HybType GetHybType() => type;
 
+        public T Cast<T>()
+        {
+            if (isCompiledType)
+                return (T)Convert.ChangeType(obj, typeof(T));
+            if (Is<T>())
+                return parent.Cast<T>();
+            throw new InvalidCastException($"Cannot be casted to {typeof(T)}");
+        }
         public HybInstance Cast(HybType type)
         {
             if (isCompiledType) {
