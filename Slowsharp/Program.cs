@@ -148,8 +148,14 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-Console.WriteLine(typeof(List<int>));
-Resources.Load(""asdf"");
+var bbb = 2;
+
+switch(bbb) {
+case 1:  
+case 2:  Console.WriteLine(""BOO22""); break;
+case 151: Console.WriteLine(""BOO333""); break;
+case 152: Console.WriteLine(""BOO333""); break;
+}
 
 var a = 11;
 var b = 14;

@@ -175,6 +175,8 @@ namespace Slowsharp
                 RunIf(node as IfStatementSyntax);
             else if (node is ForStatementSyntax)
                 RunFor(node as ForStatementSyntax);
+            else if (node is SwitchStatementSyntax)
+                RunSwitch(node as SwitchStatementSyntax);
             else if (node is ForEachStatementSyntax)
                 RunForEach(node as ForEachStatementSyntax);
             else if (node is WhileStatementSyntax)

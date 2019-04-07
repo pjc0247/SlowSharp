@@ -54,6 +54,52 @@ namespace Slowsharp
             return true;
         }
 
+        private void RunSwitch(SwitchStatementSyntax node)
+        {
+            var value = RunExpression(node.Expression);
+
+            foreach (var section in node.Sections)
+            {
+                foreach (var label in section.Labels)
+                {
+                    if (label is DefaultSwitchLabelSyntax)
+                    {
+                        foreach (var statement in section.Statements)
+                        {
+                            Run(statement);
+
+                            if (halt != HaltType.None)
+                                break;
+                        }
+                    }
+                    else if (label is CaseSwitchLabelSyntax caseLabel)
+                    {
+                        var caseValue = RunExpression(caseLabel.Value);
+
+                        if (MadMath.Eq(value, caseValue).As<bool>())
+                        {
+                            foreach (var statement in section.Statements)
+                            {
+                                Run(statement);
+
+                                if (halt != HaltType.None)
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (halt != HaltType.None)
+                        break;
+                }
+
+                if (halt != HaltType.None)
+                    break;
+            }
+
+            if (halt == HaltType.Break)
+                halt = HaltType.None;
+        }
+
         private void RunFor(ForStatementSyntax node)
         {
             vars = new VarFrame(vars);
