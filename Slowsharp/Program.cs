@@ -132,7 +132,7 @@ public void MoveForward() {
     transform.position += new Vector3(11,1,1);
 }
 }
-
+class MyList : List<int> { }
     class Program : Bar
     {
 static int bb = 1;
@@ -148,7 +148,7 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-var bbb = 2;
+return new MyList();
 
 switch(bbb) {
 case 1:  
@@ -195,7 +195,8 @@ class Fooo : Bar {
 
             var run = CScript.CreateRunner(src);
             SSDebugger.runner = run;
-            run.RunMain();
+            var myList = run.RunMain();
+            Console.WriteLine(myList.Is<List<int>>());
 
             var vd = new Validator();
             vd.Visit(root);

@@ -184,8 +184,16 @@ namespace Slowsharp
                 var ct = GetHybType().compiledType;
                 if (ct == type || ct.IsSubclassOf(type))
                     return true;
+                return false;
             }
-            return false;
+            if (klass.parent == null)
+                return false;
+
+            // It's safe to access `compiledType` 
+            //   without checking `isCompiledType`
+            return 
+                klass.parent.compiledType == type ||
+                klass.parent.IsSubclassOf(type);
         }
         public bool Is<T>() => Is(typeof(T));
 

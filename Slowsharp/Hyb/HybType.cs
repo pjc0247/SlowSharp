@@ -309,6 +309,20 @@ namespace Slowsharp
             }
             return false;
         }
+        public bool IsSubclassOf(Type other)
+        {
+            if (isCompiledType)
+                return compiledType.IsSubclassOf(other);
+
+            var type = parent;
+            while (type != null)
+            {
+                if (type.isCompiledType &&
+                    type.compiledType == other) return true;
+                type = type.parent;
+            }
+            return false;
+        }
         public bool IsAssignableFrom(HybType other)
         {
             if (other.isCompiledType)
