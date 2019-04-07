@@ -90,6 +90,10 @@ namespace Slowsharp
         {
             return new HybInstance(HybType.Double, f);
         }
+        public static HybInstance Type(Type type)
+        {
+            return new HybInstance(HybType.Type, type);
+        }
 
         internal HybInstance(HybType type, object obj)
         {

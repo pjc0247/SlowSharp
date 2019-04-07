@@ -29,6 +29,7 @@ namespace Slowsharp
         public static HybType Float => HybTypeCache.Float;
         public static HybType Double => HybTypeCache.Double;
         public static HybType Decimal => HybTypeCache.Decimal;
+        public static HybType Type => HybTypeCache.Type;
 
         public string id { get; }
         public string fullName { get; }

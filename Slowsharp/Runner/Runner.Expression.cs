@@ -49,8 +49,10 @@ namespace Slowsharp
             else if (node is PostfixUnaryExpressionSyntax)
                 return RunPostfixUnary(node as PostfixUnaryExpressionSyntax);
 
+            else if (node is TypeOfExpressionSyntax)
+                return RunTypeof(node as TypeOfExpressionSyntax);
             else if (node is SizeOfExpressionSyntax)
-                RunSizeof(node as SizeOfExpressionSyntax);
+                return RunSizeof(node as SizeOfExpressionSyntax);
 
             else if (node is ObjectCreationExpressionSyntax)
                 return RunObjectCreation(node as ObjectCreationExpressionSyntax);
@@ -533,6 +535,14 @@ namespace Slowsharp
             return null;
         }
 
+        private HybInstance RunTypeof(TypeOfExpressionSyntax node)
+        {
+            var type = resolver.GetType($"{node.Type}");
+            if (type.isCompiledType)
+                return HybInstance.Type(type.compiledType);
+            else
+                return HybInstance.Type(typeof(HybType));
+        }
         private HybInstance RunSizeof(SizeOfExpressionSyntax node)
         {
             var type = $"{node.Type}";

@@ -148,6 +148,7 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
+Console.WriteLine(typeof(List<int>));
 Resources.Load(""asdf"");
 
 var a = 11;

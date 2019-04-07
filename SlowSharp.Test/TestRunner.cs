@@ -24,6 +24,7 @@ using System;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Slowsharp.Test;
 
 public class FooTest__ {
@@ -43,6 +44,7 @@ config);
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Slowsharp.Test;
 
 public class FooTest__ {"

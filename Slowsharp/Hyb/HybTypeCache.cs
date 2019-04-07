@@ -26,6 +26,7 @@ namespace Slowsharp
         public static readonly HybType Float = new HybType(typeof(float));
         public static readonly HybType Double = new HybType(typeof(double));
         public static readonly HybType Decimal = new HybType(typeof(decimal));
+        public static readonly HybType Type = new HybType(typeof(Type));
 
         static HybTypeCache()
         {
