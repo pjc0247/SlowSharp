@@ -49,6 +49,12 @@ namespace Slowsharp
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
         }
 
+        public int GetGenericArgumentCount()
+        {
+            if (target.isCompiled)
+                return target.compiledMethod.GetGenericArguments().Length;
+            return 0;
+        }
         public SSMethodInfo MakeGenericMethod(HybType[] genericArgs)
         {
             if (target.isCompiled)

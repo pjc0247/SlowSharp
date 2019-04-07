@@ -78,8 +78,13 @@ namespace Slowsharp
                     if (match == false)
                         continue;
 
-                    if (genericArgs.Count > 0)
+                    var methodGenericArgs = member.GetGenericArgumentCount();
+                    if (methodGenericArgs > 0)
+                    {
+                        if (genericArgs.Count != methodGenericArgs)
+                            throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
                         return member.MakeGenericMethod(genericArgs.ToArray());
+                    }
                     return member;
                 }
                 else

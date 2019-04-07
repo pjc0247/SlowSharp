@@ -148,7 +148,7 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
-Resources.Load<GameObject>(""asdf"");
+Resources.Load(""asdf"");
 
 var a = 11;
 var b = 14;
