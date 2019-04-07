@@ -50,7 +50,7 @@ namespace Slowsharp
                     nameof(Task<int>.Result),
                     out result, AccessLevel.Outside))
                 {
-                    Console.WriteLine(result);
+                    return result;
                 }
             }
 
