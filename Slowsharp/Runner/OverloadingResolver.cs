@@ -9,7 +9,9 @@ namespace Slowsharp
     internal class OverloadingResolver
     {
         public static SSMethodInfo FindMethodWithArguments(
-            TypeResolver resolver, SSMethodInfo[] members, ref HybInstance[] args)
+            TypeResolver resolver, SSMethodInfo[] members, 
+            HybType[] implicitGenercArgs,
+            ref HybInstance[] args)
         {
             var originalArgs = (HybInstance[])args.Clone();
 
@@ -19,7 +21,7 @@ namespace Slowsharp
                 {
                     args = originalArgs;
 
-                    var genericArgs = new List<HybType>();
+                    var genericArgs = new List<HybType>(implicitGenercArgs);
                     var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
 

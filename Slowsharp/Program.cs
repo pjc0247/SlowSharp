@@ -33,6 +33,17 @@ namespace Slowsharp
         public Vector3 position { get; set; }
     }
 
+    public class Resources
+    {
+        public static void Load<T>(string path)
+        {
+            Console.WriteLine(typeof(T) + " / " + path);
+        }
+    }
+    public class GameObject
+    {
+    }
+
     public class Bar
     {
         public Transform transform = new Transform();
@@ -136,6 +147,8 @@ Console.WriteLine(b);
 }
 
         static int Main(int n) {
+
+Resources.Load<GameObject>(""asdf"");
 
 var a = 11;
 var b = 14;

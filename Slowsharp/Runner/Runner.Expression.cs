@@ -199,19 +199,23 @@ namespace Slowsharp
             string targetId = "";
             HybInstance callee = null;
             SSMethodInfo[] callsite = null;
+            HybType[] implicitGenericArgs = null;
 
             var (args, hasRefOrOut) = ResolveArgumentList(node.ArgumentList);
 
             if (node.Expression is MemberAccessExpressionSyntax ma)
             {
                 var leftIsType = false;
+                var rightName = $"{ma.Name.Identifier}";
+
+                implicitGenericArgs = ResolveGenericArgumentsFromName(ma.Name);
 
                 if (ma.Expression is PredefinedTypeSyntax pd)
                 {
                     HybType leftType = null;
                     leftIsType = true;
                     leftType = resolver.GetType($"{pd}");
-                    callsite = leftType.GetStaticMethods($"{ma.Name}");
+                    callsite = leftType.GetStaticMethods(rightName);
                 }
                 else if (ma.Expression is IdentifierNameSyntax id)
                 {
@@ -219,7 +223,7 @@ namespace Slowsharp
                     if (resolver.TryGetType($"{id.Identifier}", out leftType))
                     {
                         leftIsType = true;
-                        callsite = leftType.GetStaticMethods($"{ma.Name}");
+                        callsite = leftType.GetStaticMethods(rightName);
                     }
                     else
                     {
@@ -231,8 +235,7 @@ namespace Slowsharp
                         else
                             throw new SemanticViolationException($"Unrecognized identifier: {id.Identifier}");
                         
-                        callsite = callee
-                            .GetMethods($"{ma.Name}");
+                        callsite = callee.GetMethods(rightName);
                     }
 
                     calleeId = $"{id.Identifier}";
@@ -254,8 +257,10 @@ namespace Slowsharp
                 targetId = $"{ma.Name}";
                 //callsite = ResolveMemberAccess(node.Expression as MemberAccessExpressionSyntax);
             }
-            else if (node.Expression is IdentifierNameSyntax id)
+            else if (node.Expression is SimpleNameSyntax id)
             {
+                implicitGenericArgs = ResolveGenericArgumentsFromName(id);
+
                 callee = ctx._this;
                 callsite =
                     ResolveLocalMember(id)
@@ -269,7 +274,9 @@ namespace Slowsharp
             
             var method = OverloadingResolver.FindMethodWithArguments(
                 resolver,
-                callsite, ref args);
+                callsite, 
+                implicitGenericArgs.ToArray(),
+                ref args);
 
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
@@ -292,6 +299,18 @@ namespace Slowsharp
             }
 
             return ret;
+        }
+        private HybType[] ResolveGenericArgumentsFromName(SimpleNameSyntax name)
+        {
+            if (name is GenericNameSyntax gn)
+            {
+                var result = new HybType[gn.TypeArgumentList.Arguments.Count];
+                var count = 0;
+                foreach (var genericType in gn.TypeArgumentList.Arguments)
+                    result[count++] = resolver.GetType($"{genericType}");
+                return result;
+            }
+            return new HybType[] { };
         }
         private (HybInstance[], bool) ResolveArgumentList(ArgumentListSyntax node)
         {
@@ -434,7 +453,7 @@ namespace Slowsharp
                     var value = RunExpression(expr);
                     var addArgs = new HybInstance[] { value };
                     var method = OverloadingResolver.FindMethodWithArguments(
-                        resolver, addMethods, ref addArgs);
+                        resolver, addMethods, new HybType[] { }, ref addArgs);
 
                     method.target.Invoke(inst, addArgs);
                 }

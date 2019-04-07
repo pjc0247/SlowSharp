@@ -432,7 +432,7 @@ namespace Slowsharp
             return false;
         }
 
-        private SSMethodInfo[] ResolveLocalMember(IdentifierNameSyntax node)
+        private SSMethodInfo[] ResolveLocalMember(SimpleNameSyntax node)
         {
             var id = node.Identifier.ValueText;
             return ctx.method.declaringClass.GetMethods(id);

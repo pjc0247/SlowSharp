@@ -6,6 +6,8 @@ using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 namespace Slowsharp
 {
     public class HybInstance
@@ -213,7 +215,7 @@ namespace Slowsharp
                 throw new ArgumentException($"No such method: {name}");
 
             var method = OverloadingResolver.FindMethodWithArguments(
-                runner.resolver, methods, ref wrappedArgs);
+                runner.resolver, methods, new HybType[] { },ref wrappedArgs);
 
             if (method == null)
                 throw new ArgumentException($"No matching override found: {name}");

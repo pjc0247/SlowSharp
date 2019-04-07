@@ -5,6 +5,8 @@ using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 namespace Slowsharp
 {
     public class HybType
@@ -135,7 +137,7 @@ namespace Slowsharp
             if (ctors.Length > 0)
             {
                 var ctor = OverloadingResolver
-                    .FindMethodWithArguments(runner.resolver, ctors, ref args);
+                    .FindMethodWithArguments(runner.resolver, ctors, new HybType[] { }, ref args);
                 ctor.target.Invoke(inst, args);
             }
 
@@ -250,6 +252,7 @@ namespace Slowsharp
                     .ToArray();
             }
         }
+
         public SSMethodInfo[] GetStaticMethods(string id)
         {
             return GetStaticMethods()
