@@ -12,12 +12,18 @@ namespace Slowsharp
     {
         private void RunLocalDeclaration(LocalDeclarationStatementSyntax node)
         {
-            var typename = $"{node.Declaration.Type}";
-            var isVar = typename == "var";
-            HybType type = null;
+            var cache = optCache.GetOrCreate(node, () => {
+                var _typename = $"{node.Declaration.Type}";
+                var _isVar = _typename == "var";
 
-            if (isVar == false)
-                type = resolver.GetType(typename);
+                return new OptLocalDeclarationNode() {
+                    isVar = _isVar,
+                    type = _isVar ? null : resolver.GetType(_typename)
+                };
+            });
+
+            var isVar = cache.isVar;
+            var type = cache.type;
 
             foreach (var v in node.Declaration.Variables)
             {

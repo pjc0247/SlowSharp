@@ -21,6 +21,7 @@ namespace Slowsharp
         private Class klass;
         internal VarFrame vars { get; private set; }
         private Stack<CatchFrame> catches;
+        private OptNodeCache optCache;
 
         private Stack<VarFrame> frames { get; }
 
@@ -36,6 +37,7 @@ namespace Slowsharp
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+            this.optCache = new OptNodeCache();
             this.lookup = new IdLookup(assemblies);
             this.catches = new Stack<CatchFrame>();
             this.frames = new Stack<VarFrame>();

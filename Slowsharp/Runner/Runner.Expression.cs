@@ -70,26 +70,34 @@ namespace Slowsharp
         }
         private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
-            if (node.Token.Value == null)
-                return HybInstance.Null();
-            if (node.Token.Value is char c)
-                return HybInstance.Char(c);
-            if (node.Token.Value is string str)
-                return HybInstance.String(str);
-            if (node.Token.Value is bool b)
-                return HybInstance.Bool(b);
-            if (node.Token.Value is int i)
-            {
-                if (int.TryParse(node.Token.Text, out _) == false)
-                    throw new SemanticViolationException($"Integer literal out of range");
-                return HybInstance.Int(i);
-            }
-            if (node.Token.Value is float f)
-                return HybInstance.Float(f);
-            if (node.Token.Value is double d)
-                return HybInstance.Double(d);
+            var cache = optCache.GetOrCreate(node, () => {
+                var optNode = new OptLiteralNode();
 
-            throw new InvalidOperationException();
+                if (node.Token.Value == null)
+                    optNode.value = HybInstance.Null();
+                else if (node.Token.Value is char c)
+                    optNode.value = HybInstance.Char(c);
+                else if (node.Token.Value is string str)
+                    optNode.value = HybInstance.String(str);
+                else if (node.Token.Value is bool b)
+                    optNode.value = HybInstance.Bool(b);
+                else if (node.Token.Value is int i)
+                {
+                    if (int.TryParse(node.Token.Text, out _) == false)
+                        throw new SemanticViolationException($"Integer literal out of range");
+                    optNode.value = HybInstance.Int(i);
+                }
+                else if (node.Token.Value is float f)
+                    optNode.value = HybInstance.Float(f);
+                else if (node.Token.Value is double d)
+                    optNode.value = HybInstance.Double(d);
+                else
+                    throw new InvalidOperationException();
+
+                return optNode;
+            });
+
+            return cache.value;
         }
         private HybInstance ResolveId(IdentifierNameSyntax node)
         {
@@ -146,10 +154,14 @@ namespace Slowsharp
 
         private HybInstance RunCast(CastExpressionSyntax node)
         {
-            var type = resolver.GetType($"{node.Type}");
+            var cache = optCache.GetOrCreate(node, () => {
+                return new OptCastNode() {
+                    type = resolver.GetType($"{node.Type}")
+                };
+            });
             var value = RunExpression(node.Expression);
 
-            return value.Cast(type);
+            return value.Cast(cache.type);
         }
 
         private HybInstance RunDefault(DefaultExpressionSyntax node)
