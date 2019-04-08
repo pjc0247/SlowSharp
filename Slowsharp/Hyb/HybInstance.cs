@@ -510,7 +510,10 @@ namespace Slowsharp
             }
             return type.ToString();
         }
-        public HybInstance Clone()
+        public DynamicHybInstance AsDynamic()
+            => new DynamicHybInstance(this);
+
+        internal HybInstance Clone()
         {
             if (isCompiledType)
                 return new HybInstance(type, obj);

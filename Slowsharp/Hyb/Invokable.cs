@@ -58,6 +58,9 @@ namespace Slowsharp
 
             if (type == InvokeType.ReflectionInvoke)
             {
+                if (compiledMethod.GetParameters().Length > args.Length)
+                    args = ExpandArgs(args, compiledMethod);
+
                 var unwrappedArgs = args.Unwrap();
                 var ret = compiledMethod.Invoke(_this?.innerObject, unwrappedArgs);
 
@@ -84,6 +87,22 @@ namespace Slowsharp
             }
 
             throw new NotImplementedException($"Unknown type: {type}");
+        }
+
+        private HybInstance[] ExpandArgs(HybInstance[] args, MethodInfo info)
+        {
+            var ps = info.GetParameters();
+            var expanded = new HybInstance[ps.Length];
+
+            for (int i = 0; i < ps.Length; i++)
+            {
+                if (args.Length > i)
+                    expanded[i] = args[i];
+                else
+                    expanded[i] = HybInstance.Object(ps[i].DefaultValue);
+            }
+
+            return expanded;
         }
     }
 }

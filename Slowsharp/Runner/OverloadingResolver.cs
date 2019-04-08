@@ -25,13 +25,23 @@ namespace Slowsharp
                     var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
 
-                    if (args.Length != ps.Length)
+                    if (args.Length > ps.Length)
                         continue;
 
                     bool match = true;
                     for (int i = 0; i < ps.Length; i++)
                     {
                         var p = ps[i].ParameterType;
+
+                        if (args.Length <= i)
+                        {
+                            if (ps[i].IsOptional == false)
+                            {
+                                match = false;
+                                break;
+                            }
+                            continue;
+                        }
 
                         if (p.IsByRef)
                             p = p.GetElementType();

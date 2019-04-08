@@ -55,6 +55,11 @@ namespace Slowsharp
             Console.WriteLine("I AM INIT");
         }
 
+        public static void Opt(int n = 1)
+        {
+            Console.WriteLine("Opt" + n);
+        }
+
         public void SayHello()
         {
             Console.WriteLine("hello from BAR");
@@ -148,6 +153,17 @@ Console.WriteLine(b);
 
         static int Main(int n) {
 
+var count = 0;
+for (int i=0;i<5;i++) {
+    for (int j=0;j<5;j++) {
+        count += 10;
+        //if (j == 2) break;
+    }
+    count ++;
+    //if (i == 2) break;
+}
+return count;
+
 return new MyList();
 
 switch(bbb) {
@@ -206,7 +222,7 @@ class Fooo : Bar {
             r.Run(root);
 
             r.RunMain(5);
-            Console.WriteLine("AAA");
+            Console.WriteLine(Goo());
 
             tree = CSharpSyntaxTree.ParseText(hotReloadSrc);
             root = tree.GetCompilationUnitRoot();
@@ -235,6 +251,22 @@ class Fooo : Bar {
 
             foreach (var child in syntax.ChildNodes())
                 Dump(child, depth + 1);
+        }
+
+        private static int Goo()
+        {
+            var count = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    count += 10;
+                    if (j == 2) break;
+                }
+                count++;
+                if (i == 2) break;
+            }
+            return count;
         }
     }
 }
