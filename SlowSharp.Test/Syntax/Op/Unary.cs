@@ -17,6 +17,16 @@ namespace Slowsharp.Test
                 -5,
                 TestRunner.Run(@"var a = 5; return -a;"));
         }
+        [TestMethod]
+        public void PrefixNot()
+        {
+            Assert.AreEqual(
+                true,
+                TestRunner.Run(@"return !false;"));
+            Assert.AreEqual(
+                false,
+                TestRunner.Run(@"return !true;"));
+        }
 
         [TestMethod]
         public void PostfixIncDec()

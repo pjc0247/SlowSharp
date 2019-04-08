@@ -10,6 +10,7 @@ namespace Slowsharp
     {
         public static HybInstance PrefixUnary(HybInstance a, string op)
         {
+            if (op == "!") return PrefixNot(a);
             if (op == "-") return PrefixMinus(a);
             if (op == "+") return PrefixPlus(a);
 
@@ -38,6 +39,14 @@ namespace Slowsharp
 
             throw new ArgumentException($"Unrecognized operator: '{op}'.");
         }
+
+        public static HybInstance PrefixNot(HybInstance a)
+        {
+            if (a.isCompiledType)
+                return HybInstance.Object(_PrefixNot(a.innerObject));
+            throw new NotImplementedException();
+        }
+        private static dynamic _PrefixNot(dynamic a) => !a;
 
         public static HybInstance PrefixMinus(HybInstance a)
         {
