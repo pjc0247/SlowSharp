@@ -519,34 +519,5 @@ namespace Slowsharp
                 return new HybInstance(type, obj);
             return new HybInstance(runner, type, klass);
         }
-
-        public static HybInstance operator ++(HybInstance _this)
-        {
-            var c = _this.Clone();
-            c += 1;
-            return c;
-        }
-        public static HybInstance operator +(HybInstance _this, int n)
-        {
-            if (_this.isCompiledType)
-            {
-                if (_this.obj is int i) _this.obj = i + n;
-                else if (_this.obj is uint ui) _this.obj = ui + n;
-                else if (_this.obj is float f) _this.obj = f + n;
-                else if (_this.obj is double d) _this.obj = d + n;
-                else if (_this.obj is decimal dec) _this.obj = dec + n;
-            }
-
-            return _this;
-        }
-        public static HybInstance operator +(HybInstance _this, string n)
-        {
-            if (_this.isCompiledType)
-            {
-                if (_this.obj is string s) _this.obj = s + n;
-            }
-
-            return _this;
-        }
     }
 }

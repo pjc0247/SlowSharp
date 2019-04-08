@@ -8,6 +8,20 @@ namespace Slowsharp
 {
     internal class MadMath
     {
+        public static HybInstance PrefixUnary(HybInstance a, string op)
+        {
+            if (op == "-") return PrefixMinus(a);
+            if (op == "+") return PrefixPlus(a);
+
+            throw new ArgumentException($"Unrecognized operator: '{op}'.");
+        }
+        public static HybInstance PostfixUnary(HybInstance a, string op)
+        {
+            if (op == "++") return PostfixInc(a);
+            if (op == "--") return PostfixDec(a);
+
+            throw new ArgumentException($"Unrecognized operator: '{op}'.");
+        }
         public static HybInstance Op(HybInstance a, HybInstance b, string op)
         {
             if (op == "+") return Add(a, b);
@@ -24,6 +38,38 @@ namespace Slowsharp
 
             throw new ArgumentException($"Unrecognized operator: '{op}'.");
         }
+
+        public static HybInstance PrefixMinus(HybInstance a)
+        {
+            if (a.isCompiledType)
+                return HybInstance.Object(_PrefixMinus(a.innerObject));
+            throw new NotImplementedException();
+        }
+        private static dynamic _PrefixMinus(dynamic a) => -a;
+
+        public static HybInstance PrefixPlus(HybInstance a)
+        {
+            if (a.isCompiledType)
+                return HybInstance.Object(_PrefixPlus(a.innerObject));
+            throw new NotImplementedException();
+        }
+        private static dynamic _PrefixPlus(dynamic a) => +a;
+
+        public static HybInstance PostfixInc(HybInstance a)
+        {
+            if (a.isCompiledType)
+                return HybInstance.Object(_PrefixPlus(a.innerObject));
+            throw new NotImplementedException();
+        }
+        private static dynamic _PostfixInc(dynamic a) => a++;
+
+        public static HybInstance PostfixDec(HybInstance a)
+        {
+            if (a.isCompiledType)
+                return HybInstance.Object(_PostfixDec(a.innerObject));
+            throw new NotImplementedException();
+        }
+        private static dynamic _PostfixDec(dynamic a) => a--;
 
         public static HybInstance Add(HybInstance a, HybInstance b)
         {

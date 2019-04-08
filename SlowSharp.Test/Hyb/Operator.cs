@@ -6,6 +6,8 @@ namespace Slowsharp.Test
     [TestClass]
     public class HybOperatorTest
     {
+        // these operators will be removed maybe?
+        /*
         [TestMethod]
         public void Plus()
         {
@@ -30,5 +32,6 @@ namespace Slowsharp.Test
             Assert.AreEqual(6, after.As<int>());
             Assert.AreEqual(6, n.As<int>());
         }
+        */
     }
 }

@@ -36,6 +36,7 @@ namespace Slowsharp
         public bool isCompiledType => compiledType != null;
         public bool isInterface { get; }
         public bool isSealed { get; }
+        public bool isValueType { get; }
 
         public Type compiledType { get; }
         internal Class interpretKlass { get; }
@@ -69,6 +70,7 @@ namespace Slowsharp
             this.fullName = type.FullName;
             this.isSealed = type.IsSealed;
             this.isInterface = type.IsInterface;
+            this.isValueType = type.IsValueType;
             this.compiledType = type;
         }
         internal HybType(Class klass)
@@ -77,6 +79,7 @@ namespace Slowsharp
             this.fullName = klass.id;
             this.isSealed = false;
             this.isInterface = false;
+            this.isValueType = false;
             this.interpretKlass = klass;
         }
         internal HybType(Class klass, HybType elementType, int arrayRank) :

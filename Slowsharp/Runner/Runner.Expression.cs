@@ -46,6 +46,8 @@ namespace Slowsharp
                 return RunConditional(node as ConditionalExpressionSyntax);
             else if (node is IdentifierNameSyntax)
                 return ResolveId(node as IdentifierNameSyntax);
+            else if (node is PrefixUnaryExpressionSyntax)
+                return RunPrefixUnary(node as PrefixUnaryExpressionSyntax);
             else if (node is PostfixUnaryExpressionSyntax)
                 return RunPostfixUnary(node as PostfixUnaryExpressionSyntax);
 
@@ -520,19 +522,53 @@ namespace Slowsharp
             return HybInstance.Object(ary);
         }
 
-        private HybInstance RunPostfixUnary(PostfixUnaryExpressionSyntax node)
+        private HybInstance RunPrefixUnary(PrefixUnaryExpressionSyntax node)
         {
-            var delta = node.OperatorToken.Text == "++" ? 1 : -1;
+            var op = node.OperatorToken.Text;
+            var operand = RunExpression(node.Operand);
+            var after = MadMath.PrefixUnary(operand, op);
 
-            if (node.Operand is IdentifierNameSyntax id)
+            if (op == "++" || op == "--")
             {
-                var v = vars.GetValue($"{id.Identifier}");
-                var after = v + delta;
-                vars.SetValue($"{id.Identifier}", after);
-                return after;
+                if (node.Operand is IdentifierNameSyntax id)
+                {
+                    if (operand.GetHybType().isValueType)
+                    {
+                        var applied = MadMath.Op(
+                            operand,
+                            HybInstanceCache.One,
+                            op.Substring(1));
+
+                        vars.SetValue($"{id.Identifier}", applied);
+                    }
+                }
             }
 
-            return null;
+            return after;
+        }
+        private HybInstance RunPostfixUnary(PostfixUnaryExpressionSyntax node)
+        {
+            var op = node.OperatorToken.Text;
+            var operand = RunExpression(node.Operand);
+            var after = MadMath.PostfixUnary(operand, op);
+
+            if (op == "++" || op == "--")
+            {
+                if (node.Operand is IdentifierNameSyntax id)
+                {
+                    if (operand.GetHybType().isValueType)
+                    {
+                        var applied = MadMath.Op(
+                            operand, 
+                            HybInstanceCache.One,
+                            op.Substring(1));
+
+                        vars.SetValue($"{id.Identifier}", applied);
+                    }
+                }
+            }
+
+            return after;
         }
 
         private HybInstance RunTypeof(TypeOfExpressionSyntax node)

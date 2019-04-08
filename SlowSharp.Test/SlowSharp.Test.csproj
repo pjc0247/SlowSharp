@@ -79,6 +79,7 @@
     <Compile Include="Syntax\ControlFlow\While.cs" />
     <Compile Include="Syntax\Keyword\Typeof.cs" />
     <Compile Include="Syntax\Op\OpAndAssign.cs" />
+    <Compile Include="Syntax\Op\Unary.cs" />
     <Compile Include="TestRunner.cs" />
   </ItemGroup>
   <ItemGroup>

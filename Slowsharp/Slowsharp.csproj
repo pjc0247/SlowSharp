@@ -90,6 +90,7 @@
     <Compile Include="Debugger\DumpSnapshot.cs" />
     <Compile Include="Hyb\DynamicHybInstance.cs" />
     <Compile Include="Exception\SandboxException.cs" />
+    <Compile Include="Hyb\HybInstanceCache.cs" />
     <Compile Include="Optimizer\NodeAnalyzer.cs" />
     <Compile Include="Optimizer\OptNodeCache.cs" />
     <Compile Include="Optimizer\OptNode\OptCastNode.cs" />
