@@ -12,7 +12,7 @@ namespace Slowsharp
 {
     internal static class ModifierExt
     {
-        private static bool Contains(this SyntaxTokenList _this, string word)
+        public static bool Contains(this SyntaxTokenList _this, string word)
         {
             foreach (var token in _this)
             {

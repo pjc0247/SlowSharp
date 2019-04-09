@@ -211,7 +211,7 @@ class Fooo : Bar {
             var vd = new Validator();
             vd.Visit(root);
 
-            var r = new Runner(new RunConfig() {
+            var r = new Runner(ScriptConfig.Default, new RunConfig() {
             });
             r.Run(root);
 
@@ -255,10 +255,10 @@ class Fooo : Bar {
                 for (int j = 0; j < 5; j++)
                 {
                     count += 10;
-                    if (j == 2) break;
+                    //if (j == 2) break;
                 }
                 count++;
-                if (i == 2) break;
+                //if (i == 2) break;
             }
             return count;
         }

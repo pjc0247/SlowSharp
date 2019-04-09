@@ -19,6 +19,8 @@ namespace Slowsharp
         {
             var id = $"{node.Identifier}";
 
+            if (node.Modifiers.Contains("partial"))
+                throw new SemanticViolationException($"partial keyword is not supported: {id}");
             if (ctx.types.ContainsKey(id))
                 throw new SemanticViolationException($"Class redefination is not supported: {id}");
 
@@ -29,7 +31,14 @@ namespace Slowsharp
                 {
                     var type = resolver.GetType($"{b.Type}");
                     if (type.isInterface == false)
+                    {
+                        if (parentType != null)
+                            throw new SemanticViolationException($"Cannot be derived from more than 2 base classes.");
+                        if (type.isSealed)
+                            throw new SemanticViolationException($"Sealed class cannot be inherited.");
+
                         parentType = type;
+                    }
                 }
             }
 
