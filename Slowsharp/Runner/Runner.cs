@@ -13,6 +13,7 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        internal ScriptConfig scriptConfig { get; }
         internal RunContext ctx;
         internal GlobalStorage globals { get; }
         internal ExtensionMethodResolver extResolver { get; }
@@ -30,9 +31,10 @@ namespace Slowsharp
 
         private RunMode runMode;
 
-        public Runner(RunConfig config)
+        public Runner(ScriptConfig scriptConfig, RunConfig config)
         {
             this.ctx = new RunContext(config);
+            this.scriptConfig = scriptConfig;
             this.globals = new GlobalStorage();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -43,6 +45,13 @@ namespace Slowsharp
             this.frames = new Stack<VarFrame>();
             this.extResolver = new ExtensionMethodResolver(assemblies);
             this.resolver = new TypeResolver(ctx, assemblies);
+
+            AddDefaultUsings();
+        }
+        private void AddDefaultUsings()
+        {
+            foreach (var ns in scriptConfig.DefaultUsings)
+                resolver.AddLookupNamespace(ns);
         }
 
         public HybType[] GetTypes()
@@ -221,6 +230,7 @@ namespace Slowsharp
         }
         internal void RunBlock(BlockSyntax node, VarFrame vf, int pc = 0)
         {
+            var prevVars = vars;
             vars = vf;
 
             var children = node.ChildNodes().ToArray();
@@ -248,7 +258,9 @@ namespace Slowsharp
 
                 if (halt != HaltType.None) break;
             }
-            vars = vars.parent;
+
+            vars = prevVars;
+            //vars = vars.parent;
         }
         internal void RunBlock(BlockSyntax node)
         {
