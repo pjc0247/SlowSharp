@@ -609,9 +609,18 @@ namespace Slowsharp
 
         private HybInstance RunTypeof(TypeOfExpressionSyntax node)
         {
-            var type = resolver.GetType($"{node.Type}");
-            if (type.isCompiledType)
-                return HybInstance.Type(type.compiledType);
+            var cache = optCache.GetOrCreate<TypeOfExpressionSyntax, OptTypeofNode>(node,
+                () =>
+                {
+                    var type = resolver.GetType($"{node.Type}");
+                    return new OptTypeofNode()
+                    {
+                        type = type
+                    };
+                });
+            
+            if (cache.type.isCompiledType)
+                return HybInstance.Type(cache.type.compiledType);
             else
                 return HybInstance.Type(typeof(HybType));
         }
