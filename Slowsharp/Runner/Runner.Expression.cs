@@ -342,13 +342,25 @@ namespace Slowsharp
         }
         private HybInstance RunMemberAccess(MemberAccessExpressionSyntax node)
         {
-            if (node.Expression is IdentifierNameSyntax idNode)
-            {
-                HybType type;
-                var id = $"{idNode.Identifier}";
-                if (resolver.TryGetType(id, out type))
-                    return RunStaticMemberAccess(node, type);
-            }
+            var cache = optCache.GetOrCreate<MemberAccessExpressionSyntax, OptRunMemberAccessNode>(node,
+                () => {
+                    var result = new OptRunMemberAccessNode();
+
+                    if (node.Expression is IdentifierNameSyntax idNode)
+                    {
+                        HybType type;
+                        var id = $"{idNode.Identifier}";
+                        if (resolver.TryGetType(id, out type))
+                        {
+                            result.leftType = type;
+                            result.isStaticMemberAccess = true;
+                        }
+                    }
+
+                    return result;
+                });
+            if (cache.isStaticMemberAccess)
+                return RunStaticMemberAccess(node, cache.leftType);
 
             var left = RunExpression(node.Expression);
             var right = node.Name.Identifier.Text;

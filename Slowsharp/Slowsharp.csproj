@@ -97,6 +97,7 @@
     <Compile Include="Optimizer\OptNode\OptLiteralNode.cs" />
     <Compile Include="Optimizer\OptNode\OptLocalDeclarationNode.cs" />
     <Compile Include="Optimizer\OptNode\OptNodeBase.cs" />
+    <Compile Include="Optimizer\OptNode\OptRunMemberAccessNode.cs" />
     <Compile Include="Optimizer\OptNode\OptUnaryNode.cs" />
     <Compile Include="Optimizer\PointableDictionary.cs" />
     <Compile Include="Runner\CatchFrame.cs" />

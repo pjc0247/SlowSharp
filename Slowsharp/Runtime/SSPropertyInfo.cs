@@ -115,7 +115,7 @@ namespace Slowsharp
             if (declaringClass.HasField(id))
                 return;
 
-            backingField = new SSInterpretFieldInfo()
+            backingField = new SSInterpretFieldInfo(declaringClass)
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{node.Type}"),

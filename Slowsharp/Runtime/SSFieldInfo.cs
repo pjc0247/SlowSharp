@@ -29,12 +29,14 @@ namespace Slowsharp
             this.origin = SSMemberOrigin.InterpretScript;
             this.fieldType = new HybType(field.FieldType);
             this.fieldInfo = field;
+
+            this.isStatic = field.IsStatic;
         }
 
         public override HybInstance GetValue(HybInstance _this)
-            => HybInstance.Object(fieldInfo.GetValue(_this.Unwrap()));
+            => HybInstance.Object(fieldInfo.GetValue(isStatic ? null : _this.Unwrap()));
         public override void SetValue(HybInstance _this, HybInstance value)
-            => fieldInfo.SetValue(_this.Unwrap(), value);
+            => fieldInfo.SetValue(isStatic ? null : _this.Unwrap(), value);
     }
     public class SSInterpretFieldInfo : SSFieldInfo
     {
@@ -43,8 +45,10 @@ namespace Slowsharp
 
         private int fieldPtr = -1;
 
-        internal SSInterpretFieldInfo()
+        internal SSInterpretFieldInfo(Class klass)
         {
+            this.origin = SSMemberOrigin.InterpretScript;
+            this.declaringClass = klass;
         }
 
         public override HybInstance GetValue(HybInstance _this)
@@ -66,6 +70,7 @@ namespace Slowsharp
             {
                 declaringClass.runner.globals
                     .SetStaticField(declaringClass, id, value);
+                return;
             }
 
             // it's fast enough to do like this

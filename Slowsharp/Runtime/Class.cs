@@ -111,7 +111,7 @@ namespace Slowsharp
         }
         public SSFieldInfo AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
-            var fieldInfo = new SSInterpretFieldInfo()
+            var fieldInfo = new SSInterpretFieldInfo(this)
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{field.Declaration.Type}"),
