@@ -47,18 +47,40 @@ namespace Slowsharp
         public static HybInstance PrefixNot(HybInstance a)
         {
             if (a.isCompiledType)
-                return HybInstance.Object(_PrefixNot(a.innerObject));
+            {
+                if (a.GetHybType().isValueType)
+                    return a;
+            }
+
+            var plusMethod = GetUnaryPlusMethod(a);
+            if (plusMethod != null)
+                return plusMethod.target.Invoke(null, new HybInstance[] { a });
+
             throw new NotImplementedException();
         }
-        private static dynamic _PrefixNot(dynamic a) => !a;
 
         public static HybInstance PrefixMinus(HybInstance a)
         {
             if (a.isCompiledType)
-                return HybInstance.Object(_PrefixMinus(a.innerObject));
+            {
+                if (a.GetHybType().isValueType)
+                {
+                    if (a.Is<Decimal>()) return HybInstance.Decimal(-a.As<Decimal>());
+                    if (a.Is<Double>()) return HybInstance.Double(-a.As<Double>());
+                    if (a.Is<Single>()) return HybInstance.Float(-a.As<Single>());
+                    if (a.Is<Int64>()) return HybInstance.Int64(-a.As<Int64>());
+                    if (a.Is<Int32>()) return HybInstance.Int(-a.As<Int32>());
+                    if (a.Is<short>()) return HybInstance.Short(-a.As<short>());
+                    if (a.Is<sbyte>()) return HybInstance.Byte(-a.As<sbyte>());
+                }
+            }
+
+            var negationMethod = GetUnaryNegationMethod(a);
+            if (negationMethod != null)
+                return negationMethod.target.Invoke(null, new HybInstance[] { a });
+
             throw new NotImplementedException();
         }
-        private static dynamic _PrefixMinus(dynamic a) => -a;
 
         public static HybInstance PrefixPlus(HybInstance a)
         {
@@ -417,6 +439,15 @@ namespace Slowsharp
             => left.GetMethods("op_GreaterThanOrEqual").FirstOrDefault();
         private static SSMethodInfo GetLessEqualMethod(HybInstance left)
             => left.GetMethods("op_LessThanOrEqual").FirstOrDefault();
+
+        private static SSMethodInfo GetOnesComplementMethod(HybInstance left)
+            => left.GetMethods("op_OnesComplement").FirstOrDefault();
+        private static SSMethodInfo GetLogicalNotMethod(HybInstance left)
+            => left.GetMethods("op_LogicalNot").FirstOrDefault();
+        private static SSMethodInfo GetUnaryNegationMethod(HybInstance left)
+            => left.GetMethods("op_UnaryNegation").FirstOrDefault();
+        private static SSMethodInfo GetUnaryPlusMethod(HybInstance left)
+            => left.GetMethods("op_UnaryPlus").FirstOrDefault();
 
         private static SSMethodInfo GetIncMethod(HybInstance left)
             => left.GetMethods("op_Increment").FirstOrDefault();
