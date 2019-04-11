@@ -36,8 +36,9 @@ namespace Slowsharp
             }
         }
         public HybInstance parent { get; private set; }
-        
-        private Dictionary<string, HybInstance> fields = new Dictionary<string, HybInstance>();
+
+        //private Dictionary<string, HybInstance> fields = new Dictionary<string, HybInstance>();
+        internal PointableDictionary<string, HybInstance> fields = new PointableDictionary<string, HybInstance>();
 
         private HybType type;
         private object obj;
@@ -154,11 +155,13 @@ namespace Slowsharp
         private void InitializeFields()
         {
             foreach (var field in klass.GetFields()
-                .Where(x => x.isStatic == false))
+                .Where(x => x.isStatic == false)
+                .OfType<SSInterpretFieldInfo>())
             {
                 if (field.declartor == null || field.declartor.Initializer == null)
                 {
-                    fields.Add(field.id, HybInstance.Object(field.fieldType.GetDefault()));
+                    fields.Add(field.id, 
+                        HybInstance.Object(field.fieldType.GetDefault()));
                 }
                 else
                 {
@@ -422,7 +425,7 @@ namespace Slowsharp
                     if (f.accessModifier.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
 
-                    fields[id] = value;
+                    fields.Add(id, value);
                     return true;
                 }
 
@@ -485,7 +488,7 @@ namespace Slowsharp
                     var f = klass.GetField(id);
                     if (f.accessModifier.IsAcceesible(level) == false)
                         throw new SemanticViolationException($"Invalid access: {id}");
-                    value = fields[id];
+                    value = fields.Get(id);
                     return true;
                 }
 

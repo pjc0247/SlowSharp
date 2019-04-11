@@ -37,10 +37,9 @@ namespace Slowsharp
             this.runner = runner;
             this.interpretMethod = declaration;
         }
-        public Invokable(SSMethodInfo methodInfo, MethodInfo method)
+        public Invokable(MethodInfo method)
         {
             this.type = InvokeType.ReflectionInvoke;
-            this.methodInfo = methodInfo;
             this.compiledMethod = method;
         }
         public Invokable(Func<HybInstance[], HybInstance> func)

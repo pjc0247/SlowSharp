@@ -581,7 +581,7 @@ namespace Slowsharp
                 };
             });
 
-            var after = MadMath.PrefixUnary(operand, op);
+            var after = MadMath.PostfixUnary(operand, op);
 
             if (cache.isPrimitiveIncOrDec)
             {
@@ -592,7 +592,7 @@ namespace Slowsharp
                 vars.SetValue(cache.operandId, applied);
             }
 
-            return after;
+            return operand;
         }
 
         private HybInstance RunTypeof(TypeOfExpressionSyntax node)

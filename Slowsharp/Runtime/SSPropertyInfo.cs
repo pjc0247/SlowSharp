@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,6 +20,12 @@ namespace Slowsharp
         internal SSFieldInfo backingField { get; private set; }
         internal bool hasBackingField => backingField != null;
 
+        internal SSPropertyInfo(PropertyInfo property)
+        {
+            this.type = new HybType(property.PropertyType);
+            this.getMethod = property.CanRead ? new Invokable(property.GetMethod) : null;
+            this.setMethod = property.CanWrite ? new Invokable(property.SetMethod) : null;
+        }
         internal SSPropertyInfo(Class klass, Runner runner, PropertyDeclarationSyntax node)
         {
             this.property = node;
@@ -108,7 +115,7 @@ namespace Slowsharp
             if (declaringClass.HasField(id))
                 return;
 
-            backingField = new SSFieldInfo()
+            backingField = new SSInterpretFieldInfo()
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{node.Type}"),

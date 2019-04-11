@@ -48,8 +48,12 @@ namespace Slowsharp
         {
             if (a.isCompiledType)
             {
-                if (a.GetHybType().isValueType)
-                    return a;
+                if (a.Is<bool>())
+                {
+                    return a.As<bool>() ? 
+                        HybInstanceCache.False : 
+                        HybInstanceCache.True;
+                }
             }
 
             var plusMethod = GetUnaryPlusMethod(a);
@@ -143,6 +147,8 @@ namespace Slowsharp
                 if (a.Is<Single>()) return HybInstance.Float(a.As<Single>() + b.As<Single>());
                 if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() + b.As<Double>());
             }
+            else if (a.Is<String>())
+                return HybInstance.String(a.As<String>() + b.As<String>());
 
             var addMethod = GetAddMethod(a);
             if (addMethod != null)

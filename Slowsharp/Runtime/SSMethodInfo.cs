@@ -41,7 +41,7 @@ namespace Slowsharp
             this.id = methodInfo.Name;
             this.signature = MemberSignature.GetSignature(methodInfo);
             this.declaringType = new HybType(methodInfo.DeclaringType);
-            this.target = new Invokable(this, methodInfo);
+            this.target = new Invokable(methodInfo);
 
             this.returnType = new HybType(methodInfo.ReturnType);
             this.isVaArg =

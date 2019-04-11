@@ -194,7 +194,8 @@ namespace Slowsharp
             value = null;
             return false;
         }
-        public bool GetStaticPropertyOrField(string id, out HybInstance value)
+
+        public SSPropertyInfo GetProperty(string id)
         {
             if (isCompiledType)
             {
@@ -202,42 +203,90 @@ namespace Slowsharp
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (property != null)
-                {
-                    value = property.GetValue(null).Wrap();
-                    return true;
-                }
+                    return new SSPropertyInfo(property);
+            }
+            else
+            {
+                if (interpretKlass.HasProperty(id))
+                    return interpretKlass.GetProperty(id);
+                if (parent != null)
+                    return parent.GetProperty(id);
+            }
 
+            return null;
+        }
+        public SSFieldInfo GetField(string id)
+        {
+            if (isCompiledType)
+            {
                 var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (field != null)
-                {
-                    value = field.GetValue(null).Wrap();
-                    return true;
-                }
+                    return new SSCompiledFieldInfo(field);
             }
             else
             {
-                if (interpretKlass.HasStaticProperty(id))
-                {
-                    value = interpretKlass
-                        .GetProperty(id)
-                        .getMethod
-                        .Invoke(null, new HybInstance[] { });
-                    return true;
-                }
-                if (interpretKlass.HasStaticField(id))
-                {
-                    value = interpretKlass.runner.globals.GetStaticField(
-                        interpretKlass, id);
-                    return true;
-                }
+                if (interpretKlass.HasField(id))
+                    return interpretKlass.GetField(id);
+                if (parent != null)
+                    return parent.GetField(id);
+            }
+
+            return null;
+        }
+
+        private Dictionary<string, SSPropertyInfo> _Properties = null;
+        private Dictionary<string, SSFieldInfo> _Fields = null;
+        public bool GetStaticPropertyOrField(string id, out HybInstance value)
+        {
+            SSPropertyInfo property;
+            SSFieldInfo field;
+
+            if (_Properties == null) _Properties = new Dictionary<string, SSPropertyInfo>();
+            if (_Properties.ContainsKey(id))
+                property = _Properties[id];
+            else
+            {
+                property = GetProperty(id);
+                if (property != null)
+                    _Properties[id] = property;
+            }
+
+            if (property != null)
+            {
+                value = property.getMethod.Invoke(null, new HybInstance[] { });
+                return true;
+            }
+
+            if (_Fields == null) _Fields = new Dictionary<string, SSFieldInfo>();
+            if (_Fields.ContainsKey(id))
+                field = _Fields[id];
+            else
+            {
+                field = GetField(id);
+                if (field != null)
+                    _Fields[id] = field;
+            }
+
+            if (field != null)
+            {
+                value = field.GetValue(null);
+                return true;
             }
 
             value = null;
             return false;
         }
+
         public SSMethodInfo[] GetStaticMethods()
+        {
+            if (_StaticMethods == null)
+                _StaticMethods = _GetStaticMethods();
+            return _StaticMethods;
+        }
+        private SSMethodInfo[] _StaticMethods;
+        private SSMethodInfo[] _GetStaticMethods()
         {
             if (isCompiledType)
             {
@@ -266,7 +315,15 @@ namespace Slowsharp
                 .Where(x => x.id == id)
                 .ToArray();
         }
+
         public SSMethodInfo[] GetMethods()
+        {
+            if (_Methods == null)
+                _Methods = _GetMethods();
+            return _Methods;
+        }
+        private SSMethodInfo[] _Methods;
+        private SSMethodInfo[] _GetMethods()
         {
             if (isCompiledType)
             {
