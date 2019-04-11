@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Slowsharp
@@ -34,8 +35,11 @@ namespace Slowsharp
             if (op == "<") return L(a, b);
             if (op == "<=") return LE(a, b);
             if (op == "==") return Eq(a, b);
+            if (op == "!=") return Neq(a, b);
             if (op == "||") return Or(a, b);
             if (op == "&&") return And(a, b);
+            if (op == "&") return BitwiseAnd(a, b);
+            if (op == "|") return BitwiseAnd(a, b);
 
             throw new ArgumentException($"Unrecognized operator: '{op}'.");
         }
@@ -67,120 +71,356 @@ namespace Slowsharp
         public static HybInstance PostfixInc(HybInstance a)
         {
             if (a.isCompiledType)
-                return HybInstance.Object(_PrefixPlus(a.innerObject));
+            {
+                if (a.GetHybType().isValueType)
+                {
+                    if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() + 1);
+                    if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() + 1);
+                    if (a.Is<short>()) return HybInstance.Short(a.As<short>() + 1);
+                    if (a.Is<byte>()) return HybInstance.Byte(a.As<byte>() + 1);
+                }
+            }
+
+            var incMethod = GetIncMethod(a);
+            if (incMethod != null)
+                return incMethod.target.Invoke(null, new HybInstance[] { a });
+
             throw new NotImplementedException();
         }
-        private static dynamic _PostfixInc(dynamic a) => a++;
-
         public static HybInstance PostfixDec(HybInstance a)
         {
             if (a.isCompiledType)
-                return HybInstance.Object(_PostfixDec(a.innerObject));
+            {
+                if (a.GetHybType().isValueType)
+                {
+                    if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() - 1);
+                    if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() - 1);
+                    if (a.Is<short>()) return HybInstance.Short(a.As<short>() - 1);
+                    if (a.Is<byte>()) return HybInstance.Byte(a.As<byte>() - 1);
+                }
+            }
+
+            var decMethod = GetDecMethod(a);
+            if (decMethod != null)
+                return decMethod.target.Invoke(null, new HybInstance[] { a });
+
             throw new NotImplementedException();
         }
-        private static dynamic _PostfixDec(dynamic a) => a--;
 
         public static HybInstance Add(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Add(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() + b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() + b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Float(a.As<Single>() + b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() + b.As<Double>());
+            }
+
+            var addMethod = GetAddMethod(a);
+            if (addMethod != null)
+                return addMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Sub(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Sub(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() - b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() - b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Float(a.As<Single>() - b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() - b.As<Double>());
+            }
+
+            var subMethod = GetSubMethod(a);
+            if (subMethod != null)
+                return subMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Mul(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Mul(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() * b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() * b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Float(a.As<Single>() * b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() * b.As<Double>());
+            }
+
+            var mulMethod = GetMulMethod(a);
+            if (mulMethod != null)
+                return mulMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Div(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Div(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() / b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() / b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Float(a.As<Single>() / b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() / b.As<Double>());
+            }
+
+            var DivMethod = GetDivMethod(a);
+            if (DivMethod != null)
+                return DivMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
 
         public static HybInstance G(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_G(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Bool(a.As<Int32>() > b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Bool(a.As<Int64>() > b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Bool(a.As<Single>() > b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Bool(a.As<Double>() > b.As<Double>());
+            }
+
+            var greaterMethod = GetGreaterMethod(a);
+            if (greaterMethod != null)
+                return greaterMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance GE(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_GE(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Bool(a.As<Int32>() >= b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Bool(a.As<Int64>() >= b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Bool(a.As<Single>() >= b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Bool(a.As<Double>() >= b.As<Double>());
+            }
+
+            var greaterEqualMethod = GetGreaterEqualMethod(a);
+            if (greaterEqualMethod != null)
+                return greaterEqualMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance L(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_L(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Bool(a.As<Int32>() < b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Bool(a.As<Int64>() < b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Bool(a.As<Single>() < b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Bool(a.As<Double>() < b.As<Double>());
+            }
+
+            var lessMethod = GetLessMethod(a);
+            if (lessMethod != null)
+                return lessMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance LE(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_LE(a.innerObject, b.innerObject));
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                (a, b) = Promote(a, b);
+
+                if (a.Is<Int32>()) return HybInstance.Bool(a.As<Int32>() <= b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Bool(a.As<Int64>() <= b.As<Int64>());
+                if (a.Is<Single>()) return HybInstance.Bool(a.As<Single>() <= b.As<Single>());
+                if (a.Is<Double>()) return HybInstance.Bool(a.As<Double>() <= b.As<Double>());
+            }
+
+            var lessEqualMethod = GetLessEqualMethod(a);
+            if (lessEqualMethod != null)
+                return lessEqualMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Eq(HybInstance a, HybInstance b)
         {
             if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Eq(a.innerObject, b.innerObject));
+            {
+                var aType = a.GetHybType();
+                if (aType.isValueType)
+                {
+                    if (aType.isPrimitive)
+                        (a, b) = Promote(a, b);
+                    return HybInstance.Bool(a.innerObject.Equals(b.innerObject));
+                }
+                return HybInstance.Bool(a.innerObject == b.innerObject);
+            }
 
             throw new NotImplementedException();
         }
+        public static HybInstance Neq(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+            {
+                var aType = a.GetHybType();
+                if (aType.isValueType)
+                {
+                    if (aType.isPrimitive)
+                        (a, b) = Promote(a, b);
+                    return HybInstance.Bool(!a.innerObject.Equals(b.innerObject));
+                }
+                return HybInstance.Bool(a.innerObject != b.innerObject);
+            }
+
+            throw new NotImplementedException();
+        }
+
         public static HybInstance Or(HybInstance a, HybInstance b)
         {
             if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_Or(a.innerObject, b.innerObject));
+            {
+                if (a.Is<bool>() && b.Is<bool>())
+                {
+                    return a.As<bool>() || b.As<bool>() ? 
+                        HybInstanceCache.True :
+                        HybInstanceCache.False;
+                }
+            }
 
             throw new NotImplementedException();
         }
         public static HybInstance And(HybInstance a, HybInstance b)
         {
             if (a.isCompiledType && b.isCompiledType)
-                return HybInstance.Object(_And(a.innerObject, b.innerObject));
+            {
+                if (a.Is<bool>() && b.Is<bool>())
+                {
+                    return a.As<bool>() && b.As<bool>() ?
+                        HybInstanceCache.True :
+                        HybInstanceCache.False;
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+        public static HybInstance BitwiseAnd(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+            {
+                if (a.Is<bool>() && b.Is<bool>())
+                {
+                    return a.As<bool>() & b.As<bool>() ?
+                        HybInstanceCache.True :
+                        HybInstanceCache.False;
+                }
+            }
+
+            var bitwiseAndMethod = GetBitwiseAndMethod(a);
+            if (bitwiseAndMethod != null)
+                return bitwiseAndMethod.target.Invoke(null, new HybInstance[] { a, b });
+
+            throw new NotImplementedException();
+        }
+        public static HybInstance BitwiseOr(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+            {
+                if (a.Is<bool>() && b.Is<bool>())
+                {
+                    return a.As<bool>() | b.As<bool>() ?
+                        HybInstanceCache.True :
+                        HybInstanceCache.False;
+                }
+            }
+
+            var bitwiseOrMethod = GetBitwiseOrMethod(a);
+            if (bitwiseOrMethod != null)
+                return bitwiseOrMethod.target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
 
-        private static dynamic _Add(dynamic a, dynamic b ) => a + b;
-        private static dynamic _Sub(dynamic a, dynamic b)  => a - b;
-        private static dynamic _Mul(dynamic a, dynamic b) => a * b;
-        private static dynamic _Div(dynamic a, dynamic b) => a / b;
-        private static dynamic _G(dynamic a, dynamic b) => a > b;
-        private static dynamic _GE(dynamic a, dynamic b) => a >= b;
-        private static dynamic _L(dynamic a, dynamic b) => a < b;
-        private static dynamic _LE(dynamic a, dynamic b) => a <= b;
-        private static dynamic _Eq(dynamic a, dynamic b) => a == b;
-        private static dynamic _Or(dynamic a, dynamic b) => a || b;
-        private static dynamic _And(dynamic a, dynamic b) => a && b;
-
-        private static HybInstance AddInt32(HybInstance a, HybInstance b)
+        private static (HybInstance, HybInstance) Promote(HybInstance a, HybInstance b)
         {
-            Int32 ia = a.As<Int32>();
+            if (a.GetHybType() == b.GetHybType())
+                return (a, b);
 
-            if (b.Is<Int16>()) return HybInstance.Int(ia + b.As<Int32>());
-            if (b.Is<Int32>()) return HybInstance.Int(ia + b.As<Int32>());
-            if (b.Is<Int64>()) return HybInstance.Int64(ia + b.As<Int64>());
-            if (b.Is<float>()) return HybInstance.Float(ia + b.As<float>());
+            if (a.Is<double>() || b.Is<double>())
+                return (a.Cast<double>(), b.Cast<double>());
+            if (a.Is<float>() || b.Is<float>())
+                return (a.Cast<float>(), b.Cast<float>());
+            if (a.Is<Int64>() || b.Is<Int64>())
+                return (a.Cast<Int64>(), b.Cast<Int64>());
+            if (a.Is<Int32>() || b.Is<Int32>())
+                return (a.Cast<Int32>(), b.Cast<Int32>());
 
-            throw new SemanticViolationException($"");
+            return (a, b);
         }
+
+        private static SSMethodInfo GetAddMethod(HybInstance left)
+            => left.GetMethods("op_Addition").FirstOrDefault();
+        private static SSMethodInfo GetSubMethod(HybInstance left)
+            => left.GetMethods("op_Subtraction").FirstOrDefault();
+        private static SSMethodInfo GetMulMethod(HybInstance left)
+            => left.GetMethods("op_Multiply").FirstOrDefault();
+        private static SSMethodInfo GetDivMethod(HybInstance left)
+            => left.GetMethods("op_Division").FirstOrDefault();
+        private static SSMethodInfo GetModMethod(HybInstance left)
+            => left.GetMethods("op_Modulus").FirstOrDefault();
+        private static SSMethodInfo GetBitwiseOrMethod(HybInstance left)
+            => left.GetMethods("op_BitwiseOr").FirstOrDefault();
+        private static SSMethodInfo GetBitwiseAndMethod(HybInstance left)
+            => left.GetMethods("op_BitwiseAnd").FirstOrDefault();
+        private static SSMethodInfo GetXorMethod(HybInstance left)
+            => left.GetMethods("op_ExclusiveOr").FirstOrDefault();
+        private static SSMethodInfo GetEqMethod(HybInstance left)
+            => left.GetMethods("op_Equality").FirstOrDefault();
+        private static SSMethodInfo GetGreaterMethod(HybInstance left)
+            => left.GetMethods("op_GreaterThan").FirstOrDefault();
+        private static SSMethodInfo GetLessMethod(HybInstance left)
+            => left.GetMethods("op_LessThan").FirstOrDefault();
+        private static SSMethodInfo GetGreaterEqualMethod(HybInstance left)
+            => left.GetMethods("op_GreaterThanOrEqual").FirstOrDefault();
+        private static SSMethodInfo GetLessEqualMethod(HybInstance left)
+            => left.GetMethods("op_LessThanOrEqual").FirstOrDefault();
+
+        private static SSMethodInfo GetIncMethod(HybInstance left)
+            => left.GetMethods("op_Increment").FirstOrDefault();
+        private static SSMethodInfo GetDecMethod(HybInstance left)
+            => left.GetMethods("op_Decrement").FirstOrDefault();
     }
 }

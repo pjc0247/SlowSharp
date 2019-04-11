@@ -15,6 +15,14 @@ namespace Slowsharp
     {
         Space
     }
+    public class Foo
+    {
+        public int value;
+        public static Foo operator +(Foo a, Foo b)
+        {
+            return new Foo() { value = a.value + b.value };
+        }
+    }
     public class Input
     {
         public static bool GetKeyDown(KeyCode k)
@@ -152,9 +160,10 @@ Console.WriteLine(b);
 }
 
         static int Main(int n) {
-var a = 1;
-a++;
-Console.WriteLine(a);
+var foo10 = new Foo() { value = 10 };
+Console.WriteLine(foo10.value);
+var foo25 = new Foo() { value = 25 };
+return foo10 + foo25;
 
 return count;
 
@@ -215,7 +224,7 @@ class Fooo : Bar {
             });
             r.Run(root);
 
-            r.RunMain(5);
+            Console.WriteLine(r.RunMain(5));
             Console.WriteLine(Goo());
 
             tree = CSharpSyntaxTree.ParseText(hotReloadSrc);

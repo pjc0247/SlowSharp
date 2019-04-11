@@ -455,6 +455,21 @@ namespace Slowsharp
                     method.target.Invoke(inst, addArgs);
                 }
             }
+            else
+            {
+                foreach (var expr in init.Expressions)
+                {
+                    if (expr is AssignmentExpressionSyntax assign)
+                    {
+                        var id = (IdentifierNameSyntax)assign.Left;
+                        var value = RunExpression(assign.Right);
+                        if (inst.SetPropertyOrField($"{id.Identifier}", value) == false)
+                            throw new SemanticViolationException($"No such member: {id}");
+                    }
+                    else
+                        throw new SemanticViolationException("");
+                }
+            }
         }
 
         private bool IsArrayAddible(HybInstance obj)
@@ -519,22 +534,30 @@ namespace Slowsharp
         {
             var op = node.OperatorToken.Text;
             var operand = RunExpression(node.Operand);
+            var cache = optCache.GetOrCreate<PrefixUnaryExpressionSyntax, OptPrefixUnary>(node, () =>
+            {
+                return new OptPrefixUnary()
+                {
+                    operandId = (node.Operand is IdentifierNameSyntax id) ?
+                        $"{id.Identifier}" : null,
+                    isInc = op == "++",
+                    isDec = op == "--",
+                    isPrimitiveIncOrDec = 
+                        (op == "++" || op == "--") &&
+                        node.Operand is IdentifierNameSyntax &&
+                        operand.GetHybType().isPrimitive
+                };
+            });
+
             var after = MadMath.PrefixUnary(operand, op);
 
-            if (op == "++" || op == "--")
+            if (cache.isPrimitiveIncOrDec)
             {
-                if (node.Operand is IdentifierNameSyntax id)
-                {
-                    if (operand.GetHybType().isValueType)
-                    {
-                        var applied = MadMath.Op(
-                            operand,
-                            HybInstanceCache.One,
-                            op.Substring(1));
-
-                        vars.SetValue($"{id.Identifier}", applied);
-                    }
-                }
+                var applied = MadMath.Op(
+                    operand,
+                    cache.isInc ? HybInstanceCache.One : HybInstanceCache.MinusOne,
+                    op.Substring(1));
+                vars.SetValue(cache.operandId, applied);
             }
 
             return after;
@@ -543,22 +566,30 @@ namespace Slowsharp
         {
             var op = node.OperatorToken.Text;
             var operand = RunExpression(node.Operand);
-            var after = MadMath.PostfixUnary(operand, op);
-
-            if (op == "++" || op == "--")
+            var cache = optCache.GetOrCreate<PostfixUnaryExpressionSyntax, OptPostfixUnary>(node, () =>
             {
-                if (node.Operand is IdentifierNameSyntax id)
+                return new OptPostfixUnary()
                 {
-                    if (operand.GetHybType().isValueType)
-                    {
-                        var applied = MadMath.Op(
-                            operand, 
-                            HybInstanceCache.One,
-                            op.Substring(1));
+                    operandId = (node.Operand is IdentifierNameSyntax id) ?
+                        $"{id.Identifier}" : null,
+                    isInc = op == "++", 
+                    isDec = op == "--",
+                    isPrimitiveIncOrDec =
+                        (op == "++" || op == "--") &&
+                        node.Operand is IdentifierNameSyntax &&
+                        operand.GetHybType().isPrimitive
+                };
+            });
 
-                        vars.SetValue($"{id.Identifier}", applied);
-                    }
-                }
+            var after = MadMath.PrefixUnary(operand, op);
+
+            if (cache.isPrimitiveIncOrDec)
+            {
+                var applied = MadMath.Op(
+                    operand,
+                    cache.isInc ? HybInstanceCache.One : HybInstanceCache.MinusOne,
+                    op.Substring(1));
+                vars.SetValue(cache.operandId, applied);
             }
 
             return after;

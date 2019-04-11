@@ -17,11 +17,11 @@ class MyList : List<int> { }
 ");
             var myList = runner.Instantiate("MyList");
             // virtual casting
-            Assert.IsInstanceOfType(myList.Cast<List<int>>(), typeof(List<int>));
+            Assert.IsInstanceOfType(myList.Cast<List<int>>().Unwrap(), typeof(List<int>));
 
             // `(int)MyList` should be failed
             Assert.ThrowsException<InvalidCastException>(() => {
-                myList.Cast<int>();
+                myList.Cast<int>().Unwrap();
             });
         }
     }

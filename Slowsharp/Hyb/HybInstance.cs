@@ -12,6 +12,8 @@ namespace Slowsharp
 {
     public class HybInstance
     {
+        public string id { get; private set; }
+
         public bool isCompiledType => type.isCompiledType;
         public bool isVirtualDerived
         {
@@ -34,7 +36,7 @@ namespace Slowsharp
             }
         }
         public HybInstance parent { get; private set; }
-
+        
         private Dictionary<string, HybInstance> fields = new Dictionary<string, HybInstance>();
 
         private HybType type;
@@ -73,6 +75,14 @@ namespace Slowsharp
         public static HybInstance Bool(bool b)
         {
             return new HybInstance(HybType.Bool, b);
+        }
+        public static HybInstance Byte(int n)
+        {
+            return new HybInstance(HybType.Byte, n);
+        }
+        public static HybInstance Short(int n)
+        {
+            return new HybInstance(HybType.Short, n);
         }
         public static HybInstance Int(int n)
         {
@@ -154,12 +164,14 @@ namespace Slowsharp
             }
         }
 
+        internal void SetIdentifier(string id) => this.id = id;
+
         public HybType GetHybType() => type;
 
-        public T Cast<T>()
+        public HybInstance Cast<T>()
         {
             if (isCompiledType)
-                return (T)Convert.ChangeType(obj, typeof(T));
+                return HybInstance.Object((T)Convert.ChangeType(obj, typeof(T)));
             if (Is<T>())
                 return parent.Cast<T>();
             throw new InvalidCastException($"Cannot be casted to {typeof(T)}");
