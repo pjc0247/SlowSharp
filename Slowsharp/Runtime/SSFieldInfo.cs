@@ -17,7 +17,7 @@ namespace Slowsharp
         public HybType fieldType;
 
         public abstract HybInstance GetValue(HybInstance _this);
-        public abstract void SetValue(HybInstance _this, HybInstance value)
+        public abstract void SetValue(HybInstance _this, HybInstance value);
     }
 
     public class SSCompiledFieldInfo : SSFieldInfo
