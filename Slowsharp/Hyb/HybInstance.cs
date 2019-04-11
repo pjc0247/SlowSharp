@@ -46,9 +46,7 @@ namespace Slowsharp
         private Runner runner;
 
         public static HybInstance Null()
-        {
-            return new HybInstance(HybType.Object, null);
-        }
+            => new HybInstance(HybType.Object, null);
         public static HybInstance Object(object o)
         {
             if (o == null)
@@ -58,57 +56,31 @@ namespace Slowsharp
             return new HybInstance(new HybType(o.GetType()), o);
         }
         public static HybInstance ObjectArray(object[] o)
-        {
-            return new HybInstance(new HybType(typeof(object[])), o);
-        }
+            => new HybInstance(new HybType(typeof(object[])), o);
         public static HybInstance ObjectArray(HybInstance[] o)
-        {
-            return new HybInstance(new HybType(typeof(object[])), o.Unwrap());
-        }
+            => new HybInstance(new HybType(typeof(object[])), o.Unwrap());
         public static HybInstance Char(char c)
-        {
-            return new HybInstance(HybType.Char, c);
-        }
+            => new HybInstance(HybType.Char, c);
         public static HybInstance String(string str)
-        {
-            return new HybInstance(HybType.String, str);
-        }
+            => new HybInstance(HybType.String, str);
         public static HybInstance Bool(bool b)
-        {
-            return new HybInstance(HybType.Bool, b);
-        }
+            => new HybInstance(HybType.Bool, b);
         public static HybInstance Byte(int n)
-        {
-            return new HybInstance(HybType.Byte, n);
-        }
+            => new HybInstance(HybType.Byte, n);
         public static HybInstance Short(int n)
-        {
-            return new HybInstance(HybType.Short, n);
-        }
+            => new HybInstance(HybType.Short, n);
         public static HybInstance Int(int n)
-        {
-            return new HybInstance(HybType.Int32, n);
-        }
+            => new HybInstance(HybType.Int32, n);
         public static HybInstance Int64(Int64 n)
-        {
-            return new HybInstance(HybType.Int64, n);
-        }
+            => new HybInstance(HybType.Int64, n);
         public static HybInstance Float(float f)
-        {
-            return new HybInstance(HybType.Float, f);
-        }
+            => new HybInstance(HybType.Float, f);
         public static HybInstance Double(double f)
-        {
-            return new HybInstance(HybType.Double, f);
-        }
+            => new HybInstance(HybType.Double, f);
         public static HybInstance Decimal(decimal d)
-        {
-            return new HybInstance(HybType.Decimal, d);
-        }
+            => new HybInstance(HybType.Decimal, d);
         public static HybInstance Type(Type type)
-        {
-            return new HybInstance(HybType.Type, type);
-        }
+            => new HybInstance(HybType.Type, type);
 
         internal HybInstance(HybType type, object obj)
         {

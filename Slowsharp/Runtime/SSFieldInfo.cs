@@ -17,6 +17,7 @@ namespace Slowsharp
         public HybType fieldType;
 
         public abstract HybInstance GetValue(HybInstance _this);
+        public abstract void SetValue(HybInstance _this, HybInstance value)
     }
 
     public class SSCompiledFieldInfo : SSFieldInfo
@@ -32,6 +33,8 @@ namespace Slowsharp
 
         public override HybInstance GetValue(HybInstance _this)
             => HybInstance.Object(fieldInfo.GetValue(_this.Unwrap()));
+        public override void SetValue(HybInstance _this, HybInstance value)
+            => fieldInfo.SetValue(_this.Unwrap(), value);
     }
     public class SSInterpretFieldInfo : SSFieldInfo
     {
@@ -56,6 +59,19 @@ namespace Slowsharp
             if (fieldPtr == -1)
                 fieldPtr = _this.fields.GetPtr(id);
             return _this.fields.GetByPtr(fieldPtr);
+        }
+        public override void SetValue(HybInstance _this, HybInstance value)
+        {
+            if (isStatic)
+            {
+                declaringClass.runner.globals
+                    .SetStaticField(declaringClass, id, value);
+            }
+
+            // it's fast enough to do like this
+            if (fieldPtr == -1)
+                fieldPtr = _this.fields.GetPtr(id);
+            _this.fields.SetByPtr(fieldPtr, value);
         }
     }
 }

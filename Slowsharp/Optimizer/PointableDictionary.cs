@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
+    /// <summary>
+    /// Optimized dictionary which can retrive ptr value as integer,
+    /// Ptr will be used to get or set value without searching
+    /// </summary>
     internal class PointableDictionary<TKey, TValue> // : IDictionary<TKey, TValue>
     {
         private Dictionary<TKey, int> keys = new Dictionary<TKey, int>();
@@ -31,6 +35,11 @@ namespace Slowsharp
                 return nextPtr++;
             }
         }
+
+        /// <summary>
+        /// Gets value by key.
+        /// Cost should be same with Dictionary`2
+        /// </summary>
         public TValue Get(TKey key)
         {
             int ptr = 0;
@@ -48,8 +57,17 @@ namespace Slowsharp
         public bool ContainsKey(TKey key)
             => GetPtr(key) != -1;
 
+        /// <summary>
+        /// Gets value by ptr.
+        /// Cost should be O(1)
+        /// </summary>
         public TValue GetByPtr(int ptr)
             => values[ptr];
+
+        /// <summary>
+        /// Sets value by ptr.
+        /// Cost should be O(1)
+        /// </summary>
         public void SetByPtr(int ptr, TValue value)
             => values[ptr] = value;
     }

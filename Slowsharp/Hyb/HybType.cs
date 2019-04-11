@@ -151,51 +151,26 @@ namespace Slowsharp
             return inst;
         }
 
-        public bool SetStaticPropertyOrField(string id, HybInstance value)
-        {
-            if (isCompiledType)
-            {
-                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
-                    .Where(x => x.Name == id)
-                    .FirstOrDefault();
-                if (property != null)
-                {
-                    property.SetValue(null, value.Unwrap());
-                    return true;
-                }
-
-                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
-                    .Where(x => x.Name == id)
-                    .FirstOrDefault();
-                if (field != null)
-                {
-                    field.SetValue(null, value.Unwrap());
-                    return true;
-                }
-            }
-            else
-            {
-                if (interpretKlass.HasStaticProperty(id))
-                {
-                    value = interpretKlass
-                        .GetProperty(id)
-                        .setMethod
-                        .Invoke(null, new HybInstance[] { value });
-                    return true;
-                }
-                if (interpretKlass.HasStaticField(id))
-                {
-                    interpretKlass.runner.globals.SetStaticField(
-                        interpretKlass, id, value);
-                    return true;
-                }
-            }
-
-            value = null;
-            return false;
-        }
+        
 
         public SSPropertyInfo GetProperty(string id)
+        {
+            SSPropertyInfo property = null;
+
+            if (_Properties == null) _Properties = new Dictionary<string, SSPropertyInfo>();
+            if (_Properties.ContainsKey(id))
+                property = _Properties[id];
+            else
+            {
+                property = _GetProperty(id);
+                if (property != null)
+                    _Properties[id] = property;
+            }
+
+            return property;
+        }
+        private Dictionary<string, SSPropertyInfo> _Properties = null;
+        private SSPropertyInfo _GetProperty(string id)
         {
             if (isCompiledType)
             {
@@ -215,7 +190,25 @@ namespace Slowsharp
 
             return null;
         }
+
         public SSFieldInfo GetField(string id)
+        {
+            SSFieldInfo field = null;
+
+            if (_Fields == null) _Fields = new Dictionary<string, SSFieldInfo>();
+            if (_Fields.ContainsKey(id))
+                field = _Fields[id];
+            else
+            {
+                field = _GetField(id);
+                if (field != null)
+                    _Fields[id] = field;
+            }
+
+            return field;
+        }
+        private Dictionary<string, SSFieldInfo> _Fields = null;
+        private SSFieldInfo _GetField(string id)
         {
             if (isCompiledType)
             {
@@ -236,39 +229,34 @@ namespace Slowsharp
             return null;
         }
 
-        private Dictionary<string, SSPropertyInfo> _Properties = null;
-        private Dictionary<string, SSFieldInfo> _Fields = null;
-        public bool GetStaticPropertyOrField(string id, out HybInstance value)
+        public bool SetStaticPropertyOrField(string id, HybInstance value)
         {
-            SSPropertyInfo property;
-            SSFieldInfo field;
-
-            if (_Properties == null) _Properties = new Dictionary<string, SSPropertyInfo>();
-            if (_Properties.ContainsKey(id))
-                property = _Properties[id];
-            else
+            SSPropertyInfo property = GetProperty(id);
+            if (property != null)
             {
-                property = GetProperty(id);
-                if (property != null)
-                    _Properties[id] = property;
+                property.setMethod.Invoke(null, new HybInstance[] { value });
+                return true;
             }
 
+            SSFieldInfo field = GetField(id);
+            if (field != null)
+            {
+                field.SetValue(null, value);
+                return true;
+            }
+
+            return false;
+        }
+        public bool GetStaticPropertyOrField(string id, out HybInstance value)
+        {
+            SSPropertyInfo property = GetProperty(id);
             if (property != null)
             {
                 value = property.getMethod.Invoke(null, new HybInstance[] { });
                 return true;
             }
 
-            if (_Fields == null) _Fields = new Dictionary<string, SSFieldInfo>();
-            if (_Fields.ContainsKey(id))
-                field = _Fields[id];
-            else
-            {
-                field = GetField(id);
-                if (field != null)
-                    _Fields[id] = field;
-            }
-
+            SSFieldInfo field = GetField(id);
             if (field != null)
             {
                 value = field.GetValue(null);
