@@ -66,5 +66,8 @@ namespace Slowsharp
 
             throw new NotImplementedException();
         }
+
+        public HybInstance Invoke(HybInstance _this, params HybInstance[] args)
+            => target.Invoke(_this, args);
     }
 }

@@ -71,7 +71,7 @@ namespace Slowsharp
             }
         }
 
-        private void InitializeStaticProperty(SSPropertyInfo info)
+        private void InitializeStaticProperty(SSInterpretPropertyInfo info)
         {
             if (info.hasBackingField == false)
                 return;

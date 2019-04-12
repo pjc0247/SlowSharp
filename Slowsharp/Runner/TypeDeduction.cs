@@ -12,19 +12,36 @@ namespace Slowsharp
     {
         public static HybType GetReturnType(TypeResolver resolver, CSharpSyntaxNode node)
         {
-            foreach (var child in node.ChildNodes())
+            var candidates = new List<HybType>();
+
+            // Collect
+            foreach (var child in node.ChildNodes()
+                .OfType<ReturnStatementSyntax>())
             {
-                Console.WriteLine(child);
+                var type = GetType(resolver, child.Expression);
+                candidates.Add(type);
             }
-            return null;
+
+            // Deduct
+            if (candidates.Count == 0)
+                return HybTypeCache.Void;
+
+            var finalCandidate = candidates[0];
+            foreach (var candidate in candidates)
+            {
+                if (candidate.isCompiledType == false)
+                    finalCandidate = HybTypeCache.Object;
+            }
+
+            return finalCandidate;
         } 
 
-        public static HybType GetType(TypeResolver resolver, CSharpSyntaxNode node)
+        public static HybType GetType(TypeResolver resolver, ExpressionSyntax node)
         {
             if (node is LiteralExpressionSyntax lit)
                 return GetTypeLiteral(lit);
 
-            throw new ArgumentException($"Unknown type: {node}");
+            return null;
         }
         private static HybType GetTypeLiteral(LiteralExpressionSyntax node)
         {
@@ -45,7 +62,7 @@ namespace Slowsharp
         }
         private static HybType GetTypeInvocation(InvocationExpressionSyntax node)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

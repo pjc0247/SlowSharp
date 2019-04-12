@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class MadMath
+    internal static class MadMath
     {
         public static HybInstance PrefixUnary(HybInstance a, string op)
         {

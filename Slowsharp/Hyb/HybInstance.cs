@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    public class HybInstance
+    public sealed class HybInstance
     {
         public string id { get; private set; }
 
@@ -112,7 +112,8 @@ namespace Slowsharp
         private void InitializeProperties()
         {
             foreach (var property in klass.GetProperties()
-                .Where(x => x.isStatic == false))
+                .Where(x => x.isStatic == false)
+                .OfType<SSInterpretPropertyInfo>())
             {
                 if (property.property.Initializer != null)
                 {

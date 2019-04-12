@@ -95,13 +95,12 @@ namespace Slowsharp
                 accessModifier = AccessModifierParser.Parse(method.Modifiers)
             });
         }
-        public SSPropertyInfo AddProperty(string id, PropertyDeclarationSyntax property)
+        public SSInterpretPropertyInfo AddProperty(string id, PropertyDeclarationSyntax property)
         {
-            var propertyInfo = new SSPropertyInfo(this, runner, property)
+            var propertyInfo = new SSInterpretPropertyInfo(this, runner, property)
             {
                 id = id,
                 isStatic = property.Modifiers.IsStatic(),
-                property = property,
                 declaringClass = this,
 
                 accessModifier = AccessModifierParser.Parse(property.Modifiers)

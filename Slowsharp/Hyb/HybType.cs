@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    public class HybType
+    public sealed class HybType
     {
         public static HybType Void => HybTypeCache.Void;
         public static HybType Object => HybTypeCache.Object;
@@ -178,7 +178,7 @@ namespace Slowsharp
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (property != null)
-                    return new SSPropertyInfo(property);
+                    return new SSCompiledPropertyInfo(property);
             }
             else
             {

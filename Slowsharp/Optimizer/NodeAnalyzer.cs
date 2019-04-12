@@ -12,7 +12,7 @@ namespace Slowsharp
 {
     internal class NodeAnalyzer
     {
-        public bool IsStaticExpression(ExpressionSyntax node)
+        public static bool IsStaticExpression(ExpressionSyntax node)
         {
             if (node is LiteralExpressionSyntax)
                 return true;

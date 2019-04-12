@@ -9,24 +9,34 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    public class SSPropertyInfo : SSMemberInfo
+    public abstract class SSPropertyInfo : SSMemberInfo
     {
-        public PropertyDeclarationSyntax property;
-        public HybType type { get; }
+        public HybType type { get; protected set; }
 
-        public Invokable setMethod { get; private set; }
-        public Invokable getMethod { get; private set; }
+        public Invokable setMethod { get; protected set; }
+        public Invokable getMethod { get; protected set; }
 
-        internal SSFieldInfo backingField { get; private set; }
-        internal bool hasBackingField => backingField != null;
+        //public abstract HybInstance GetValue(HybInstance _this);
+        //public abstract HybInstance SetValue(HybInstance _this, HybInstance value);
+    }
 
-        internal SSPropertyInfo(PropertyInfo property)
+    public class SSCompiledPropertyInfo : SSPropertyInfo
+    {
+        internal SSCompiledPropertyInfo(PropertyInfo property)
         {
             this.type = new HybType(property.PropertyType);
             this.getMethod = property.CanRead ? new Invokable(property.GetMethod) : null;
             this.setMethod = property.CanWrite ? new Invokable(property.SetMethod) : null;
         }
-        internal SSPropertyInfo(Class klass, Runner runner, PropertyDeclarationSyntax node)
+    }
+    public class SSInterpretPropertyInfo : SSPropertyInfo
+    {
+        public PropertyDeclarationSyntax property { get; }
+
+        internal SSFieldInfo backingField { get; private set; }
+        internal bool hasBackingField => backingField != null;
+
+        internal SSInterpretPropertyInfo(Class klass, Runner runner, PropertyDeclarationSyntax node)
         {
             this.property = node;
             this.declaringClass = klass;
