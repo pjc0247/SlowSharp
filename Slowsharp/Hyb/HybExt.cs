@@ -70,8 +70,15 @@ namespace Slowsharp
                 if (cType.IsGenericType &&
                     gs.Length == cType.GetGenericArguments().Length)
                 {
-                    _this = _this.GetGenericTypeDefinition()
-                        .MakeGenericType(cType.GetGenericArguments());
+                    try
+                    {
+                        _this = _this.GetGenericTypeDefinition()
+                            .MakeGenericType(cType.GetGenericArguments());
+                    }
+                    catch (ArgumentException e)
+                    {
+                        return false;
+                    }
 
                     genericBound = cType.GetGenericArguments();
                 }
