@@ -149,11 +149,25 @@ namespace Slowsharp
         }
         private HybInstance RunParenthesizedLambda(ParenthesizedLambdaExpressionSyntax node)
         {
-            return new HybInstance(new HybType(typeof(Action)), new Action(() =>
-            {
+            var cvt = typeof(Runner)
+                .GetMethod(nameof(Convert1))
+                .MakeGenericMethod(typeof(int), typeof(bool));
+
+            var body = new Func<object, object>((x1) => {
                 Run(node.Body);
                 halt = HaltType.None;
-            }));
+
+                return ret.Unwrap();
+            });
+            var cvted = cvt.Invoke(null, new object[] { body });
+
+            return new HybInstance(new HybType(cvted.GetType()), cvted);
+        }
+
+        public static Func<T1, R> Convert1<T1, R>(Func<object, object> myActionT)
+        {
+            if (myActionT == null) return null;
+            else return new Func<T1, R>(o => (R)myActionT((T1)o));
         }
 
         private HybInstance RunCast(CastExpressionSyntax node)

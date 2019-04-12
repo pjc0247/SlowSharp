@@ -21,6 +21,7 @@ namespace Slowsharp
                 {
                     args = originalArgs;
 
+                    var genericBound = new Dictionary<string, Type>();
                     var genericArgs = new List<HybType>(implicitGenercArgs);
                     var method = member.target.compiledMethod;
                     var ps = method.GetParameters();
@@ -56,14 +57,13 @@ namespace Slowsharp
                             continue;
                         }
 
-                        Type[] genericBound = null;
                         var argType = args[i].GetHybType();
-                        if (!p.IsAssignableFromEx(argType, out genericBound))
+                        if (!p.IsAssignableFromEx(argType, genericBound))
                         {
                             // Second change,
                             // Check whether parent can be assignable
                             if (args[i].isVirtualDerived &&
-                                p.IsAssignableFromEx(args[i].parent.GetHybType(), out genericBound))
+                                p.IsAssignableFromEx(args[i].parent.GetHybType(), genericBound))
                             {
                                 args[i] = args[i].parent;
                             }
@@ -76,6 +76,7 @@ namespace Slowsharp
 
                         if (p.IsGenericType || p.IsGenericTypeDefinition)
                         {
+                            /*
                             if (argType.isCompiledType)
                             {
                                 genericArgs.AddRange(
@@ -83,16 +84,23 @@ namespace Slowsharp
                             }
                             else
                                 genericArgs.Add(new HybType(typeof(HybInstance)));
+                                */
                         }
                     }
                     if (match == false)
                         continue;
 
-                    var methodGenericArgs = member.GetGenericArgumentCount();
-                    if (methodGenericArgs > 0)
+                    var methodGenericArgs = member.GetGenericArgumentsFromDefinition();
+                    if (methodGenericArgs.Length > 0)
                     {
-                        if (genericArgs.Count != methodGenericArgs)
-                            throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
+                        foreach (var arg in methodGenericArgs)
+                        {
+                            if (genericBound.ContainsKey(arg.Name) == false)
+                                throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
+
+                            genericArgs.Add(new HybType(genericBound[arg.Name]));
+                        }
+
                         return member.MakeGenericMethod(genericArgs.ToArray());
                     }
                     return member;

@@ -49,13 +49,11 @@ namespace Slowsharp
 
         public static bool IsAssignableFrom(this Type _this, HybType type)
         {
-            return IsAssignableFromEx(_this, type, out _);
+            return IsAssignableFromEx(_this, type, null);
         }
         public static bool IsAssignableFromEx(
-            this Type _this, HybType type, out Type[] genericBound)
+            this Type _this, HybType type, Dictionary<string, Type> genericBound)
         {
-            genericBound = null;
-
             if (_this == typeof(object))
                 return true;
             if (type.isCompiledType == false)
@@ -64,35 +62,59 @@ namespace Slowsharp
             var cType = type.compiledType;
             if (_this.IsGenericType)
             {
-                genericBound = new Type[] { cType };
                 var gs = _this.GetGenericArguments();
-
+                
                 if (cType.IsGenericType &&
                     gs.Length == cType.GetGenericArguments().Length)
                 {
                     try
                     {
-                        _this = _this.GetGenericTypeDefinition()
-                            .MakeGenericType(cType.GetGenericArguments());
+                        var genericDefinition = _this.GetGenericTypeDefinition();
+                        var cTypeGenericArgs = cType.GetGenericArguments();
+
+                        if (genericBound != null)
+                        {
+                            var thisGenericArgs = _this.GetGenericArguments();
+                            for (int i = 0; i < thisGenericArgs.Length; i++)
+                                genericBound[thisGenericArgs[i].Name] = cTypeGenericArgs[i];
+                        }
+
+                        _this = genericDefinition
+                            .MakeGenericType(cTypeGenericArgs);
                     }
                     catch (ArgumentException e)
                     {
                         return false;
                     }
-
-                    genericBound = cType.GetGenericArguments();
                 }
                 else if (gs.Length == 1)
                 {
+                    var firstGenericArg = _this.GetGenericArguments().First();
                     _this = _this.GetGenericTypeDefinition();
+                    Type[] genericArgs = new Type[] { cType };
 
                     if (_this == typeof(IEnumerable<>))
                     {
                         if (cType.IsArray)
-                            genericBound = new Type[] { cType.GetElementType() };
-                    }
+                        {
+                            var elemType = cType.GetElementType();
 
-                    _this = _this.MakeGenericType(genericBound);
+                            genericArgs = new Type[] { elemType };
+                            if (genericBound != null)
+                                genericBound[firstGenericArg.Name] = elemType;
+                        }
+                    }
+                    else if (genericBound != null)
+                        genericBound[firstGenericArg.Name] = cType;
+
+                    try
+                    {
+                        _this = _this.MakeGenericType(genericArgs);
+                    }
+                    catch (ArgumentException e)
+                    {
+                        return false;
+                    }
                 }
             }
 

@@ -49,6 +49,19 @@ namespace Slowsharp
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
         }
 
+        public Type[] GetGenericArgumentsFromDefinition()
+        {
+            if (target.isCompiled)
+            {
+                if (target.compiledMethod.IsGenericMethod)
+                {
+                    return target.compiledMethod
+                        .GetGenericMethodDefinition()
+                        .GetGenericArguments();
+                }
+            }
+            return new Type[] { };
+        }
         public int GetGenericArgumentCount()
         {
             if (target.isCompiled)

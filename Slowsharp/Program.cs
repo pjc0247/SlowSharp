@@ -160,10 +160,9 @@ Console.WriteLine(b);
 }
 
         static int Main(int n) {
-var foo10 = new Foo() { value = 10 };
-Console.WriteLine(foo10.value);
-var foo25 = new Foo() { value = 25 };
-return foo10 + foo25;
+var a = new List<int>() { 1,2,3,4 };
+
+Console.Log(a.Any((x) => { return x == 2; }));
 
 return count;
 
@@ -245,6 +244,15 @@ class Fooo : Bar {
             Console.WriteLine(bar.transform.position.x);
 
             //Console.WriteLine(r.Instantiate("Fooo").Invoke("Foo", 1));
+
+            var a = new List<int>() { };
+            a.Any();
+            Any(a, (int x) => true);
+        }
+
+        private static void Any<T1, T2>(IEnumerable<T1> f, Func<T2, bool> ff)
+        {
+            
         }
 
         private static void Dump(SyntaxNode syntax, int depth = 0)
