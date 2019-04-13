@@ -27,13 +27,15 @@ namespace Slowsharp
             if (hasReturn)
             {
                 converter = typeof(Runner)
-                    .GetMethods()
+                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                     .Where(x => x.Name == nameof(ConvertF))
                     .Where(x => x.GetGenericArguments().Length == ps.Count)
                     .First();
 
                 var genericArgs = new Type[ps.Count + 1];
                 for (int i = 0; i < ps.Count; i++) {
+                    if (ps[i].Type == null)
+                        throw new SemanticViolationException("Please provide a implicit type to all lambda parameters, this function is partialy implemented.");
                     genericArgs[i] = resolver
                         .GetType($"{ps[i].Type}")
                         .Unwrap();
