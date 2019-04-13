@@ -19,7 +19,8 @@ namespace Slowsharp
                 .OfType<ReturnStatementSyntax>())
             {
                 var type = GetType(resolver, child.Expression);
-                candidates.Add(type);
+                if (type != null)
+                    candidates.Add(type);
             }
 
             // Deduct
@@ -40,6 +41,18 @@ namespace Slowsharp
         {
             if (node is LiteralExpressionSyntax lit)
                 return GetTypeLiteral(lit);
+            else if (node is BinaryExpressionSyntax bin)
+                return GetTypeBinaryOperation(bin);
+
+            return null;
+        }
+        private static HybType GetTypeBinaryOperation(BinaryExpressionSyntax node)
+        {
+            var op = node.OperatorToken.Text;
+            if (op == "==" || op == "!=" ||
+                op == ">"  || op == ">=" ||
+                op == "<"  || op == "<=")
+                return HybTypeCache.Bool;
 
             return null;
         }

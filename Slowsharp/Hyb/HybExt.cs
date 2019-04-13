@@ -14,6 +14,12 @@ namespace Slowsharp
                 return _this.innerObject;
             return _this;
         }
+        public static Type Unwrap(this HybType _this)
+        {
+            if (_this.isCompiledType)
+                return _this.compiledType;
+            return typeof(HybInstance);
+        }
         public static Type[] Unwrap(this HybType[] _this)
         {
             var objs = new Type[_this.Length];
