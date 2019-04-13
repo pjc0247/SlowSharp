@@ -29,7 +29,7 @@ namespace Slowsharp
                 converter = typeof(Runner)
                     .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                     .Where(x => x.Name == nameof(ConvertF))
-                    .Where(x => x.GetGenericArguments().Length == ps.Count)
+                    .Where(x => x.GetGenericArguments().Length == ps.Count + 1)
                     .First();
 
                 var genericArgs = new Type[ps.Count + 1];

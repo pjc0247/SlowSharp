@@ -162,7 +162,7 @@ Console.WriteLine(b);
         static int Main(int n) {
 var a = new List<int>() { 1,2,3,4 };
 
-Console.WriteLine(a.Any((int x) => { return x == 45; }));
+Console.WriteLine(a.Count((int x) => { return x == 45; }));
 
 return count;
 
