@@ -99,6 +99,24 @@ namespace Slowsharp
             // `Action`
             else
             {
+                converter = typeof(Runner)
+                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                    .Where(x => x.Name == nameof(ConvertA))
+                    .Where(x => x.GetGenericArguments().Length == ps.Count)
+                    .First();
+
+                var genericArgs = new Type[ps.Count];
+                for (int i = 0; i < ps.Count; i++)
+                {
+                    if (ps[i].Type == null)
+                        throw new SemanticViolationException("Please provide a explicit type to all lambda parameters, this function is partialy implemented.");
+                    genericArgs[i] = resolver
+                        .GetType($"{ps[i].Type}")
+                        .Unwrap();
+                }
+                converter = converter
+                    .MakeGenericMethod(genericArgs);
+
                 if (ps.Count == 0)
                 {
                     body = new Action(() => {
