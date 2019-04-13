@@ -35,7 +35,7 @@ namespace Slowsharp
                 var genericArgs = new Type[ps.Count + 1];
                 for (int i = 0; i < ps.Count; i++) {
                     if (ps[i].Type == null)
-                        throw new SemanticViolationException("Please provide a implicit type to all lambda parameters, this function is partialy implemented.");
+                        throw new SemanticViolationException("Please provide a explicit type to all lambda parameters, this function is partialy implemented.");
                     genericArgs[i] = resolver
                         .GetType($"{ps[i].Type}")
                         .Unwrap();
