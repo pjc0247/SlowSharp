@@ -37,6 +37,11 @@ namespace Slowsharp
                 return 0;
             return id.Count(x => x == ',') + 1;
         }
+
+        /// <summary>
+        /// Retrives a pure name which does not contains 
+        /// generic or array symbols.
+        /// </summary>
         private string GetPureName(string id)
         {
             if (id.Contains("<"))
