@@ -95,6 +95,9 @@ namespace Slowsharp
 
         public HybType MakeArrayType(int rank)
         {
+            if (rank < 1)
+                throw new ArgumentException(nameof(rank));
+
             if (isCompiledType)
             {
                 if (rank == 1)
@@ -105,6 +108,9 @@ namespace Slowsharp
         }
         public HybType MakeGenericType(HybType[] genericArgs)
         {
+            if (genericArgs == null)
+                throw new ArgumentNullException(nameof(genericArgs));
+
             if (isCompiledType)
             {
                 return new HybType(compiledType.MakeGenericType(genericArgs.Unwrap()));
@@ -139,7 +145,7 @@ namespace Slowsharp
              object parentObject = null)
         {
             var inst = new HybInstance(runner, this, interpretKlass, parentObject);
-            var ctors = inst.GetMethods("$_ctor");
+            var ctors = GetMethods("$_ctor");
 
             if (ctors.Length > 0)
             {
@@ -150,8 +156,6 @@ namespace Slowsharp
 
             return inst;
         }
-
-        
 
         public SSPropertyInfo GetProperty(string id)
         {
@@ -267,6 +271,12 @@ namespace Slowsharp
             return false;
         }
 
+        public SSMethodInfo[] GetStaticMethods(string id)
+        {
+            return GetStaticMethods()
+                .Where(x => x.id == id)
+                .ToArray();
+        }
         public SSMethodInfo[] GetStaticMethods()
         {
             if (_StaticMethods == null)
@@ -297,13 +307,12 @@ namespace Slowsharp
             }
         }
 
-        public SSMethodInfo[] GetStaticMethods(string id)
+        public SSMethodInfo[] GetMethods(string id)
         {
-            return GetStaticMethods()
+            return GetMethods()
                 .Where(x => x.id == id)
                 .ToArray();
         }
-
         public SSMethodInfo[] GetMethods()
         {
             if (_Methods == null)

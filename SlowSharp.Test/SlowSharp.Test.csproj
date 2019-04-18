@@ -59,6 +59,8 @@
     <Compile Include="Hyb\TypeGetMember.cs" />
     <Compile Include="MinOpt\AndOr.cs" />
     <Compile Include="Snippet\Fibo.cs" />
+    <Compile Include="Snippet\MergeSort.cs" />
+    <Compile Include="Snippet\QuickSort.cs" />
     <Compile Include="Syntax\Class\Property.cs" />
     <Compile Include="Syntax\Class\RefOrOut.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />

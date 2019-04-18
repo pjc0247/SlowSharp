@@ -559,7 +559,7 @@ namespace Slowsharp
             {
                 var applied = MadMath.Op(
                     operand,
-                    cache.isInc ? HybInstanceCache.One : HybInstanceCache.MinusOne,
+                    HybInstanceCache.One,
                     op.Substring(1));
                 vars.SetValue(cache.operandId, applied);
             }
@@ -591,7 +591,7 @@ namespace Slowsharp
             {
                 var applied = MadMath.Op(
                     operand,
-                    cache.isInc ? HybInstanceCache.One : HybInstanceCache.MinusOne,
+                    HybInstanceCache.One,
                     op.Substring(1));
                 vars.SetValue(cache.operandId, applied);
             }

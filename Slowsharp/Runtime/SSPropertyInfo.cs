@@ -24,7 +24,7 @@ namespace Slowsharp
     {
         internal SSCompiledPropertyInfo(PropertyInfo property)
         {
-            this.type = new HybType(property.PropertyType);
+            this.type = HybTypeCache.GetHybType(property.PropertyType);
             this.getMethod = property.CanRead ? new Invokable(property.GetMethod) : null;
             this.setMethod = property.CanWrite ? new Invokable(property.SetMethod) : null;
         }

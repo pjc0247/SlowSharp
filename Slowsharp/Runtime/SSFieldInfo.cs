@@ -27,7 +27,7 @@ namespace Slowsharp
         internal SSCompiledFieldInfo(FieldInfo field)
         {
             this.origin = SSMemberOrigin.InterpretScript;
-            this.fieldType = new HybType(field.FieldType);
+            this.fieldType = HybTypeCache.GetHybType(field.FieldType);
             this.fieldInfo = field;
 
             this.isStatic = field.IsStatic;

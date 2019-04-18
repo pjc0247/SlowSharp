@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    class HybTypeCache
+    internal class HybTypeCache
     {
         public static readonly HybType Void = new HybType(typeof(void));
         public static readonly HybType Object = new HybType(typeof(object));
@@ -28,9 +29,27 @@ namespace Slowsharp
         public static readonly HybType Decimal = new HybType(typeof(decimal));
         public static readonly HybType Type = new HybType(typeof(Type));
 
+        private static ThreadLocal<Dictionary<Type, HybType>> compiledTypes = new ThreadLocal<Dictionary<Type, HybType>>(() =>
+        {
+            return new Dictionary<Type, HybType>();
+        });
+
         static HybTypeCache()
         {
 
+        }
+
+        public static HybType GetHybType(Type type)
+        {
+            var cache = compiledTypes.Value;
+            HybType result = null;
+
+            if (cache.TryGetValue(type, out result))
+                return result;
+
+            result = new HybType(type);
+            cache[type] = result;
+            return result;
         }
     }
 }

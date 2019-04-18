@@ -24,6 +24,7 @@ namespace Slowsharp
 
             node.Left
                 .ShouldBe<MemberAccessExpressionSyntax>()
+                .ShouldBe<ElementAccessExpressionSyntax>()
                 .ShouldBe<ImplicitElementAccessSyntax>()
                 .ShouldBe<IdentifierNameSyntax>()
                 .ThrowIfNot();
