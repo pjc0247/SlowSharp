@@ -376,8 +376,6 @@ namespace Slowsharp
 
         private HybInstance RunObjectCreation(ObjectCreationExpressionSyntax node)
         {
-            Console.WriteLine("CreateObject");
-
             HybType type = null;
 
             var args = new HybInstance[node.ArgumentList.Arguments.Count];
@@ -485,8 +483,8 @@ namespace Slowsharp
         private bool IsDictionaryAddible(HybInstance obj, InitializerExpressionSyntax init)
         {
             if (init.Expressions.Count > 0 &&
-                (init.Expressions[0] is AssignmentExpressionSyntax ||
-                 init.Expressions[0] is InitializerExpressionSyntax))
+               (init.Expressions[0] is AssignmentExpressionSyntax ||
+                init.Expressions[0] is InitializerExpressionSyntax))
             {
                 if (obj.GetSetIndexerMethod() != null)
                     return true;
@@ -496,8 +494,7 @@ namespace Slowsharp
 
         private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)
         {
-            var typeId = $"{node.Type.ElementType}";
-            var rtAry = resolver.GetType(typeId);
+            var rtAry = resolver.GetType($"{node.Type.ElementType}");
 
             Array ary = null;
             Type elemType;

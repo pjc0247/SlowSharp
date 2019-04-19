@@ -152,7 +152,7 @@ static int bb = 1;
 static int Foo() { return 5; }
 static int Foo(int n) { return 15; }
 
-private static int Booo() => 5;
+public static int Booo(int n = 5) => 5;
 
 static void Bbb(params object[] obj) {
 foreach (var b in obj)
@@ -160,9 +160,7 @@ Console.WriteLine(b);
 }
 
         static int Main(int n) {
-var a = new List<int>() { 1,2,3,4 };
-
-Console.WriteLine(a.Count((int x) => { return x == 45; }));
+Booo();
 
 return count;
 
