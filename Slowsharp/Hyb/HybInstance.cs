@@ -118,10 +118,8 @@ namespace Slowsharp
                 if (property.property.Initializer != null)
                 {
                     runner.BindThis(this);
-                    property.setMethod
-                        .Invoke(this, new HybInstance[] {
-                            runner.RunExpression(property.property.Initializer.Value)
-                        });
+                    property.backingField.SetValue(this,
+                        runner.RunExpression(property.property.Initializer.Value));
                 }
             }
         }
