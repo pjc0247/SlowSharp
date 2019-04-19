@@ -114,20 +114,24 @@ namespace Slowsharp
                         continue;
 
                     var match = true;
-                    var count = 0;
-                    foreach (var p in ps)
+                    for (int i = 0; i < ps.Count; i++)
                     {
+                        var p = ps[i];
                         var paramType = resolver.GetType($"{p.Type}");
 
                         if (p.Modifiers.IsParams())
                             break;
-                        if (args.Length <= count)
+                        if (args.Length <= i)
                         {
-                            match = false;
-                            break;
+                            if (p.Default == null)
+                            {
+                                match = false;
+                                break;
+                            }
+                            continue;
                         }
 
-                        var argType = args[count++].GetHybType();
+                        var argType = args[i].GetHybType();
 
                         if (paramType.IsAssignableFrom(argType) == false)
                         {

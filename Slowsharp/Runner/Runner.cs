@@ -275,6 +275,12 @@ namespace Slowsharp
             var node = method.declaration;
             var vf = new VarFrame(null);
             var count = 0;
+
+            foreach (var p in method.declaration.ParameterList.Parameters)
+            {
+                if (p.Default == null) continue;
+                vf.SetValue(p.Identifier.Text, RunExpression(p.Default.Value));
+            }
             foreach (var arg in args)
             {
                 var p = node.ParameterList.Parameters[count++];

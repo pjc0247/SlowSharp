@@ -58,5 +58,29 @@ public static object Main() {
 }",
 config);
         }
+
+        public static object Run(string external, string classBody, string body)
+        {
+            return CScript.Run(@"
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Slowsharp.Test;
+
+"
++ external +
+@"
+public class FooTest__ {"
++ classBody +
+@"
+public static object Main() {
+"
++ body +
+@"
+}
+}",
+config);
+        }
     }
 }
