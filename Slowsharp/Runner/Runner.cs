@@ -105,11 +105,26 @@ namespace Slowsharp
             throw new InvalidOperationException($"No class found that contains static Main()");
         }
 
+        /// <summary>
+        /// Instantiates an object with typename and args.
+        /// </summary>
+        /// <param name="id">Typename to instantiate</param>
+        /// <param name="args">Arguments passed to the constructor</param>
+        /// <returns>HybInstance object</returns>
         public HybInstance Instantiate(string id, params object[] args)
         {
             RunLazyInitializers();
             return resolver.GetType(id).CreateInstance(this, args.Wrap());
         }
+        /// <summary>
+        /// Overrides an object with already instantiated object.
+        /// This performs `virtual inherit` which links two objects.
+        /// See documentation for more information.
+        /// </summary>
+        /// <param name="id">Typename to override</param>
+        /// <param name="parentObject">Parent object</param>
+        /// <param name="args">Arguments passed to the constructor</param>
+        /// <returns>HybInstance object</returns>
         public HybInstance Override(string id, object parentObject, params object[] args)
         {
             RunLazyInitializers();
@@ -334,128 +349,6 @@ namespace Slowsharp
                         ;
                 }
             }
-        }
-
-        private void RunAssign(AssignmentExpressionSyntax node)
-        {
-            // +=, -=, *=, /=
-            if (IsOpAndAssignToken(node.OperatorToken))
-            {
-                RunAssignWithOp(node);
-                return;
-            }
-
-            RunAssign(node.Left, RunExpression(node.Right));
-        }
-        private void RunAssign(ExpressionSyntax leftNode, HybInstance right)
-        {
-            if (leftNode is IdentifierNameSyntax id)
-            {
-                var key = id.Identifier.ValueText;
-
-                var set = false;
-                if (ctx._this != null)
-                {
-                    if (ctx._this.SetPropertyOrField(key, right, AccessLevel.Outside))
-                        set = true;
-                }
-
-                if (set == false)
-                    vars.SetValue(key, right);
-            }
-            else if (leftNode is MemberAccessExpressionSyntax ma)
-            {
-                if (ma.Expression is IdentifierNameSyntax idNode)
-                {
-                    var key = $"{idNode.Identifier}";
-                    HybType leftType;
-                    if (resolver.TryGetType(key, out leftType))
-                    {
-                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", right);
-                        return;
-                    }
-                }
-
-                var left = RunExpression(ma.Expression);
-                left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
-            }
-            else if (leftNode is ElementAccessExpressionSyntax ea)
-            {
-                var callee = RunExpression(ea.Expression);
-                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
-
-                var count = 0;
-                foreach (var arg in ea.ArgumentList.Arguments)
-                    args[count++] = RunExpression(arg.Expression);
-
-                if (callee.SetIndexer(args, right) == false)
-                    throw new NoSuchMemberException("[]");
-            }
-        }
-        private void RunAssignWithOp(AssignmentExpressionSyntax node)
-        {
-            var right = RunExpression(node.Right);
-
-            if (node.Left is IdentifierNameSyntax id)
-            {
-                var key = id.Identifier.ValueText;
-                var value = MadMath.Op(ResolveId(id), right, node.OperatorToken.Text.Substring(0, 1));
-
-                UpdateVariable(key, value);
-            }
-            else if (node.Left is MemberAccessExpressionSyntax ma)
-            {
-                HybInstance left = null;
-                HybInstance value = null;
-
-                if (ma.Expression is IdentifierNameSyntax idNode)
-                {
-                    var key = $"{idNode.Identifier}";
-                    HybType leftType;
-                    if (resolver.TryGetType(key, out leftType))
-                    {
-                        leftType.GetStaticPropertyOrField($"{ma.Name.Identifier}", out left);
-                        value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
-                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", value);
-                        return;
-                    }
-                }
-
-                var callee = RunExpression(ma.Expression);
-                callee.GetPropertyOrField($"{ma.Name}", out left);
-                value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
-                callee.SetPropertyOrField($"{ma.Name}", value, AccessLevel.Outside);
-            }
-            else if (node.Left is ElementAccessExpressionSyntax ea)
-            {
-                var callee = RunExpression(ea.Expression);
-                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
-
-                var count = 0;
-                foreach (var arg in ea.ArgumentList.Arguments)
-                    args[count++] = RunExpression(arg.Expression);
-
-                HybInstance value;
-                callee.GetIndexer(args, out value);
-
-                value = MadMath.Op(value, right, node.OperatorToken.Text.Substring(0, 1));
-
-                if (callee.SetIndexer(args, value) == false)
-                    throw new NoSuchMemberException("[]");
-            }
-        }
-        private bool IsOpAndAssignToken(SyntaxToken token)
-        {
-            if (token.Text.Length == 2 &&
-                token.Text[1] == '=' && token.Text[0] != '=')
-                return true;
-            return false;
-        }
-
-        private SSMethodInfo[] ResolveLocalMember(SimpleNameSyntax node)
-        {
-            var id = node.Identifier.ValueText;
-            return ctx.method.declaringClass.GetMethods(id);
         }
     }
 }
