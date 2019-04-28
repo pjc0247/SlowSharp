@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
@@ -143,11 +143,135 @@ namespace Slowsharp
             throw new NoSuchMemberException($"{id}");
         }
 
+        private void RunAssign(AssignmentExpressionSyntax node)
+        {
+            // +=, -=, *=, /=
+            if (IsOpAndAssignToken(node.OperatorToken))
+            {
+                RunAssignWithOp(node);
+                return;
+            }
+
+            RunAssign(node.Left, RunExpression(node.Right));
+        }
+        private void RunAssign(ExpressionSyntax leftNode, HybInstance right)
+        {
+            if (leftNode is IdentifierNameSyntax id)
+            {
+                var key = id.Identifier.ValueText;
+
+                var set = false;
+                if (ctx._this != null)
+                {
+                    if (ctx._this.SetPropertyOrField(key, right, AccessLevel.Outside))
+                        set = true;
+                }
+
+                if (set == false)
+                    vars.SetValue(key, right);
+            }
+            else if (leftNode is MemberAccessExpressionSyntax ma)
+            {
+                if (ma.Expression is IdentifierNameSyntax idNode)
+                {
+                    var key = $"{idNode.Identifier}";
+                    HybType leftType;
+                    if (resolver.TryGetType(key, out leftType))
+                    {
+                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", right);
+                        return;
+                    }
+                }
+
+                var left = RunExpression(ma.Expression);
+                left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
+            }
+            else if (leftNode is ElementAccessExpressionSyntax ea)
+            {
+                var callee = RunExpression(ea.Expression);
+                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+
+                var count = 0;
+                foreach (var arg in ea.ArgumentList.Arguments)
+                    args[count++] = RunExpression(arg.Expression);
+
+                if (callee.SetIndexer(args, right) == false)
+                    throw new NoSuchMemberException("[]");
+            }
+        }
+        private void RunAssignWithOp(AssignmentExpressionSyntax node)
+        {
+            var right = RunExpression(node.Right);
+
+            if (node.Left is IdentifierNameSyntax id)
+            {
+                var key = id.Identifier.ValueText;
+                var value = MadMath.Op(ResolveId(id), right, node.OperatorToken.Text.Substring(0, 1));
+
+                UpdateVariable(key, value);
+            }
+            else if (node.Left is MemberAccessExpressionSyntax ma)
+            {
+                HybInstance left = null;
+                HybInstance value = null;
+
+                if (ma.Expression is IdentifierNameSyntax idNode)
+                {
+                    var key = $"{idNode.Identifier}";
+                    HybType leftType;
+                    if (resolver.TryGetType(key, out leftType))
+                    {
+                        leftType.GetStaticPropertyOrField($"{ma.Name.Identifier}", out left);
+                        value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
+                        leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", value);
+                        return;
+                    }
+                }
+
+                var callee = RunExpression(ma.Expression);
+                callee.GetPropertyOrField($"{ma.Name}", out left);
+                value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
+                callee.SetPropertyOrField($"{ma.Name}", value, AccessLevel.Outside);
+            }
+            else if (node.Left is ElementAccessExpressionSyntax ea)
+            {
+                var callee = RunExpression(ea.Expression);
+                var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+
+                var count = 0;
+                foreach (var arg in ea.ArgumentList.Arguments)
+                    args[count++] = RunExpression(arg.Expression);
+
+                HybInstance value;
+                callee.GetIndexer(args, out value);
+
+                value = MadMath.Op(value, right, node.OperatorToken.Text.Substring(0, 1));
+
+                if (callee.SetIndexer(args, value) == false)
+                    throw new NoSuchMemberException("[]");
+            }
+        }
+        private bool IsOpAndAssignToken(SyntaxToken token)
+        {
+            if (token.Text.Length == 2 &&
+                token.Text[1] == '=' && token.Text[0] != '=')
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Runs parenthesized expression.
+        ///   [Syntax] () => Math.Max(1, 5)
+        /// </summary>
         private HybInstance RunParenthesized(ParenthesizedExpressionSyntax node)
         {
             return RunExpression(node.Expression);
         }
 
+        /// <summary>
+        /// Runs cast expression.
+        ///   [Syntax] (int)b
+        /// </summary>
         private HybInstance RunCast(CastExpressionSyntax node)
         {
             var cache = optCache.GetOrCreate(node, () => {
@@ -160,11 +284,19 @@ namespace Slowsharp
             return value.Cast(cache.type);
         }
 
+        /// <summary>
+        /// Runs default expression.
+        ///   [Syntax] default(int)
+        /// </summary>
         private HybInstance RunDefault(DefaultExpressionSyntax node)
         {
             var type = resolver.GetType($"{node.Type}");
             return type.GetDefault();
         }
+        /// <summary>
+        /// Runs conditional expression.
+        ///   [Syntax] CONDITION ? IF_TRUE : IF_FALSE
+        /// </summary>
         private HybInstance RunConditional(ConditionalExpressionSyntax node)
         {
             var cond = RunExpression(node.Condition);
@@ -174,6 +306,10 @@ namespace Slowsharp
                 return RunExpression(node.WhenFalse);
         }
 
+        /// <summary>
+        /// Runs interpolated string expression.
+        ///   [Syntax] $"My name is {VALUE}"
+        /// </summary>
         private HybInstance RunInterpolatedString(InterpolatedStringExpressionSyntax node)
         {
             var sb = new StringBuilder();
@@ -189,6 +325,11 @@ namespace Slowsharp
             return HybInstance.String(sb.ToString());
         }
 
+        /// <summary>
+        /// Runs invocation expression.
+        ///   [Syntax] Console.WriteLine("Hello World");
+        ///            Foo(1234);
+        /// </summary>
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
         {
             string calleeId = "";
@@ -315,6 +456,11 @@ namespace Slowsharp
             }
 
             return (args, hasRefOrOut);
+        }
+        private SSMethodInfo[] ResolveLocalMember(SimpleNameSyntax node)
+        {
+            var id = node.Identifier.ValueText;
+            return ctx.method.declaringClass.GetMethods(id);
         }
 
         private HybInstance RunElementAccess(ElementAccessExpressionSyntax node)
