@@ -95,11 +95,12 @@ namespace Slowsharp
                     {
                         foreach (var arg in methodGenericArgs)
                         {
-                            if (genericBound.ContainsKey(arg.Name) == false)
-                                throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
-
-                            genericArgs.Add(new HybType(genericBound[arg.Name]));
+                            if (genericBound.ContainsKey(arg.Name))
+                                genericArgs.Add(new HybType(genericBound[arg.Name]));
                         }
+
+                        if (methodGenericArgs.Length != genericArgs.Count)
+                            throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
 
                         return member.MakeGenericMethod(genericArgs.ToArray());
                     }
