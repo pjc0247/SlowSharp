@@ -420,44 +420,44 @@ namespace Slowsharp
         }
 
         private static SSMethodInfo GetAddMethod(HybInstance left)
-            => left.GetMethods("op_Addition").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Addition").FirstOrDefault();
         private static SSMethodInfo GetSubMethod(HybInstance left)
-            => left.GetMethods("op_Subtraction").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Subtraction").FirstOrDefault();
         private static SSMethodInfo GetMulMethod(HybInstance left)
-            => left.GetMethods("op_Multiply").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Multiply").FirstOrDefault();
         private static SSMethodInfo GetDivMethod(HybInstance left)
-            => left.GetMethods("op_Division").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Division").FirstOrDefault();
         private static SSMethodInfo GetModMethod(HybInstance left)
-            => left.GetMethods("op_Modulus").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Modulus").FirstOrDefault();
         private static SSMethodInfo GetBitwiseOrMethod(HybInstance left)
-            => left.GetMethods("op_BitwiseOr").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_BitwiseOr").FirstOrDefault();
         private static SSMethodInfo GetBitwiseAndMethod(HybInstance left)
-            => left.GetMethods("op_BitwiseAnd").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_BitwiseAnd").FirstOrDefault();
         private static SSMethodInfo GetXorMethod(HybInstance left)
-            => left.GetMethods("op_ExclusiveOr").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_ExclusiveOr").FirstOrDefault();
         private static SSMethodInfo GetEqMethod(HybInstance left)
-            => left.GetMethods("op_Equality").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Equality").FirstOrDefault();
         private static SSMethodInfo GetGreaterMethod(HybInstance left)
-            => left.GetMethods("op_GreaterThan").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_GreaterThan").FirstOrDefault();
         private static SSMethodInfo GetLessMethod(HybInstance left)
-            => left.GetMethods("op_LessThan").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_LessThan").FirstOrDefault();
         private static SSMethodInfo GetGreaterEqualMethod(HybInstance left)
-            => left.GetMethods("op_GreaterThanOrEqual").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_GreaterThanOrEqual").FirstOrDefault();
         private static SSMethodInfo GetLessEqualMethod(HybInstance left)
-            => left.GetMethods("op_LessThanOrEqual").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_LessThanOrEqual").FirstOrDefault();
 
         private static SSMethodInfo GetOnesComplementMethod(HybInstance left)
-            => left.GetMethods("op_OnesComplement").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_OnesComplement").FirstOrDefault();
         private static SSMethodInfo GetLogicalNotMethod(HybInstance left)
-            => left.GetMethods("op_LogicalNot").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_LogicalNot").FirstOrDefault();
         private static SSMethodInfo GetUnaryNegationMethod(HybInstance left)
-            => left.GetMethods("op_UnaryNegation").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_UnaryNegation").FirstOrDefault();
         private static SSMethodInfo GetUnaryPlusMethod(HybInstance left)
-            => left.GetMethods("op_UnaryPlus").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_UnaryPlus").FirstOrDefault();
 
         private static SSMethodInfo GetIncMethod(HybInstance left)
-            => left.GetMethods("op_Increment").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Increment").FirstOrDefault();
         private static SSMethodInfo GetDecMethod(HybInstance left)
-            => left.GetMethods("op_Decrement").FirstOrDefault();
+            => left.GetHybType().GetStaticMethods("op_Decrement").FirstOrDefault();
     }
 }
