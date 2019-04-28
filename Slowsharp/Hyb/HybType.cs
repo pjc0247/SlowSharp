@@ -277,6 +277,10 @@ namespace Slowsharp
                 .Where(x => x.id == id)
                 .ToArray();
         }
+        internal SSMethodInfo GetStaticMethodFirst(string id)
+        {
+            return GetStaticMethods().Where(x => x.id == id).FirstOrDefault();
+        }
         public SSMethodInfo[] GetStaticMethods()
         {
             if (_StaticMethods == null)
@@ -312,6 +316,10 @@ namespace Slowsharp
             return GetMethods()
                 .Where(x => x.id == id)
                 .ToArray();
+        }
+        internal SSMethodInfo GetMethodFirst(string id)
+        {
+            return GetMethods().Where(x => x.id == id).FirstOrDefault();
         }
         public SSMethodInfo[] GetMethods()
         {
