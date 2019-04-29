@@ -58,9 +58,9 @@ namespace Slowsharp
                 {
                     if (type.Name == id &&
                         namespaces.Contains(type.Namespace))
-                        return new HybType(type);
+                        return HybTypeCache.GetHybType(type);
                     if (type.FullName == id)
-                        return new HybType(type);
+                        return HybTypeCache.GetHybType(type);
                 }
             }
 

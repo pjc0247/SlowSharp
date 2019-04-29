@@ -40,10 +40,10 @@ namespace Slowsharp
         {
             this.id = methodInfo.Name;
             this.signature = MemberSignature.GetSignature(methodInfo);
-            this.declaringType = new HybType(methodInfo.DeclaringType);
+            this.declaringType = HybTypeCache.GetHybType(methodInfo.DeclaringType);
             this.target = new Invokable(methodInfo);
 
-            this.returnType = new HybType(methodInfo.ReturnType);
+            this.returnType = HybTypeCache.GetHybType(methodInfo.ReturnType);
             this.isVaArg =
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;

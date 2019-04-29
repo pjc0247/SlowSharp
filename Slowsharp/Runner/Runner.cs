@@ -209,6 +209,8 @@ namespace Slowsharp
                 RunTry(node as TryStatementSyntax);
             else if (node is ReturnStatementSyntax)
                 RunReturn(node as ReturnStatementSyntax);
+            else if (node is YieldStatementSyntax)
+                RunYieldReturn(node as YieldStatementSyntax);
             else if (node is BreakStatementSyntax)
                 RunBreak(node as BreakStatementSyntax);
             else if (node is ContinueStatementSyntax)

@@ -54,7 +54,7 @@ namespace Slowsharp
                     if (isCompiledType)
                     {
                         _parent = compiledType.BaseType != null ?
-                            new HybType(compiledType.BaseType) :
+                            HybTypeCache.GetHybType(compiledType.BaseType) :
                             null;
                     }
                     else
@@ -101,8 +101,8 @@ namespace Slowsharp
             if (isCompiledType)
             {
                 if (rank == 1)
-                    return new HybType(compiledType.MakeArrayType());
-                return new HybType(compiledType.MakeArrayType(rank));
+                    return HybTypeCache.GetHybType(compiledType.MakeArrayType());
+                return HybTypeCache.GetHybType(compiledType.MakeArrayType(rank));
             }
             return new HybType(interpretKlass, this, arrayRank);
         }
@@ -113,7 +113,7 @@ namespace Slowsharp
 
             if (isCompiledType)
             {
-                return new HybType(compiledType.MakeGenericType(genericArgs.Unwrap()));
+                return HybTypeCache.GetHybType(compiledType.MakeGenericType(genericArgs.Unwrap()));
             }
             return null;
         }

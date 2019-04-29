@@ -13,7 +13,7 @@ namespace Slowsharp
 {
     public class CScript
     {
-        public static object RunSimple(string src, RunConfig config = null)
+        public static object RunSimple(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
         {
             return Run(@"
 using System;
@@ -23,18 +23,20 @@ public static object Main() {
     return " + src + @";
 }
 }
-", config);
+", scriptConfig, config);
         }
-        public static object Run(string src, RunConfig config = null)
+        public static object Run(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
         {
-            var r = CreateRunner(src, config);
+            var r = CreateRunner(src, scriptConfig, config);
 
             var ret = r.RunMain();
             if (ret == null) return null;
             return ret.Unwrap();
         }
-        public static CScript CreateRunner(string src, RunConfig config = null)
+        public static CScript CreateRunner(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
         {
+            if (scriptConfig == null)
+                scriptConfig = ScriptConfig.Default;
             if (config == null)
                 config = RunConfig.Default;
 
@@ -49,7 +51,7 @@ public static object Main() {
             if (string.IsNullOrEmpty(src))
                 throw new ArgumentException("src is null or empty string");
 
-            CSharpParseOptions options = new CSharpParseOptions(
+            var options = new CSharpParseOptions(
                 LanguageVersion.Default,
                 kind: isScript ? SourceCodeKind.Script : SourceCodeKind.Regular);
             var tree = CSharpSyntaxTree.ParseText(src, options);

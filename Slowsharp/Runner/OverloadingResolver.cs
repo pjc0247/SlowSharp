@@ -96,7 +96,7 @@ namespace Slowsharp
                         foreach (var arg in methodGenericArgs)
                         {
                             if (genericBound.ContainsKey(arg.Name))
-                                genericArgs.Add(new HybType(genericBound[arg.Name]));
+                                genericArgs.Add(HybTypeCache.GetHybType(genericBound[arg.Name]));
                         }
 
                         if (methodGenericArgs.Length != genericArgs.Count)

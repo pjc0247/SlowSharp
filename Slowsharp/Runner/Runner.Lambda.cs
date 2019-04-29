@@ -172,7 +172,7 @@ namespace Slowsharp
             var convertedDelegate = converter.Invoke(
                 null, new object[] { body });
             return new HybInstance(
-                new HybType(convertedDelegate.GetType()), 
+                HybTypeCache.GetHybType(convertedDelegate.GetType()), 
                 convertedDelegate);
         }
 

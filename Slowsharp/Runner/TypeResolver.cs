@@ -141,9 +141,9 @@ namespace Slowsharp
                 foreach (var type in asm.GetTypesSafe())
                 {
                     if (type.Name.Split('[')[0] == id)
-                        return new HybType(type);
+                        return HybTypeCache.GetHybType(type);
                     if (type.FullName.Split('[')[0] == id)
-                        return new HybType(type);
+                        return HybTypeCache.GetHybType(type);
                 }
             }
 

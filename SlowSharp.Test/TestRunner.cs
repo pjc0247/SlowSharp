@@ -16,7 +16,7 @@ namespace Slowsharp.Test
             return CScript.Run(@"
 using System;
 " + code,
-        config);
+null, config);
         }
         public static object Run(string code)
         {
@@ -35,7 +35,7 @@ public static object Main() {
 @"
 }
 }",
-config);
+null, config);
         }
 
         public static object Run(string classBody, string body)
@@ -56,7 +56,7 @@ public static object Main() {
 @"
 }
 }",
-config);
+null, config);
         }
 
         public static object Run(string external, string classBody, string body)
@@ -80,7 +80,7 @@ public static object Main() {
 @"
 }
 }",
-config);
+null, config);
         }
     }
 }
