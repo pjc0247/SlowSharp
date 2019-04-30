@@ -315,6 +315,9 @@ namespace Slowsharp
                         (a, b) = Promote(a, b);
                     return HybInstance.Bool(a.innerObject.Equals(b.innerObject));
                 }
+                else if (aType.compiledType == typeof(string))
+                    return HybInstance.Bool(a.innerObject.Equals(b.innerObject));
+
                 return HybInstance.Bool(a.innerObject == b.innerObject);
             }
 
@@ -331,6 +334,9 @@ namespace Slowsharp
                         (a, b) = Promote(a, b);
                     return HybInstance.Bool(!a.innerObject.Equals(b.innerObject));
                 }
+                else if (aType.compiledType == typeof(string))
+                    return HybInstance.Bool(!a.innerObject.Equals(b.innerObject));
+
                 return HybInstance.Bool(a.innerObject != b.innerObject);
             }
 
