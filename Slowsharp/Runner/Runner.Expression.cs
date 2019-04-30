@@ -484,9 +484,7 @@ namespace Slowsharp
                 () => {
                     var result = new OptRunMemberAccessNode();
 
-                    if (node.Expression is IdentifierNameSyntax idNode &&
-                        // If parent is also MemberAccessSyntax, left cannot be a type.
-                        (node.Parent is MemberAccessExpressionSyntax) == false)
+                    if (node.Expression is IdentifierNameSyntax idNode)
                     {
                         HybType type;
                         var id = $"{idNode.Identifier}";
