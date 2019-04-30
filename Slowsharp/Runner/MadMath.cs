@@ -148,7 +148,7 @@ namespace Slowsharp
                 if (a.Is<Double>()) return HybInstance.Double(a.As<Double>() + b.As<Double>());
             }
             else if (a.Is<String>())
-                return HybInstance.String(a.As<String>() + b.As<String>());
+                return HybInstance.String(a.As<String>() + b.ToString());
 
             var addMethod = GetAddMethod(a);
             if (addMethod != null)
