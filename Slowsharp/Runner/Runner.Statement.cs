@@ -76,19 +76,17 @@ namespace Slowsharp
 
             halt = HaltType.Return;
         }
-        private void RunYieldReturn(YieldStatementSyntax node)
+        private void RunYield(YieldStatementSyntax node)
         {
             if (node.Expression != null)
                 ret = RunExpression(node.Expression);
 
             // yield break;
             if (node.ReturnOrBreakKeyword.Text == "break")
-                ;
+                halt = HaltType.YieldBreak;
             // yield return EXPR;
             else
-                ;
-
-            halt = HaltType.Return;
+                halt = HaltType.YieldReturn;
         }
     }
 }

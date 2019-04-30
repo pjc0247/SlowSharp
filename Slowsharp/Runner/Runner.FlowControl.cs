@@ -146,7 +146,8 @@ namespace Slowsharp
 
                 Run(node.Statement);
 
-                if (halt == HaltType.Continue)
+                if (halt == HaltType.Continue || 
+                    halt == HaltType.YieldReturn)
                     halt = HaltType.None;
                 if (halt != HaltType.None) break;
             }

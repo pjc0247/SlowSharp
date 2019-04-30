@@ -11,11 +11,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Slowsharp
 {
-    public enum KeyCode
+    enum KeyCode
     {
         Space
     }
-    public class Foo
+    class Foo
     {
         public int value;
         public static Foo operator +(Foo a, Foo b)
@@ -23,36 +23,36 @@ namespace Slowsharp
             return new Foo() { value = a.value + b.value };
         }
     }
-    public class Input
+    class Input
     {
         public static bool GetKeyDown(KeyCode k)
         {
             return true;
         }
     }
-    public struct Vector3
+    struct Vector3
     {
         public int x, y, z;
         public Vector3(int x, int y, int z) { this.x = x; this.y = y; this.z = z; }
         public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
     }
-    public class Transform
+    class Transform
     {
         public Vector3 position { get; set; }
     }
 
-    public class Resources
+    class Resources
     {
         public static void Load<T>(string path)
         {
             Console.WriteLine(typeof(T) + " / " + path);
         }
     }
-    public class GameObject
+    class GameObject
     {
     }
 
-    public class Bar
+    class Bar
     {
         public Transform transform = new Transform();
 
@@ -154,29 +154,16 @@ static int Foo(int n) { return 15; }
 
 public static int Booo(int n = 5) => 5;
 
-static void Bbb(params object[] obj) {
-foreach (var b in obj)
-Console.WriteLine(b);
+static IEnumerator Bbb() {
+yield return 1;
+yield return 2;
+yield return 3;
 }
 
         static int Main(int n) {
-Booo();
 
-return count;
-
-return new MyList();
-
-switch(bbb) {
-case 1:  
-case 2:  Console.WriteLine(""BOO22""); break;
-case 151: Console.WriteLine(""BOO333""); break;
-case 152: Console.WriteLine(""BOO333""); break;
-}
-
-var a = 11;
-var b = 14;
-
-SSDebugger.Stop();
+foreach (var c in Bbb())
+    Console.WriteLine(c);
 
 return v;
 
@@ -209,7 +196,11 @@ class Fooo : Bar {
 
             Dump(root);
 
-            var run = CScript.CreateRunner(src);
+            var config = ScriptConfig.Default;
+
+            config.PrewarmTypes = new Type[] { typeof(Console) };
+
+            var run = CScript.CreateRunner(src, config);
             SSDebugger.runner = run;
             var myList = run.RunMain();
             Console.WriteLine(myList.Is<List<int>>());
@@ -217,12 +208,14 @@ class Fooo : Bar {
             var vd = new Validator();
             vd.Visit(root);
 
-            var r = new Runner(ScriptConfig.Default, new RunConfig() {
+            var r = new Runner(config, new RunConfig() {
             });
             r.Run(root);
 
             Console.WriteLine(r.RunMain(5));
             Console.WriteLine(Goo());
+
+            return;
 
             tree = CSharpSyntaxTree.ParseText(hotReloadSrc);
             root = tree.GetCompilationUnitRoot();

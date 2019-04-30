@@ -22,12 +22,13 @@ namespace Slowsharp
             where TNode : SyntaxNode
             where TOptNode : OptNodeBase
         {
-            if (IsOptimized(node))
-                return (TOptNode)cache[node];
+            OptNodeBase optNode = null;
+            if (cache.TryGetValue(node, out optNode))
+                return (TOptNode)optNode;
 
-            var optNode = creator();
+            optNode = creator();
             cache[node] = optNode;
-            return optNode;
+            return (TOptNode)optNode;
         }
     }
 }

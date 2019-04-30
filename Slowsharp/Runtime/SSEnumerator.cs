@@ -11,8 +11,9 @@ namespace Slowsharp
 {
     public class SSEnumerator : IEnumerator<object>, IEnumerator
     {
-        public object Current => throw new NotImplementedException();
-
+        /// <summary>
+        /// Program counter that indicates next execution point
+        /// </summary>
         private int pc = 0;
         private BlockSyntax block;
         private VarFrame vf;
@@ -25,15 +26,27 @@ namespace Slowsharp
             this.vf = vf;
         }
 
+        public object Current => runner.ret.Unwrap();
         public void Dispose()
         {
+            // releases gc refs just in case
+            block = null;
+            vf = null;
+            runner = null;
         }
         public bool MoveNext()
         {
-            runner.RunBlock(block, vf, pc);
+            if (pc == -1)
+                return false;
+
+            pc = runner.RunBlock(block, vf, pc);
+
+            // -1 means EndOfMethod
+            return pc == -1 ? false : true;
         }
         public void Reset()
         {
+            throw new NotImplementedException();
         }
     }
 }

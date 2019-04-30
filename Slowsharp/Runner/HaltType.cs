@@ -24,6 +24,9 @@ namespace Slowsharp
         /// </summary>
         Return,
 
+        YieldReturn,
+        YieldBreak,
+
         /// <summary>
         /// Stop running by API or Timeout.
         /// Should be stopped immediatly

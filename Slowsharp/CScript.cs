@@ -41,7 +41,7 @@ public static object Main() {
                 config = RunConfig.Default;
 
             var root = ParseAndValidate(src);
-            var r = new Runner(ScriptConfig.Default, config);
+            var r = new Runner(scriptConfig, config);
             r.LoadSyntax(root);
 
             return new CScript(r);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,11 +48,17 @@ namespace Slowsharp
             this.resolver = new TypeResolver(ctx, assemblies);
 
             AddDefaultUsings();
+            PrewarmTypes();
         }
         private void AddDefaultUsings()
         {
             foreach (var ns in scriptConfig.DefaultUsings)
                 resolver.AddLookupNamespace(ns);
+        }
+        private void PrewarmTypes()
+        {
+            foreach (var type in scriptConfig.PrewarmTypes)
+                resolver.CacheType(type);
         }
 
         public HybType[] GetTypes()
@@ -210,7 +217,7 @@ namespace Slowsharp
             else if (node is ReturnStatementSyntax)
                 RunReturn(node as ReturnStatementSyntax);
             else if (node is YieldStatementSyntax)
-                RunYieldReturn(node as YieldStatementSyntax);
+                RunYield(node as YieldStatementSyntax);
             else if (node is BreakStatementSyntax)
                 RunBreak(node as BreakStatementSyntax);
             else if (node is ContinueStatementSyntax)
@@ -245,15 +252,19 @@ namespace Slowsharp
             vars = vars.parent;
             return ret;
         }
-        internal void RunBlock(BlockSyntax node, VarFrame vf, int pc = 0)
+        internal int RunBlock(BlockSyntax node, VarFrame vf, int pc = 0)
         {
             var prevVars = vars;
             vars = vf;
 
             var children = node.ChildNodes().ToArray();
-            for (int i = pc; i < children.Length; i++)
+
+            if (children.Length == pc)
+                return -1;
+
+            for (; pc < children.Length; pc++)
             {
-                var child = children[i];
+                var child = children[pc];
 
                 try
                 {
@@ -273,15 +284,21 @@ namespace Slowsharp
                 if (ctx.IsExpird())
                     throw new TimeoutException();
 
-                if (halt != HaltType.None) break;
+                if (halt != HaltType.None)
+                {
+                    pc++;
+                    break;
+                }
             }
 
             vars = prevVars;
             //vars = vars.parent;
+
+            return pc;
         }
-        internal void RunBlock(BlockSyntax node)
+        internal int RunBlock(BlockSyntax node)
         {
-            RunBlock(node, new VarFrame(vars));
+            return RunBlock(node, new VarFrame(vars));
         }
 
         internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
@@ -322,7 +339,16 @@ namespace Slowsharp
             vars = null;
 
             if (node.Body != null)
-                RunBlock(node.Body, vf);
+            {
+                if (method.returnType.isCompiledType &&
+                    method.returnType.compiledType == typeof(IEnumerator))
+                {
+                    var enumerator = new SSEnumerator(this, node.Body, vf);
+                    ret = HybInstance.Object(enumerator);
+                }
+                else
+                    RunBlock(node.Body, vf);
+            }
             else
                 ret = RunArrowExpressionClause(node.ExpressionBody, vf);
 

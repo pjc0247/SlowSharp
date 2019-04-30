@@ -26,16 +26,21 @@ namespace Slowsharp
             namespaces.Add(ns);
         }
 
-        public HybType GetType(string id)
+        public void CacheType(Type type)
         {
-            if (cache.ContainsKey(id))
-                return cache[id];
+            cache[type.Name] = HybTypeCache.GetHybType(type);
+        }
+        public HybType GetType(string id, Assembly hintAssembly = null)
+        {
+            HybType type = null;
+            if (cache.TryGetValue(id, out type))
+                return type;
 
-            var type = FindType(id);
+            type = FindType(id, hintAssembly);
             cache[id] = type;
             return type;
         }
-        private HybType FindType(string id)
+        private HybType FindType(string id, Assembly hintAssembly = null)
         {
             if (id == "void") return HybType.Void;
             else if (id == "int") return HybType.Int32;
@@ -52,21 +57,38 @@ namespace Slowsharp
             else if (id == "uint") return HybType.Uint32;
             else if (id == "object") return HybType.Object;
 
+            if (hintAssembly != null)
+            {
+                var type = FindTypeFromAssembly(id, hintAssembly);
+                if (type != null)
+                    return type;
+            }
+
             foreach (var asm in assemblies)
             {
-                foreach (var type in asm.GetTypesSafe())
-                {
-                    if (type.Name == id &&
-                        namespaces.Contains(type.Namespace))
-                        return HybTypeCache.GetHybType(type);
-                    if (type.FullName == id)
-                        return HybTypeCache.GetHybType(type);
-                }
+                if (asm == hintAssembly)
+                    continue;
+
+                var type = FindTypeFromAssembly(id, asm);
+                if (type != null)
+                    return type;
             }
 
             if (ctx.types.ContainsKey(id))
                 return new HybType(ctx.types[id]);
 
+            return null;
+        }
+        private HybType FindTypeFromAssembly(string id, Assembly assembly)
+        {
+            foreach (var type in assembly.GetTypesSafe())
+            {
+                if (type.Name == id &&
+                    namespaces.Contains(type.Namespace))
+                    return HybTypeCache.GetHybType(type);
+                if (type.FullName == id)
+                    return HybTypeCache.GetHybType(type);
+            }
             return null;
         }
     }

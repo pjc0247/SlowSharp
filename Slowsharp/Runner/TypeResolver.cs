@@ -27,6 +27,14 @@ namespace Slowsharp
             typeCache.AddLookupNamespace(ns);
         }
 
+        public void CacheType(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            typeCache.CacheType(type);
+        }
+
         private bool IsGeneric(string id)
         {
             return id.Count(x => x == '<') != 0;
@@ -93,7 +101,7 @@ namespace Slowsharp
             return id;
         }
 
-        public bool TryGetType(string id, out HybType type)
+        public bool TryGetType(string id, out HybType type, Assembly hintAssembly = null)
         {
             var sig = GetPureName(id);
             var rank = GetArrayRank(id);
@@ -103,7 +111,7 @@ namespace Slowsharp
             if (isGeneric)
                 sig = GetSignatureName(id, out genericArgs);
 
-            type = typeCache.GetType(sig);
+            type = typeCache.GetType(sig, hintAssembly);
             if (type == null)
                 return false;    
 

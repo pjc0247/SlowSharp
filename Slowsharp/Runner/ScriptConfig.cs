@@ -20,5 +20,7 @@ namespace Slowsharp
         /// List of namespaces
         /// </summary>
         public string[] DefaultUsings { get; set; } = new string[] { };
+
+        public Type[] PrewarmTypes { get; set; } = new Type[] { };
     }
 }
