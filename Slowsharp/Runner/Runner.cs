@@ -252,54 +252,7 @@ namespace Slowsharp
             vars = vars.parent;
             return ret;
         }
-        internal int RunBlock(BlockSyntax node, VarFrame vf, int pc = 0)
-        {
-            var prevVars = vars;
-            vars = vf;
-
-            var children = node.ChildNodes().ToArray();
-
-            if (children.Length == pc)
-                return -1;
-
-            for (; pc < children.Length; pc++)
-            {
-                var child = children[pc];
-
-                try
-                {
-                    Run(child);
-                }
-                catch (Exception e) when (catches.Count > 0)
-                {
-                    Console.WriteLine(e);
-
-                    foreach (var c in catches.Reverse())
-                    {
-                        if (c.RunCatch(e))
-                            break;
-                    }
-                }
-
-                if (ctx.IsExpird())
-                    throw new TimeoutException();
-
-                if (halt != HaltType.None)
-                {
-                    pc++;
-                    break;
-                }
-            }
-
-            vars = prevVars;
-            //vars = vars.parent;
-
-            return pc;
-        }
-        internal int RunBlock(BlockSyntax node)
-        {
-            return RunBlock(node, new VarFrame(vars));
-        }
+        
 
         internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
         {

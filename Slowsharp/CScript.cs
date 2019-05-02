@@ -33,19 +33,29 @@ public static object Main() {
             if (ret == null) return null;
             return ret.Unwrap();
         }
-        public static CScript CreateRunner(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
+
+        public static CScript CreateRunner(string[] srcs, ScriptConfig scriptConfig = null, RunConfig config = null)
         {
+            if (srcs == null || srcs.Length == 0)
+                throw new ArgumentException(nameof(srcs));
+
             if (scriptConfig == null)
                 scriptConfig = ScriptConfig.Default;
             if (config == null)
                 config = RunConfig.Default;
 
-            var root = ParseAndValidate(src);
             var r = new Runner(scriptConfig, config);
-            r.LoadSyntax(root);
+            foreach (var src in srcs)
+            {
+                var root = ParseAndValidate(src);
+                r.LoadSyntax(root);
+            }
 
             return new CScript(r);
         }
+        public static CScript CreateRunner(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
+            => CreateRunner(new string[] { src }, scriptConfig, config);
+
         private static CSharpSyntaxNode ParseAndValidate(string src, bool isScript = false)
         {
             if (string.IsNullOrEmpty(src))
@@ -80,6 +90,11 @@ public static object Main() {
             }
 
             throw new ArgumentException("src is not a expression");
+        }
+        public void LoadScript(string src)
+        {
+            var root = ParseAndValidate(src);
+            runner.LoadSyntax(root);
         }
         public void UpdateMethodsOnly(string src)
         {
