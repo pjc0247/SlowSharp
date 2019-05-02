@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,6 +16,12 @@ namespace Slowsharp
         {
             return new ValidationRule(_this)
                 .ShouldBe<TAccept>();
+        }
+
+        public static void ShouldBeNotEmpty(this SyntaxToken _this, string expected)
+        {
+            if (_this.Text == "")
+                throw new SemanticViolationException($"Missing token. (Expected: {expected})");
         }
     }
     internal class ValidationRule

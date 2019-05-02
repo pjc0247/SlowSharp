@@ -11,11 +11,26 @@ namespace Slowsharp
 {
     internal partial class Validator : CSharpSyntaxWalker
     {
+        public override void VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            base.VisitIdentifierName(node);
+
+            if (string.IsNullOrEmpty(node.Identifier.Text))
+                throw new SemanticViolationException($"Illigal syntax");
+        }
         public override void VisitIncompleteMember(IncompleteMemberSyntax node)
         {
             base.VisitIncompleteMember(node);
 
             throw new SemanticViolationException($"Unrecognized syntax: {node}");
+        }
+
+        public override void VisitIfStatement(IfStatementSyntax node)
+        {
+            base.VisitIfStatement(node);
+
+            node.CloseParenToken
+                .ShouldBeNotEmpty(")");
         }
 
         public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
