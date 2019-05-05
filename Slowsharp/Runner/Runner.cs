@@ -293,7 +293,8 @@ namespace Slowsharp
 
             if (node.Body != null)
             {
-                if (method.returnType.isCompiledType &&
+                if (method.returnType != null && // ctor doesn't have return type
+                    method.returnType.isCompiledType &&
                     method.returnType.compiledType == typeof(IEnumerator))
                 {
                     var enumerator = new SSEnumerator(this, node.Body, vf);
