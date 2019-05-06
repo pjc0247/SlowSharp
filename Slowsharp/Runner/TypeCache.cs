@@ -57,6 +57,9 @@ namespace Slowsharp
             else if (id == "uint") return HybType.Uint32;
             else if (id == "object") return HybType.Object;
 
+            if (ctx.types.ContainsKey(id))
+                return new HybType(ctx.types[id]);
+
             if (hintAssembly != null)
             {
                 var type = FindTypeFromAssembly(id, hintAssembly);
@@ -73,9 +76,6 @@ namespace Slowsharp
                 if (type != null)
                     return type;
             }
-
-            if (ctx.types.ContainsKey(id))
-                return new HybType(ctx.types[id]);
 
             return null;
         }

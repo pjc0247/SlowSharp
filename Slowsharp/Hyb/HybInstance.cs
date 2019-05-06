@@ -89,6 +89,9 @@ namespace Slowsharp
         }
         internal HybInstance(Runner runner, HybType type, Class klass, object parentObject = null)
         {
+            if (klass == null)
+                throw new ArgumentNullException(nameof(klass));
+
             this.runner = runner;
             this.type = type;
             this.klass = klass;
