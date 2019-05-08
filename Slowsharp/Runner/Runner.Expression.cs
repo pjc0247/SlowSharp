@@ -503,8 +503,15 @@ namespace Slowsharp
             var left = RunExpression(node.Expression);
             var right = node.Name.Identifier.Text;
 
+            var accessLevel = AccessLevel.Outside;
+            if (node.Expression is ThisExpressionSyntax ||
+                left.GetHybType() == ctx.method.declaringType)
+            {
+                // TODO
+            }
+
             HybInstance o;
-            if (left.GetPropertyOrField(right, out o, AccessLevel.Outside))
+            if (left.GetPropertyOrField(right, out o, accessLevel))
                 return o;
 
             throw new NoSuchMemberException(right);
@@ -513,8 +520,12 @@ namespace Slowsharp
         {
             var right = node.Name.Identifier.Text;
 
+            var accessLevel = AccessLevel.Outside;
+            if (ctx.method.declaringType == leftType)
+                accessLevel = AccessLevel.This;
+
             HybInstance value;
-            if (leftType.GetStaticPropertyOrField(right, out value))
+            if (leftType.GetStaticPropertyOrField(right, out value, accessLevel))
                 return value;
 
             throw new SemanticViolationException($"No such static member: {right}");

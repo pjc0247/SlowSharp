@@ -15,6 +15,21 @@ namespace Slowsharp
             lookup.Add($"{node.Name}");
             resolver.AddLookupNamespace($"{node.Name}");
         }
+
+        private void AddEnum(EnumDeclarationSyntax node)
+        {
+            var id = $"{node.Identifier}";
+
+            klass = new EnumClass(this, id);
+            ctx.types.Add(id, klass);
+        }
+        private void AddEnumMember(EnumMemberDeclarationSyntax node)
+        {
+            var value = ((EnumClass)klass).AddMember(node);
+            globals.SetStaticField(
+                klass, node.Identifier.Text, HybInstance.Int(value));
+        }
+
         private void AddClass(ClassDeclarationSyntax node)
         {
             var id = $"{node.Identifier}";
@@ -25,6 +40,7 @@ namespace Slowsharp
                 throw new SemanticViolationException($"Class redefination is not supported: {id}");
 
             HybType parentType = null;
+            var interfaceTypes = new List<HybType>();
             if (node.BaseList != null)
             {
                 foreach (var b in node.BaseList.Types)
@@ -39,10 +55,14 @@ namespace Slowsharp
 
                         parentType = type;
                     }
+                    else
+                    {
+                        interfaceTypes.Add(type);
+                    }
                 }
             }
 
-            klass = new Class(this, id, parentType);
+            klass = new Class(this, id, parentType, interfaceTypes.ToArray());
             ctx.types.Add(id, klass);
         }
         private void AddProperty(PropertyDeclarationSyntax node)

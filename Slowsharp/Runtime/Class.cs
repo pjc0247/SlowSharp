@@ -15,6 +15,7 @@ namespace Slowsharp
         public string id { get; }
 
         public HybType parent { get; }
+        public HybType[] interfaces { get; }
         public HybType type { get; }
 
         internal Runner runner;
@@ -30,10 +31,11 @@ namespace Slowsharp
             this.id = id;
             this.type = new HybType(this);
         }
-        public Class(Runner runner, string id, HybType parent) :
+        public Class(Runner runner, string id, HybType parent, HybType[] interfaces) :
             this(runner, id)
         {
             this.parent = parent;
+            this.interfaces = interfaces;
 
             if (parent != null)
                 InheritFrom(parent);

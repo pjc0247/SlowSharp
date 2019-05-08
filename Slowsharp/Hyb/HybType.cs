@@ -45,6 +45,25 @@ namespace Slowsharp
         public bool isArray { get; }
         public int arrayRank { get; }
         public HybType elementType { get; }
+        public HybType[] interfaces
+        {
+            get
+            {
+                if (_interfaces == null)
+                {
+                    if (isCompiledType)
+                    {
+                        _interfaces = compiledType.GetInterfaces()
+                            .Select(x => HybTypeCache.GetHybType(x))
+                            .ToArray();
+                    }
+                    else
+                        _interfaces = interpretKlass.interfaces;
+                }
+                return _interfaces;
+            }
+        }
+        private HybType[] _interfaces;
         public HybType parent
         {
             get
@@ -157,6 +176,17 @@ namespace Slowsharp
             return inst;
         }
 
+        /// <summary>
+        /// Returns whether type implements the given interface or not.
+        /// </summary>
+        public bool HasInterface(HybType type)
+            => interfaces.Any(x => x == type);
+        /// <summary>
+        /// Returns whether type implements the given interface or not.
+        /// </summary>
+        public bool HasInterface(Type type)
+            => interfaces.Any(x => x.isCompiledType && x.compiledType == type);
+
         public SSPropertyInfo GetProperty(string id)
         {
             SSPropertyInfo property = null;
@@ -251,11 +281,18 @@ namespace Slowsharp
 
             return false;
         }
+
         public bool GetStaticPropertyOrField(string id, out HybInstance value)
+        {
+            return GetStaticPropertyOrField(id, out value, AccessLevel.Outside);
+        }
+        internal bool GetStaticPropertyOrField(string id, out HybInstance value, AccessLevel accessLevel)
         {
             SSPropertyInfo property = GetProperty(id);
             if (property != null)
             {
+                if (property.accessModifier.IsAcceesible(accessLevel) == false)
+                    throw new SemanticViolationException($"Invalid access: {id}");
                 value = property.getMethod.Invoke(null, new HybInstance[] { });
                 return true;
             }
@@ -263,6 +300,8 @@ namespace Slowsharp
             SSFieldInfo field = GetField(id);
             if (field != null)
             {
+                if (field.accessModifier.IsAcceesible(accessLevel) == false)
+                    throw new SemanticViolationException($"Invalid access: {id}");
                 value = field.GetValue(null);
                 return true;
             }

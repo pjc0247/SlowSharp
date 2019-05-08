@@ -15,6 +15,7 @@ namespace Slowsharp
     {
         Space
     }
+    interface IFoo { }
     class Foo
     {
         public int value;
@@ -127,6 +128,7 @@ using Slowsharp;
  
 namespace HelloWorld
 {
+
     class Fooo : Bar {
         public static int aa = 1;
 
@@ -141,12 +143,14 @@ namespace HelloWorld
     }
 
 class Boor : Bar {
+
+
 public void MoveForward() {  
     transform.position += new Vector3(11,1,1);
 }
 }
 class MyList : List<int> { }
-    class Program : Bar
+    class Program : Bar, IFoo
     {
 static int bb = 1;
 static int Foo() { return 5; }
@@ -160,10 +164,13 @@ yield return 2;
 yield return 3;
 }
 
+private static int acac = 123;
+
         static int Main(int n) {
 
-foreach (var c in Bbb())
-    Console.WriteLine(c);
+Console.WriteLine(BA.A);
+Console.WriteLine(BA.B);
+
 
 return v;
 

@@ -146,7 +146,8 @@ namespace Slowsharp
             {
                 typeof(CompilationUnitSyntax),
                 typeof(NamespaceDeclarationSyntax),
-                typeof(ClassDeclarationSyntax)
+                typeof(ClassDeclarationSyntax),
+                typeof(EnumDeclarationSyntax)
             };
 
             switch (runMode)
@@ -182,6 +183,10 @@ namespace Slowsharp
                 AddField(node as FieldDeclarationSyntax);
             else if (node is MethodDeclarationSyntax)
                 AddMethod(node as MethodDeclarationSyntax);
+            else if (node is EnumDeclarationSyntax)
+                AddEnum(node as EnumDeclarationSyntax);
+            else if (node is EnumMemberDeclarationSyntax)
+                AddEnumMember(node as EnumMemberDeclarationSyntax);
         }
         public void RunAsHotReloadMethodsOnly(SyntaxNode node)
         {
