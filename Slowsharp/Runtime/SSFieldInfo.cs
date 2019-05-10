@@ -15,6 +15,7 @@ namespace Slowsharp
     public abstract class SSFieldInfo : SSMemberInfo
     {
         public HybType fieldType;
+        public bool isConst;
 
         public abstract HybInstance GetValue(HybInstance _this);
         public abstract void SetValue(HybInstance _this, HybInstance value);

@@ -26,5 +26,7 @@ namespace Slowsharp
             => Contains(_this, "params");
         public static bool IsStatic(this SyntaxTokenList _this)
             => Contains(_this, "static");
+        public static bool IsConst(this SyntaxTokenList _this)
+            => Contains(_this, "const");
     }
 }

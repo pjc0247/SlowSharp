@@ -78,15 +78,14 @@ namespace Slowsharp
         }
         private void AddField(FieldDeclarationSyntax node)
         {
-            var isStatic = node.Modifiers.IsStatic();
             var type = resolver.GetType($"{node.Declaration.Type}");
 
             foreach (var f in node.Declaration.Variables)
             {
                 var id = $"{f.Identifier}";
 
-                klass.AddField(id, node, f);
-                if (isStatic)
+                var fieldInfo = klass.AddField(id, node, f);
+                if (fieldInfo.isStatic)
                     InitializeStaticField(f, id, type);
             }
         }

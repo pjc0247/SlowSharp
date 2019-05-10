@@ -44,6 +44,8 @@ namespace Slowsharp
                 return RunInvocation(node as InvocationExpressionSyntax);
             else if (node is ConditionalExpressionSyntax)
                 return RunConditional(node as ConditionalExpressionSyntax);
+            else if (node is ConditionalAccessExpressionSyntax)
+                return RunConditionalAccess(node as ConditionalAccessExpressionSyntax);
             else if (node is IdentifierNameSyntax)
                 return ResolveId(node as IdentifierNameSyntax);
             else if (node is PrefixUnaryExpressionSyntax)
@@ -305,6 +307,20 @@ namespace Slowsharp
             else
                 return RunExpression(node.WhenFalse);
         }
+        /// <summary>
+        /// Runs conditional access expression. (CS6)
+        ///   [Syntax] EXPR?.WHEN_NOT_NULL
+        /// </summary>
+        private HybInstance RunConditionalAccess(ConditionalAccessExpressionSyntax node)
+        {
+            var left = RunExpression(node.Expression);
+
+            ctx._bound = left;
+
+            if (left.IsNull() == false)
+                return RunExpression(node.WhenNotNull);
+            return HybInstance.Null();
+        }
 
         /// <summary>
         /// Runs interpolated string expression.
@@ -387,11 +403,19 @@ namespace Slowsharp
                 targetId = $"{ma.Name}";
                 //callsite = ResolveMemberAccess(node.Expression as MemberAccessExpressionSyntax);
             }
-            else if (node.Expression is SimpleNameSyntax id)
+            else if (node.Expression is SimpleNameSyntax ||
+                node.Expression is MemberBindingExpressionSyntax)
             {
-                implicitGenericArgs = ResolveGenericArgumentsFromName(id);
+                SimpleNameSyntax id = node.Expression as SimpleNameSyntax;
+                if (id == null)
+                {
+                    id = (node.Expression as MemberBindingExpressionSyntax)?.Name;
+                    callee = ctx._bound;
+                }
+                else
+                    callee = ctx._this;
 
-                callee = ctx._this;
+                implicitGenericArgs = ResolveGenericArgumentsFromName(id);
                 callsite =
                     ResolveLocalMember(id)
                     .Concat(ctx.method.declaringType.GetStaticMethods(id.Identifier.Text))
@@ -411,7 +435,7 @@ namespace Slowsharp
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
-            if (callee != null && method.declaringType != callee.GetHybType())
+            if (callee != null && method.declaringType.parent == callee.GetHybType())
                 callee = callee.parent;
 
             var ret = method.target.Invoke(callee, args, hasRefOrOut);

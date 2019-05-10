@@ -168,9 +168,7 @@ private static int acac = 123;
 
         static int Main(int n) {
 
-Console.WriteLine(BA.A);
-Console.WriteLine(BA.B);
-
+Console.WriteLine(nameof(Console));
 
 return v;
 
@@ -193,6 +191,7 @@ class Fooo : Bar {
     }
 }
 ";
+            Console.WriteLine(nameof(Console));
             Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
 
             Console.WriteLine(src);

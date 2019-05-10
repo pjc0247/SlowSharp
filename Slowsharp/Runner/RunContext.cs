@@ -15,6 +15,7 @@ namespace Slowsharp
         public Dictionary<string, Class> types { get; }
 
         public HybInstance _this { get; set; }
+        public HybInstance _bound { get; set; }
         public SSMethodInfo method { get; private set; }
         public SyntaxNode lastNode { get; set; }
         public Stack<SSMethodInfo> methodStack { get; private set; }

@@ -116,7 +116,8 @@ namespace Slowsharp
             {
                 id = id,
                 fieldType = runner.resolver.GetType($"{field.Declaration.Type}"),
-                isStatic = field.Modifiers.IsStatic(),
+                isStatic = field.Modifiers.IsStatic() | field.Modifiers.IsConst(),
+                isConst = field.Modifiers.IsConst(),
                 field = field,
                 declaringClass = this,
                 declartor = declarator,
