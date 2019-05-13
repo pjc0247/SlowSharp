@@ -9,6 +9,7 @@ namespace Slowsharp
     internal enum RunMode
     {
         Preparse,
+        Parse,
         Execution,
         HotLoadMethodsOnly
     }

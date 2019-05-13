@@ -36,7 +36,7 @@ namespace Slowsharp
         {
             startsAt = DateTime.Now;
         }
-        public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= config.timeout;
+        public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= config.Timeout;
 
         public void PushMethod(SSMethodInfo methodInfo)
         {

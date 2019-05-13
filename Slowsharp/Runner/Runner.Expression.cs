@@ -487,6 +487,11 @@ namespace Slowsharp
             return ctx.method.declaringClass.GetMethods(id);
         }
 
+        private HybInstance RunNameOf(SimpleNameSyntax node)
+        {
+            return HybInstance.String(node.Identifier.Text.Split('.').Last());
+        }
+
         private HybInstance RunElementAccess(ElementAccessExpressionSyntax node)
         {
             var left = RunExpression(node.Expression);

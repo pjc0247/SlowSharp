@@ -115,7 +115,7 @@ namespace Slowsharp
             if (type == null)
                 return false;    
 
-            var ac = ctx.config.accessControl;
+            var ac = ctx.config.AccessControl;
             if (ac.IsSafeType(type) == false)
                 throw new SandboxException($"{id} is not allowed to use.");
 

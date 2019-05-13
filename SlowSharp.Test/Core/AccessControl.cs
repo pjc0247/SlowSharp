@@ -10,7 +10,7 @@ namespace Slowsharp.Test
         public void Setup()
         {
             var ac = BlacklistAccessControl.Default;
-            TestRunner.config.accessControl = ac;
+            TestRunner.config.AccessControl = ac;
         }
         [TestCleanup]
         public void Cleanup()
