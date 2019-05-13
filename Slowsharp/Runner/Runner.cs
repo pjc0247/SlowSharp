@@ -32,6 +32,9 @@ namespace Slowsharp
 
         private RunMode runMode;
 
+        private Dictionary<string, SyntaxNode> pendingSyntaxs = new Dictionary<string, SyntaxNode>();
+        private HashSet<SyntaxNode> loadedSyntaxs = new HashSet<SyntaxNode>();
+
         public Runner(ScriptConfig scriptConfig, RunConfig config)
         {
             this.ctx = new RunContext(config);
@@ -79,8 +82,18 @@ namespace Slowsharp
 
         public void LoadSyntax(SyntaxNode node)
         {
-            runMode = RunMode.Preparse;
+            runMode = RunMode.Parse;
             Run(node);
+            runMode = RunMode.Execution;
+        }
+        public void LoadSyntax(SyntaxNode[] nodes)
+        {
+            runMode = RunMode.Preparse;
+            foreach (var node in nodes)
+                Run(node);
+            runMode = RunMode.Parse;
+            foreach (var node in nodes)
+                Run(node);
             runMode = RunMode.Execution;
         }
         public void UpdateMethodsOnly(SyntaxNode node)
@@ -140,6 +153,9 @@ namespace Slowsharp
 
         public void Run(SyntaxNode node)
         {
+            if (loadedSyntaxs.Contains(node))
+                return;
+
             ctx.lastNode = node;
 
             var treatAsBlock = new Type[]
@@ -155,6 +171,9 @@ namespace Slowsharp
                 case RunMode.Preparse:
                     RunAsPreparse(node);
                     break;
+                case RunMode.Parse:
+                    RunAsParse(node);
+                    break;
                 case RunMode.HotLoadMethodsOnly:
                     RunAsHotReloadMethodsOnly(node);
                     break;
@@ -168,8 +187,15 @@ namespace Slowsharp
 
             if (ctx.IsExpird())
                 throw new TimeoutException();
+
+            loadedSyntaxs.Add(node);
         }
         public void RunAsPreparse(SyntaxNode node)
+        {
+            if (node is ClassDeclarationSyntax cd)
+                pendingSyntaxs[cd.Identifier.Text] = node;
+        }
+        public void RunAsParse(SyntaxNode node)
         {
             if (node is UsingDirectiveSyntax)
                 AddUsing(node as UsingDirectiveSyntax);
