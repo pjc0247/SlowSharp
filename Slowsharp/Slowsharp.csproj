@@ -150,6 +150,7 @@
     <Compile Include="Runner\Runner.Expression.cs" />
     <Compile Include="Runner\Runner.FlowControl.cs" />
     <Compile Include="Runtime\SSFieldInfo.cs" />
+    <Compile Include="Runtime\SSParamInfo.cs" />
     <Compile Include="Runtime\SSPropertyInfo.cs" />
     <Compile Include="Sandbox\BlacklistAccessControl.cs" />
     <Compile Include="Sandbox\DefaultAccessControl.cs" />

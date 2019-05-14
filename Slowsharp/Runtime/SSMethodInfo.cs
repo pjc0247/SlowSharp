@@ -12,7 +12,6 @@ namespace Slowsharp
     public class SSMethodInfo : SSMemberInfo
     {
         public Invokable target;
-        public BaseMethodDeclarationSyntax declaration;
 
         /// <summary>
         /// Whether method has `params` modifier in last parameter.
@@ -20,7 +19,10 @@ namespace Slowsharp
         public bool isVaArg { get; }
         public HybType returnType { get; }
 
+        public SSParamInfo[] parameters { get; }
+
         internal JumpDestination[] jumps;
+        internal BaseMethodDeclarationSyntax declaration;
 
         internal SSMethodInfo(Runner runner, string id, HybType declaringType, BaseMethodDeclarationSyntax declaration)
         {
@@ -35,6 +37,39 @@ namespace Slowsharp
             this.isVaArg =
                 declaration.ParameterList.Parameters.LastOrDefault()
                 ?.Modifiers.IsParams() ?? false;
+
+            this.parameters = new SSParamInfo[declaration.ParameterList.Parameters.Count];
+            for (int i = 0; i < this.parameters.Length; i++)
+            {
+                var p = declaration.ParameterList.Parameters[i];
+                this.parameters[i] = new SSParamInfo()
+                {
+                    id = p.Identifier.Text,
+                    defaultValue = p.Default != null ? runner.RunExpression(p.Default.Value) : null,
+                    isParams = p.Modifiers.IsParams()
+                };
+            }
+        }
+        internal SSMethodInfo(Runner runner, string id, HybType declaringType, Invokable body, HybType[] parameterTypes, HybType returnType)
+        {
+            this.id = id;
+            this.signature = id; // ??
+            this.declaringType = declaringType;
+            this.target = body;
+
+            this.returnType = returnType;
+            this.isVaArg = false; // for now
+
+            this.parameters = new SSParamInfo[parameterTypes.Length];
+            for (int i = 0; i < this.parameters.Length; i++)
+            {
+                this.parameters[i] = new SSParamInfo()
+                {
+                    id = $"{i}",
+                    defaultValue = null,
+                    isParams = false
+                };
+            }
         }
         internal SSMethodInfo(MethodInfo methodInfo)
         {
@@ -47,6 +82,19 @@ namespace Slowsharp
             this.isVaArg =
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
+
+            var ps = methodInfo.GetParameters();
+            this.parameters = new SSParamInfo[ps.Length];
+            for (int i = 0; i < this.parameters.Length; i++)
+            {
+                var p = ps[i];
+                this.parameters[i] = new SSParamInfo()
+                {
+                    id = p.Name,
+                    defaultValue = p.HasDefaultValue ? HybInstance.Object(p.DefaultValue) : null,
+                    isParams = this.isVaArg && i == this.parameters.Length - 1
+                };
+            }
         }
 
         public Type[] GetGenericArgumentsFromDefinition()

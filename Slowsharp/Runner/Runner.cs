@@ -153,9 +153,6 @@ namespace Slowsharp
 
         public void Run(SyntaxNode node)
         {
-            if (loadedSyntaxs.Contains(node))
-                return;
-
             ctx.lastNode = node;
 
             var treatAsBlock = new Type[]
@@ -187,8 +184,6 @@ namespace Slowsharp
 
             if (ctx.IsExpird())
                 throw new TimeoutException();
-
-            loadedSyntaxs.Add(node);
         }
         public void RunAsPreparse(SyntaxNode node)
         {
@@ -197,12 +192,17 @@ namespace Slowsharp
         }
         public void RunAsParse(SyntaxNode node)
         {
+            if (loadedSyntaxs.Contains(node))
+                return;
+
             if (node is UsingDirectiveSyntax)
                 AddUsing(node as UsingDirectiveSyntax);
             else if (node is ClassDeclarationSyntax)
                 AddClass(node as ClassDeclarationSyntax);
             else if (node is ConstructorDeclarationSyntax)
                 AddConstructorMethod(node as ConstructorDeclarationSyntax);
+            else if (node is IndexerDeclarationSyntax)
+                AddIndexer(node as IndexerDeclarationSyntax);
             else if (node is PropertyDeclarationSyntax)
                 AddProperty(node as PropertyDeclarationSyntax);
             else if (node is FieldDeclarationSyntax)
@@ -213,6 +213,8 @@ namespace Slowsharp
                 AddEnum(node as EnumDeclarationSyntax);
             else if (node is EnumMemberDeclarationSyntax)
                 AddEnumMember(node as EnumMemberDeclarationSyntax);
+
+            loadedSyntaxs.Add(node);
         }
         public void RunAsHotReloadMethodsOnly(SyntaxNode node)
         {
@@ -294,20 +296,18 @@ namespace Slowsharp
             var vf = new VarFrame(null);
             var count = 0;
 
-            foreach (var p in method.declaration.ParameterList.Parameters)
+            foreach (var p in method.parameters)
             {
-                if (p.Default == null) continue;
-                vf.SetValue(p.Identifier.Text, RunExpression(p.Default.Value));
+                if (p.defaultValue == null) continue;
+                vf.SetValue(p.id, p.defaultValue);
             }
             foreach (var arg in args)
             {
-                var p = node.ParameterList.Parameters[count++];
-                var paramId = p.Identifier.Text;
-
-                if (p.Modifiers.IsParams())
+                var p = method.parameters[count++];
+                if (p.isParams)
                     break;
 
-                vf.SetValue(paramId, arg);
+                vf.SetValue(p.id, arg);
             }
 
             if (method.isVaArg)

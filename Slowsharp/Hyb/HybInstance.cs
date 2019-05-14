@@ -118,11 +118,11 @@ namespace Slowsharp
                 .Where(x => x.isStatic == false)
                 .OfType<SSInterpretPropertyInfo>())
             {
-                if (property.property.Initializer != null)
+                if (property.initializer != null)
                 {
                     runner.BindThis(this);
                     property.backingField.SetValue(this,
-                        runner.RunExpression(property.property.Initializer.Value));
+                        runner.RunExpression(property.initializer.Value));
                 }
             }
         }
@@ -304,6 +304,13 @@ namespace Slowsharp
             }
             else
             {
+                var p = type.GetProperty("[]");
+                if (p != null)
+                {
+                    value = p.setMethod.Invoke(this, args.Concat(new HybInstance[] { value }).ToArray());
+                    return true;
+                }
+
                 if (parent != null)
                     return parent.SetIndexer(args, value);
             }
@@ -340,6 +347,13 @@ namespace Slowsharp
             }
             else
             {
+                var p = type.GetProperty("[]");
+                if (p != null)
+                {
+                    value = p.getMethod.Invoke(this, args);
+                    return true;
+                }
+
                 if (parent != null)
                     return parent.GetIndexer(args, out value);
             }

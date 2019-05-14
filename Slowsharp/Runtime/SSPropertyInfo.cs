@@ -13,8 +13,8 @@ namespace Slowsharp
     {
         public HybType type { get; protected set; }
 
-        public Invokable setMethod { get; protected set; }
-        public Invokable getMethod { get; protected set; }
+        public SSMethodInfo setMethod { get; protected set; }
+        public SSMethodInfo getMethod { get; protected set; }
 
         //public abstract HybInstance GetValue(HybInstance _this);
         //public abstract HybInstance SetValue(HybInstance _this, HybInstance value);
@@ -25,36 +25,50 @@ namespace Slowsharp
         internal SSCompiledPropertyInfo(PropertyInfo property)
         {
             this.type = HybTypeCache.GetHybType(property.PropertyType);
-            this.getMethod = property.CanRead ? new Invokable(property.GetMethod) : null;
-            this.setMethod = property.CanWrite ? new Invokable(property.SetMethod) : null;
+            this.getMethod = property.CanRead ? new SSMethodInfo(property.GetMethod) : null;
+            this.setMethod = property.CanWrite ? new SSMethodInfo(property.SetMethod) : null;
         }
     }
     public class SSInterpretPropertyInfo : SSPropertyInfo
     {
-        public PropertyDeclarationSyntax property { get; }
+        public BasePropertyDeclarationSyntax property { get; }
+        public EqualsValueClauseSyntax initializer
+        {
+            get
+            {
+                if (property is PropertyDeclarationSyntax pd)
+                    return pd.Initializer;
+                return null;
+            }
+        }
 
         internal SSFieldInfo backingField { get; private set; }
         internal bool hasBackingField => backingField != null;
 
-        internal SSInterpretPropertyInfo(Class klass, Runner runner, PropertyDeclarationSyntax node)
+        internal SSInterpretPropertyInfo(Class klass, Runner runner, string id, BasePropertyDeclarationSyntax node)
         {
+            this.id = id;
             this.property = node;
             this.declaringClass = klass;
             this.type = runner.resolver.GetType($"{node.Type}");
 
-            if (node.ExpressionBody != null)
-                InitializeWithExpressionBody(runner, node);
+            if (node is PropertyDeclarationSyntax pd &&
+                pd.ExpressionBody != null)
+                InitializeWithExpressionBody(runner, pd);
             else InitializeWithAccessor(runner, node);
         }
 
         private void InitializeWithExpressionBody(Runner runner, PropertyDeclarationSyntax node)
         {
-            getMethod = new Invokable((args) =>
+            var invokable = new Invokable((args) =>
             {
                 return runner.RunExpression(node.ExpressionBody.Expression);
             });
+            getMethod = new SSMethodInfo(
+                runner, $"get_{id}", declaringType, invokable,
+                new HybType[] { }, type);
         }
-        private void InitializeWithAccessor(Runner runner, PropertyDeclarationSyntax node)
+        private void InitializeWithAccessor(Runner runner, BasePropertyDeclarationSyntax node)
         {
             var accs = node.AccessorList.Accessors;
 
@@ -64,8 +78,8 @@ namespace Slowsharp
             {
                 if (get.ExpressionBody == null && get.Body == null)
                     AddBackingFieldIfNotExist(runner, node);
-
-                getMethod = new Invokable((args) =>
+                
+                var invokable = new Invokable((args) =>
                 {
                     if (get.ExpressionBody != null)
                         return runner.RunExpression(get.ExpressionBody.Expression);
@@ -80,11 +94,14 @@ namespace Slowsharp
                             return runner.globals.GetStaticField(declaringClass, backingField.id);
 
                         HybInstance value;
-                        if (runner.ctx._this.GetPropertyOrField($"__{node.Identifier}", out value, AccessLevel.This))
+                        if (runner.ctx._this.GetPropertyOrField($"__{this.id}", out value, AccessLevel.This))
                             return value;
                         throw new InvalidOperationException();
                     }
                 });
+                getMethod = new SSMethodInfo(
+                    runner, $"get_{id}", declaringType, invokable,
+                    new HybType[] { }, type);
             }
 
             var set = accs.Where(x => x.Keyword.Text == "set")
@@ -94,13 +111,15 @@ namespace Slowsharp
                 if (set.ExpressionBody == null && set.Body == null)
                     AddBackingFieldIfNotExist(runner, node);
 
-                setMethod = new Invokable((args) =>
+                var invokable = new Invokable((args) =>
                 {
                     if (set.ExpressionBody != null)
                         return runner.RunExpression(set.ExpressionBody.Expression);
                     else if (set.Body != null)
                     {
-                        runner.RunBlock(set.Body);
+                        var vf = new VarFrame(runner.vars);
+                        vf.SetValue("value", args[1]);
+                        runner.RunBlock(set.Body, vf);
                         return runner.ret;
                     }
                     else
@@ -111,17 +130,20 @@ namespace Slowsharp
                             return null;
                         }
 
-                        if (runner.ctx._this.SetPropertyOrField($"__{node.Identifier}", args[0], AccessLevel.This))
+                        if (runner.ctx._this.SetPropertyOrField($"__{this.id}", args[0], AccessLevel.This))
                             return null;
                         throw new InvalidOperationException();
                     }
                 });
+                setMethod = new SSMethodInfo(
+                    runner, $"set_{id}", declaringType, invokable,
+                    new HybType[] { type }, HybTypeCache.Void);
             }
         }
 
-        private void AddBackingFieldIfNotExist(Runner runner, PropertyDeclarationSyntax node)
+        private void AddBackingFieldIfNotExist(Runner runner, BasePropertyDeclarationSyntax node)
         {
-            var id = $"__{node.Identifier}";
+            var id = $"__{this.id}";
             if (declaringClass.HasField(id))
                 return;
 

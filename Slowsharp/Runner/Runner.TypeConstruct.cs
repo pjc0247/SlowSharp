@@ -65,6 +65,11 @@ namespace Slowsharp
             klass = new Class(this, id, parentType, interfaceTypes.ToArray());
             ctx.types.Add(id, klass);
         }
+        private void AddIndexer(IndexerDeclarationSyntax node)
+        {
+            var type = resolver.GetType($"{node.Type}");
+            var propertyInfo = klass.AddProperty("[]", node);
+        }
         private void AddProperty(PropertyDeclarationSyntax node)
         {
             var isStatic = node.Modifiers.IsStatic();
@@ -97,7 +102,7 @@ namespace Slowsharp
 
             var backingField = info.backingField;
 
-            if (info.property.Initializer == null)
+            if (info.initializer == null)
                 globals.SetStaticField(klass, backingField.id, info.type.GetDefault());
             else
             {
@@ -106,7 +111,7 @@ namespace Slowsharp
                 {
                     globals.SetStaticField(
                         capturedKlass,
-                        backingField.id, RunExpression(info.property.Initializer.Value));
+                        backingField.id, RunExpression(info.initializer.Value));
                 });
             }
         }

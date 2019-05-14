@@ -168,7 +168,8 @@ private static int acac = 123;
 
         static int Main(int n) {
 
-Console.WriteLine(nameof(Console));
+var a = new int[] {1,2,3,4}
+return a.Any((int x) => { return x > 2; });
 
 return v;
 
@@ -191,6 +192,8 @@ class Fooo : Bar {
     }
 }
 ";
+            //src = System.IO.File.ReadAllText("a.cs");
+
             Console.WriteLine(nameof(Console));
             Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
 
