@@ -42,8 +42,9 @@ namespace Slowsharp
             this.type = InvokeType.ReflectionInvoke;
             this.compiledMethod = method;
         }
-        public Invokable(Func<HybInstance[], HybInstance> func)
+        public Invokable(Runner runner, Func<HybInstance[], HybInstance> func)
         {
+            this.runner = runner;
             this.type = InvokeType.FuncInvoke;
             this.funcMethod = func;
         }
@@ -73,6 +74,7 @@ namespace Slowsharp
             }
             else if (type == InvokeType.FuncInvoke)
             {
+                runner.BindThis(_this);
                 return funcMethod.Invoke(args);
             }
             else if (type == InvokeType.Interpret)

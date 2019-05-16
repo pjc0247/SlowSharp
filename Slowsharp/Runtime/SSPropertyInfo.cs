@@ -60,7 +60,7 @@ namespace Slowsharp
 
         private void InitializeWithExpressionBody(Runner runner, PropertyDeclarationSyntax node)
         {
-            var invokable = new Invokable((args) =>
+            var invokable = new Invokable(runner, (args) =>
             {
                 return runner.RunExpression(node.ExpressionBody.Expression);
             });
@@ -79,13 +79,21 @@ namespace Slowsharp
                 if (get.ExpressionBody == null && get.Body == null)
                     AddBackingFieldIfNotExist(runner, node);
                 
-                var invokable = new Invokable((args) =>
+                var invokable = new Invokable(runner, (args) =>
                 {
                     if (get.ExpressionBody != null)
                         return runner.RunExpression(get.ExpressionBody.Expression);
                     else if (get.Body != null)
                     {
-                        runner.RunBlock(get.Body);
+                        var vf = new VarFrame(runner.vars);
+                        if (node is IndexerDeclarationSyntax id)
+                        {
+                            var cnt = 0;
+                            foreach (var p in id.ParameterList.Parameters)
+                                vf.SetValue(p.Identifier.Text, args.ElementAt(cnt++));
+                        }
+
+                        runner.RunBlock(get.Body, vf);
                         return runner.ret;
                     }
                     else
@@ -111,7 +119,7 @@ namespace Slowsharp
                 if (set.ExpressionBody == null && set.Body == null)
                     AddBackingFieldIfNotExist(runner, node);
 
-                var invokable = new Invokable((args) =>
+                var invokable = new Invokable(runner, (args) =>
                 {
                     if (set.ExpressionBody != null)
                         return runner.RunExpression(set.ExpressionBody.Expression);
@@ -119,6 +127,14 @@ namespace Slowsharp
                     {
                         var vf = new VarFrame(runner.vars);
                         vf.SetValue("value", args[1]);
+
+                        if (node is IndexerDeclarationSyntax id)
+                        {
+                            var cnt = 0;
+                            foreach (var p in id.ParameterList.Parameters)
+                                vf.SetValue(p.Identifier.Text, args.ElementAt(cnt++));
+                        }
+
                         runner.RunBlock(set.Body, vf);
                         return runner.ret;
                     }
