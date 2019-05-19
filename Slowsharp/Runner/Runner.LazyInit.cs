@@ -11,6 +11,8 @@ namespace Slowsharp
         private List<Action> initializers = new List<Action>();
         private bool initialized = false;
 
+        private HashSet<Class> initializedTypes = new HashSet<Class>();
+
         public void AddLazyInitializer(Action callback)
         {
             initializers.Add(callback);
@@ -22,6 +24,35 @@ namespace Slowsharp
 
             foreach (var cb in initializers)
                 cb();
+
+            InitializeTypes();
+        }
+
+        /// <summary>
+        /// Runs all static constructors.
+        /// </summary>
+        private void InitializeTypes()
+        {
+            var oldTypeResolver = resolver;
+            resolver = new TypeResolverForStaticInitialization(this, resolver);
+
+            foreach (var init in staticInitializers)
+            {
+                RunStaticInitializer(init.Key);
+            }
+
+            resolver = oldTypeResolver;
+        }
+        internal void RunStaticInitializer(Class klass)
+        {
+            if (initializedTypes.Add(klass) == false)
+                return;
+
+            SSMethodInfo methodInfo = null;
+            if (staticInitializers.TryGetValue(klass, out methodInfo))
+            {
+                RunMethod(methodInfo, new HybInstance[] { });
+            }
         }
     }
 }

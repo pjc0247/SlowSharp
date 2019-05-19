@@ -101,7 +101,7 @@ namespace Slowsharp
             return id;
         }
 
-        public bool TryGetType(string id, out HybType type, Assembly hintAssembly = null)
+        public virtual bool TryGetType(string id, out HybType type, Assembly hintAssembly = null)
         {
             var sig = GetPureName(id);
             var rank = GetArrayRank(id);
@@ -131,7 +131,7 @@ namespace Slowsharp
 
             return true;
         }
-        public HybType GetType(string id)
+        public virtual HybType GetType(string id)
         {
             HybType type;
             if (TryGetType(id, out type))
@@ -140,7 +140,7 @@ namespace Slowsharp
             throw new SemanticViolationException($"Unrecognized type {id}");
         }
         
-        public HybType GetGenericType(string id, int n)
+        public virtual HybType GetGenericType(string id, int n)
         {
             id = $"{id}`{n}";
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -388,6 +389,8 @@ namespace Slowsharp
 
                 return parent.GetMethods()
                     .Concat(interpretKlass.GetMethods())
+                    .GroupBy(x => x.signature)
+                    .Select(x => x.Last())
                     .ToArray();
             }
         }
@@ -436,6 +439,10 @@ namespace Slowsharp
             {
                 if (isCompiledType)
                 {
+                    if (compiledType.IsPrimitive && other.compiledType.IsPrimitive)
+                        return TypeDescriptor.GetConverter(other.compiledType)
+                            .CanConvertTo(compiledType);
+
                     return compiledType
                         .IsAssignableFrom(other.compiledType);
                 }

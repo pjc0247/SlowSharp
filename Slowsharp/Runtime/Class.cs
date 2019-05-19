@@ -79,15 +79,15 @@ namespace Slowsharp
             if (methods.ContainsKey(id) == false)
                 methods[id] = new List<SSMethodInfo>();
         }
-        public void AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
+        public SSMethodInfo AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
         {
             EnsureMethodKey(id);
 
             var signature = MemberSignature.GetSignature(
                 runner.resolver, id, method);
 
-            methods[id].RemoveAll(x => x.signature == signature);
-            methods[id].Add(new SSMethodInfo(runner, id, type, method) {
+            var methodInfo = new SSMethodInfo(runner, id, type, method)
+            {
                 id = id,
                 isStatic = method.Modifiers.IsStatic(),
                 declaringClass = this,
@@ -95,7 +95,12 @@ namespace Slowsharp
                 jumps = jumps,
 
                 accessModifier = AccessModifierParser.Parse(method.Modifiers)
-            });
+            };
+
+            methods[id].RemoveAll(x => x.signature == signature);
+            methods[id].Add(methodInfo);
+
+            return methodInfo;
         }
         public SSInterpretPropertyInfo AddProperty(string id, BasePropertyDeclarationSyntax property)
         {

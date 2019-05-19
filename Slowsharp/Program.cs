@@ -192,7 +192,7 @@ class Fooo : Bar {
     }
 }
 ";
-            //src = System.IO.File.ReadAllText("a.cs");
+            src = System.IO.File.ReadAllText("a.cs");
 
             Console.WriteLine(nameof(Console));
             Console.WriteLine(CScript.RunSimple("\"hello from inception\""));

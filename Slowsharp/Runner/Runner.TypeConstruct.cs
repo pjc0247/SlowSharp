@@ -10,6 +10,8 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        private Dictionary<Class, SSMethodInfo> staticInitializers = new Dictionary<Class, SSMethodInfo>();
+
         private void AddUsing(UsingDirectiveSyntax node)
         {
             lookup.Add($"{node.Name}");
@@ -133,9 +135,12 @@ namespace Slowsharp
 
         private void AddConstructorMethod(ConstructorDeclarationSyntax node)
         {
-            klass.AddMethod(
+            var methodInfo = klass.AddMethod(
                 "$_ctor", node,
                 BuildJumps(node.Body));
+
+            if (methodInfo.isStatic)
+                staticInitializers[klass] = methodInfo;
         }
         private void AddMethod(MethodDeclarationSyntax node)
         {

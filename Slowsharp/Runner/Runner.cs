@@ -18,7 +18,7 @@ namespace Slowsharp
         internal RunContext ctx;
         internal GlobalStorage globals { get; }
         internal ExtensionMethodResolver extResolver { get; }
-        internal TypeResolver resolver { get; }
+        internal TypeResolver resolver { get; private set; }
         private IdLookup lookup;
         private Class klass;
         internal VarFrame vars { get; private set; }
@@ -227,6 +227,8 @@ namespace Slowsharp
         }
         public void RunAsExecution(SyntaxNode node)
         {
+            Console.WriteLine(node);
+
             if (node is BlockSyntax)
                 RunBlock(node as BlockSyntax);
             else if (node is ArrowExpressionClauseSyntax)
@@ -285,7 +287,6 @@ namespace Slowsharp
             vars = vars.parent;
             return ret;
         }
-        
 
         internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
         {
@@ -346,6 +347,14 @@ namespace Slowsharp
 
             return ret;
         }
+        internal HybInstance RunWrappedFunc(HybInstance _this, Func<HybInstance[], HybInstance> func, HybInstance[] args)
+        {
+            BindThis(_this);
+            var ret = func.Invoke(args);
+            if (halt == HaltType.Return)
+                halt = HaltType.None;
+            return ret;
+        }
         internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
         {
             BindThis(_this);
@@ -359,8 +368,10 @@ namespace Slowsharp
                 if (ctx._this != null)
                 {
                     if (ctx._this.SetPropertyOrField(key, value, AccessLevel.Outside))
-                        ;
+                        return;
                 }
+                if (ctx.method.declaringType.SetStaticPropertyOrField(key, value))
+                    return;
             }
         }
     }

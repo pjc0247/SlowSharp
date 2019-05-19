@@ -74,8 +74,7 @@ namespace Slowsharp
             }
             else if (type == InvokeType.FuncInvoke)
             {
-                runner.BindThis(_this);
-                return funcMethod.Invoke(args);
+                return runner.RunWrappedFunc(_this, funcMethod, args);
             }
             else if (type == InvokeType.Interpret)
             {
