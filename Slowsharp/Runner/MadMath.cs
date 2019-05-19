@@ -38,8 +38,11 @@ namespace Slowsharp
             if (op == "!=") return Neq(a, b);
             if (op == "||") return Or(a, b);
             if (op == "&&") return And(a, b);
+            if (op == "^") return Xor(a, b);
             if (op == "&") return BitwiseAnd(a, b);
             if (op == "|") return BitwiseAnd(a, b);
+            if (op == ">>") return ShiftRight(a, b);
+            if (op == "<<") return ShiftLeft(a, b);
 
             throw new ArgumentException($"Unrecognized operator: '{op}'.");
         }
@@ -371,6 +374,24 @@ namespace Slowsharp
 
             throw new NotImplementedException();
         }
+        public static HybInstance Xor(HybInstance a, HybInstance b)
+        {
+            if (a.isCompiledType && b.isCompiledType)
+            {
+                if (a.Is<bool>() && b.Is<bool>())
+                {
+                    return HybInstance.Bool(a.As<bool>() ^ b.As<bool>());
+                }
+
+                if (a.GetHybType().isPrimitive)
+                {
+                    if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() ^ b.As<Int32>());
+                    if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() ^ b.As<Int32>());
+                }
+            }
+
+            throw new NotImplementedException();
+        }
         public static HybInstance BitwiseAnd(HybInstance a, HybInstance b)
         {
             if (a.isCompiledType && b.isCompiledType)
@@ -404,6 +425,36 @@ namespace Slowsharp
             var bitwiseOrMethod = GetBitwiseOrMethod(a);
             if (bitwiseOrMethod != null)
                 return bitwiseOrMethod.target.Invoke(null, new HybInstance[] { a, b });
+
+            throw new NotImplementedException();
+        }
+        public static HybInstance ShiftRight(HybInstance a, HybInstance b)
+        {
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() >> b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() >> b.As<Int32>());
+                if (a.Is<UInt32>()) return HybInstance.UInt(a.As<UInt32>() >> b.As<Int32>());
+                if (a.Is<UInt64>()) return HybInstance.UInt64(a.As<UInt64>() >> b.As<Int32>());
+            }
+
+            throw new NotImplementedException();
+        }
+        public static HybInstance ShiftLeft(HybInstance a, HybInstance b)
+        {
+            if (a.IsNull())
+                throw new NullReferenceException(a.id);
+
+            if (a.GetHybType().isPrimitive)
+            {
+                if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() << b.As<Int32>());
+                if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() << b.As<Int32>());
+                if (a.Is<UInt32>()) return HybInstance.UInt(a.As<UInt32>() << b.As<Int32>());
+                if (a.Is<UInt64>()) return HybInstance.UInt64(a.As<UInt64>() << b.As<Int32>());
+            }
 
             throw new NotImplementedException();
         }
