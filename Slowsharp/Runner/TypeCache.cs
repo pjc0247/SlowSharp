@@ -55,6 +55,8 @@ namespace Slowsharp
             else if (id == "double") return HybType.Double;
             else if (id == "decimal") return HybType.Decimal;
             else if (id == "uint") return HybType.Uint32;
+            else if (id == "long") return HybType.Int64;
+            else if (id == "ulong") return HybType.Uint64;
             else if (id == "object") return HybType.Object;
 
             if (ctx.types.ContainsKey(id))

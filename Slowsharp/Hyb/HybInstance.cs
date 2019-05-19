@@ -73,6 +73,10 @@ namespace Slowsharp
             => new HybInstance(HybType.Int32, n);
         public static HybInstance Int64(Int64 n)
             => new HybInstance(HybType.Int64, n);
+        public static HybInstance UInt(uint n)
+            => new HybInstance(HybType.Uint32, n);
+        public static HybInstance UInt64(UInt64 n)
+            => new HybInstance(HybType.Uint64, n);
         public static HybInstance Float(float f)
             => new HybInstance(HybType.Float, f);
         public static HybInstance Double(double f)
