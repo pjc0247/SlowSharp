@@ -19,6 +19,7 @@ namespace Slowsharp
         public SSMethodInfo method { get; private set; }
         public SyntaxNode lastNode { get; set; }
         public Stack<SSMethodInfo> methodStack { get; private set; }
+        public Stack<CallFrame> callstack { get; private set; }
 
         private DateTime startsAt;
 
@@ -28,6 +29,7 @@ namespace Slowsharp
 
             this.types = new Dictionary<string, Class>();
             this.methodStack = new Stack<SSMethodInfo>();
+            this.callstack = new Stack<CallFrame>();
 
             // This prevents bug
             Reset();
@@ -41,11 +43,19 @@ namespace Slowsharp
         public void PushMethod(SSMethodInfo methodInfo)
         {
             methodStack.Push(methodInfo);
+            callstack.Push(new CallFrame()
+            {
+                _this = _this,
+                method = method
+            });
             method = methodInfo;
         }
         public void PopMethod()
         {
             methodStack.Pop();
+            var prevCallframe = callstack.Pop();
+            _this = prevCallframe._this;
+            method = prevCallframe.method;
         }
     }
 }

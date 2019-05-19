@@ -101,6 +101,7 @@
     <Compile Include="Optimizer\OptNode\OptTypeofNode.cs" />
     <Compile Include="Optimizer\OptNode\OptUnaryNode.cs" />
     <Compile Include="Optimizer\PointableDictionary.cs" />
+    <Compile Include="Runner\CallFrame.cs" />
     <Compile Include="Runner\CatchFrame.cs" />
     <Compile Include="Runner\ExtensionMethodResolver.cs" />
     <Compile Include="Runner\GlobalStorage.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Runner\Runner.LazyInit.cs" />
     <Compile Include="Runner\ScriptConfig.cs" />
     <Compile Include="Runner\TypeCache.cs" />
+    <Compile Include="Runner\TypeResolverForStaticInitialization.cs" />
     <Compile Include="Runtime\Class.cs" />
     <Compile Include="CScript.cs" />
     <Compile Include="Exception\NoSuchMemberException.cs" />
