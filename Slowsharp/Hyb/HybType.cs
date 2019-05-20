@@ -266,9 +266,15 @@ namespace Slowsharp
 
         public bool SetStaticPropertyOrField(string id, HybInstance value)
         {
+            return SetStaticPropertyOrField(id, value, AccessLevel.Outside);
+        }
+        internal bool SetStaticPropertyOrField(string id, HybInstance value, AccessLevel accessLevel)
+        {
             SSPropertyInfo property = GetProperty(id);
             if (property != null)
             {
+                if (property.accessModifier.IsAcceesible(accessLevel) == false)
+                    throw new SemanticViolationException($"Invalid access: {id}");
                 property.setMethod.Invoke(null, new HybInstance[] { value });
                 return true;
             }
@@ -276,6 +282,8 @@ namespace Slowsharp
             SSFieldInfo field = GetField(id);
             if (field != null)
             {
+                if (field.accessModifier.IsAcceesible(accessLevel) == false)
+                    throw new SemanticViolationException($"Invalid access: {id}");
                 field.SetValue(null, value);
                 return true;
             }

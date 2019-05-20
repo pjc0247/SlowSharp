@@ -161,16 +161,7 @@ namespace Slowsharp
             if (leftNode is IdentifierNameSyntax id)
             {
                 var key = id.Identifier.ValueText;
-
-                var set = false;
-                if (ctx._this != null)
-                {
-                    if (ctx._this.SetPropertyOrField(key, right, AccessLevel.Outside))
-                        set = true;
-                }
-
-                if (set == false)
-                    vars.SetValue(key, right);
+                UpdateVariable(key, right);
             }
             else if (leftNode is MemberAccessExpressionSyntax ma)
             {
@@ -186,7 +177,12 @@ namespace Slowsharp
                 }
 
                 var left = RunExpression(ma.Expression);
-                left.SetPropertyOrField($"{ma.Name}", right, AccessLevel.Outside);
+                var accessLevel = AccessLevel.Outside;
+
+                if (ma.Expression is ThisExpressionSyntax)
+                    accessLevel = AccessLevel.This;
+
+                left.SetPropertyOrField($"{ma.Name}", right, accessLevel);
             }
             else if (leftNode is ElementAccessExpressionSyntax ea)
             {
@@ -231,9 +227,14 @@ namespace Slowsharp
                 }
 
                 var callee = RunExpression(ma.Expression);
-                callee.GetPropertyOrField($"{ma.Name}", out left);
+                var accessLevel = AccessLevel.Outside;
+
+                if (ma.Expression is ThisExpressionSyntax)
+                    accessLevel = AccessLevel.This;
+
+                callee.GetPropertyOrField($"{ma.Name}", out left, accessLevel);
                 value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
-                callee.SetPropertyOrField($"{ma.Name}", value, AccessLevel.Outside);
+                callee.SetPropertyOrField($"{ma.Name}", value, accessLevel);
             }
             else if (node.Left is ElementAccessExpressionSyntax ea)
             {
@@ -536,7 +537,8 @@ namespace Slowsharp
             if (node.Expression is ThisExpressionSyntax ||
                 left.GetHybType() == ctx.method.declaringType)
             {
-                // TODO
+                // TODO: protected
+                accessLevel = AccessLevel.This;
             }
 
             HybInstance o;

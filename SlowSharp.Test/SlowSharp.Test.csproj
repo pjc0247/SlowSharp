@@ -64,6 +64,7 @@
     <Compile Include="Syntax\Class\Ctor.cs" />
     <Compile Include="Syntax\Class\Property.cs" />
     <Compile Include="Syntax\Class\RefOrOut.cs" />
+    <Compile Include="Syntax\Class\StaticCtor.cs" />
     <Compile Include="Syntax\Class\VaArgs.cs" />
     <Compile Include="Syntax\Class\Accessor.cs" />
     <Compile Include="Syntax\Class\Field.cs" />

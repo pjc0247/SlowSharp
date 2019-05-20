@@ -367,12 +367,16 @@ namespace Slowsharp
             {
                 if (ctx._this != null)
                 {
-                    if (ctx._this.SetPropertyOrField(key, value, AccessLevel.Outside))
+                    if (ctx._this.SetPropertyOrField(key, value, AccessLevel.This))
                         return;
                 }
-                if (ctx.method.declaringType.SetStaticPropertyOrField(key, value))
+                if (ctx.method.declaringType.SetStaticPropertyOrField(key, value, AccessLevel.This))
                     return;
             }
+            else
+                return;
+
+            throw new SemanticViolationException($"No such variable in current context: {key}.");
         }
     }
 }
