@@ -18,7 +18,7 @@ namespace Slowsharp
             var hasReturn = node.DescendantNodes()
                 .Any(x => x is ReturnStatementSyntax);
             var ps = node.ParameterList.Parameters;
-            var retType = TypeDeduction.GetReturnType(resolver, node.Body);
+            var retType = TypeDeduction.GetReturnType(Resolver, node.Body);
 
             MethodInfo converter = null;
             object body = null;
@@ -36,7 +36,7 @@ namespace Slowsharp
                 for (int i = 0; i < ps.Count; i++) {
                     if (ps[i].Type == null)
                         throw new SemanticViolationException("Please provide a explicit type to all lambda parameters, this function is partialy implemented.");
-                    genericArgs[i] = resolver
+                    genericArgs[i] = Resolver
                         .GetType($"{ps[i].Type}")
                         .Unwrap();
                 }
@@ -48,9 +48,9 @@ namespace Slowsharp
                 {
                     body = new Func<object>(() => {
                         RunBlock(node.Body as BlockSyntax);
-                        if (halt == HaltType.Return)
-                            halt = HaltType.None;
-                        return ret.Unwrap();
+                        if (Halt == HaltType.Return)
+                            Halt = HaltType.None;
+                        return Ret.Unwrap();
                     });
                 }
                 else if (ps.Count == 1)
@@ -110,7 +110,7 @@ namespace Slowsharp
                 {
                     if (ps[i].Type == null)
                         throw new SemanticViolationException("Please provide a explicit type to all lambda parameters, this function is partialy implemented.");
-                    genericArgs[i] = resolver
+                    genericArgs[i] = Resolver
                         .GetType($"{ps[i].Type}")
                         .Unwrap();
                 }
@@ -121,8 +121,8 @@ namespace Slowsharp
                 {
                     body = new Action(() => {
                         RunBlock(node.Body as BlockSyntax);
-                        if (halt == HaltType.Return)
-                            halt = HaltType.None;
+                        if (Halt == HaltType.Return)
+                            Halt = HaltType.None;
                     });
                 }
                 else if (ps.Count == 1)
@@ -178,23 +178,23 @@ namespace Slowsharp
 
         private void ActionBody(SeparatedSyntaxList<ParameterSyntax> ps, BlockSyntax body, params object[] args)
         {
-            var vf = new VarFrame(vars);
+            var vf = new VarFrame(Vars);
             for (int i = 0; i < ps.Count; i++)
                 vf.SetValue($"{ps[i].Identifier}", HybInstance.Object(args[i]));
             RunBlock(body as BlockSyntax, vf);
-            if (halt == HaltType.Return)
-                halt = HaltType.None;
+            if (Halt == HaltType.Return)
+                Halt = HaltType.None;
         }
         private object FuncBody(SeparatedSyntaxList<ParameterSyntax> ps, BlockSyntax body, params object[] args)
         {
-            var vf = new VarFrame(vars);
+            var vf = new VarFrame(Vars);
             for (int i = 0; i< ps.Count; i++) 
                 vf.SetValue($"{ps[i].Identifier}", HybInstance.Object(args[i]));
             RunBlock(body as BlockSyntax, vf);
-            if (halt == HaltType.Return)
-                halt = HaltType.None;
+            if (Halt == HaltType.Return)
+                Halt = HaltType.None;
 
-            return ret.Unwrap();
+            return Ret.Unwrap();
         }
 
         private static Action ConvertA(Action func)

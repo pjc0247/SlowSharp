@@ -19,20 +19,20 @@ namespace Slowsharp
         public DumpSnapshot(Runner runner)
         {
             this.runner = runner;
-            this._this = runner.ctx._this;
-            this.locals = runner.vars.Flatten();
-            this.methodSrc = runner.ctx.method.declaration.ToString();
+            this._this = runner.Ctx._this;
+            this.locals = runner.Vars.Flatten();
+            this.methodSrc = runner.Ctx.Method.Declaration.ToString();
 
-            var method = runner.ctx.method;
-            var methodLine = method.declaration.GetLocation().GetLineSpan().StartLinePosition.Line;
-            var nodeLine = runner.ctx.lastNode.GetLocation().GetLineSpan().StartLinePosition.Line;
+            var method = runner.Ctx.Method;
+            var methodLine = method.Declaration.GetLocation().GetLineSpan().StartLinePosition.Line;
+            var nodeLine = runner.Ctx.LastNode.GetLocation().GetLineSpan().StartLinePosition.Line;
             breakLine = nodeLine - methodLine;
 
             var frames = new List<CallStackFrame>();
-            foreach (var m in runner.ctx.methodStack)
+            foreach (var m in runner.Ctx.Callstack)
             {
                 frames.Add(new CallStackFrame() {
-                    signature = m.signature
+                    signature = m.Method.Signature
                 });  
             }
             this.callStack = frames.ToArray();

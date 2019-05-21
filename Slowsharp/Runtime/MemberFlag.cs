@@ -22,23 +22,23 @@ namespace Slowsharp
         public static bool IsMatch(this SSMemberInfo _this, MemberFlag flag)
         {
             if (flag.HasFlag(MemberFlag.Static) &&
-                _this.isStatic == false)
+                _this.IsStatic == false)
                 return false;
             if (flag.HasFlag(MemberFlag.Member) &&
-                _this.isStatic == true)
+                _this.IsStatic == true)
                 return false;
 
             if (flag.HasFlag(MemberFlag.Public) &&
-                _this.accessModifier.HasFlag(AccessModifier.Public) == false)
+                _this.AccessModifier.HasFlag(AccessModifier.Public) == false)
                 return false;
             if (flag.HasFlag(MemberFlag.Protected) &&
-                _this.accessModifier.HasFlag(AccessModifier.Protected) == false)
+                _this.AccessModifier.HasFlag(AccessModifier.Protected) == false)
                 return false;
             if (flag.HasFlag(MemberFlag.Private) &&
-                _this.accessModifier.HasFlag(AccessModifier.Private) == false)
+                _this.AccessModifier.HasFlag(AccessModifier.Private) == false)
                 return false;
             if (flag.HasFlag(MemberFlag.Internal) &&
-                _this.accessModifier.HasFlag(AccessModifier.Internal) == false)
+                _this.AccessModifier.HasFlag(AccessModifier.Internal) == false)
                 return false;
 
             return true;

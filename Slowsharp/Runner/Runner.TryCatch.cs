@@ -15,7 +15,7 @@ namespace Slowsharp
             bool hasCatches = node.Catches.Count > 0;
 
             if (hasCatches)
-                catches.Push(new CatchFrame(this, node));
+                Catches.Push(new CatchFrame(this, node));
             try
             {
                 RunBlock(node.Block);
@@ -26,7 +26,7 @@ namespace Slowsharp
                     Run(node.Finally.Block);
             }
             if (hasCatches)
-                catches.Pop();
+                Catches.Pop();
         }
     }
 }

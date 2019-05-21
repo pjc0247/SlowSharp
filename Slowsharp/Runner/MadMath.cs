@@ -49,7 +49,7 @@ namespace Slowsharp
 
         public static HybInstance PrefixNot(HybInstance a)
         {
-            if (a.isCompiledType)
+            if (a.IsCompiledType)
             {
                 if (a.Is<bool>())
                 {
@@ -61,16 +61,16 @@ namespace Slowsharp
 
             var plusMethod = GetUnaryPlusMethod(a);
             if (plusMethod != null)
-                return plusMethod.target.Invoke(null, new HybInstance[] { a });
+                return plusMethod.Target.Invoke(null, new HybInstance[] { a });
 
             throw new NotImplementedException();
         }
 
         public static HybInstance PrefixMinus(HybInstance a)
         {
-            if (a.isCompiledType)
+            if (a.IsCompiledType)
             {
-                if (a.GetHybType().isValueType)
+                if (a.GetHybType().IsValueType)
                 {
                     if (a.Is<Decimal>()) return HybInstance.Decimal(-a.As<Decimal>());
                     if (a.Is<Double>()) return HybInstance.Double(-a.As<Double>());
@@ -84,24 +84,24 @@ namespace Slowsharp
 
             var negationMethod = GetUnaryNegationMethod(a);
             if (negationMethod != null)
-                return negationMethod.target.Invoke(null, new HybInstance[] { a });
+                return negationMethod.Target.Invoke(null, new HybInstance[] { a });
 
             throw new NotImplementedException();
         }
 
         public static HybInstance PrefixPlus(HybInstance a)
         {
-            if (a.isCompiledType)
-                return HybInstance.Object(_PrefixPlus(a.innerObject));
+            if (a.IsCompiledType)
+                return HybInstance.Object(_PrefixPlus(a.InnerObject));
             throw new NotImplementedException();
         }
         private static dynamic _PrefixPlus(dynamic a) => +a;
 
         public static HybInstance PostfixInc(HybInstance a)
         {
-            if (a.isCompiledType)
+            if (a.IsCompiledType)
             {
-                if (a.GetHybType().isValueType)
+                if (a.GetHybType().IsValueType)
                 {
                     if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() + 1);
                     if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() + 1);
@@ -112,15 +112,15 @@ namespace Slowsharp
 
             var incMethod = GetIncMethod(a);
             if (incMethod != null)
-                return incMethod.target.Invoke(null, new HybInstance[] { a });
+                return incMethod.Target.Invoke(null, new HybInstance[] { a });
 
             throw new NotImplementedException();
         }
         public static HybInstance PostfixDec(HybInstance a)
         {
-            if (a.isCompiledType)
+            if (a.IsCompiledType)
             {
-                if (a.GetHybType().isValueType)
+                if (a.GetHybType().IsValueType)
                 {
                     if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() - 1);
                     if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() - 1);
@@ -131,7 +131,7 @@ namespace Slowsharp
 
             var decMethod = GetDecMethod(a);
             if (decMethod != null)
-                return decMethod.target.Invoke(null, new HybInstance[] { a });
+                return decMethod.Target.Invoke(null, new HybInstance[] { a });
 
             throw new NotImplementedException();
         }
@@ -139,9 +139,9 @@ namespace Slowsharp
         public static HybInstance Add(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -155,16 +155,16 @@ namespace Slowsharp
 
             var addMethod = GetAddMethod(a);
             if (addMethod != null)
-                return addMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return addMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Sub(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -176,16 +176,16 @@ namespace Slowsharp
 
             var subMethod = GetSubMethod(a);
             if (subMethod != null)
-                return subMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return subMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Mul(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -197,16 +197,16 @@ namespace Slowsharp
 
             var mulMethod = GetMulMethod(a);
             if (mulMethod != null)
-                return mulMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return mulMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Div(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -218,7 +218,7 @@ namespace Slowsharp
 
             var DivMethod = GetDivMethod(a);
             if (DivMethod != null)
-                return DivMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return DivMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
@@ -226,9 +226,9 @@ namespace Slowsharp
         public static HybInstance G(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -240,16 +240,16 @@ namespace Slowsharp
 
             var greaterMethod = GetGreaterMethod(a);
             if (greaterMethod != null)
-                return greaterMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return greaterMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance GE(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -261,16 +261,16 @@ namespace Slowsharp
 
             var greaterEqualMethod = GetGreaterEqualMethod(a);
             if (greaterEqualMethod != null)
-                return greaterEqualMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return greaterEqualMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance L(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -282,16 +282,16 @@ namespace Slowsharp
 
             var lessMethod = GetLessMethod(a);
             if (lessMethod != null)
-                return lessMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return lessMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance LE(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 (a, b) = Promote(a, b);
 
@@ -303,44 +303,44 @@ namespace Slowsharp
 
             var lessEqualMethod = GetLessEqualMethod(a);
             if (lessEqualMethod != null)
-                return lessEqualMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return lessEqualMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance Eq(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 var aType = a.GetHybType();
-                if (aType.isValueType)
+                if (aType.IsValueType)
                 {
-                    if (aType.isPrimitive)
+                    if (aType.IsPrimitive)
                         (a, b) = Promote(a, b);
-                    return HybInstance.Bool(a.innerObject.Equals(b.innerObject));
+                    return HybInstance.Bool(a.InnerObject.Equals(b.InnerObject));
                 }
-                else if (aType.compiledType == typeof(string))
-                    return HybInstance.Bool(a.innerObject.Equals(b.innerObject));
+                else if (aType.CompiledType == typeof(string))
+                    return HybInstance.Bool(a.InnerObject.Equals(b.InnerObject));
 
-                return HybInstance.Bool(a.innerObject == b.innerObject);
+                return HybInstance.Bool(a.InnerObject == b.InnerObject);
             }
 
             throw new NotImplementedException();
         }
         public static HybInstance Neq(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 var aType = a.GetHybType();
-                if (aType.isValueType)
+                if (aType.IsValueType)
                 {
-                    if (aType.isPrimitive)
+                    if (aType.IsPrimitive)
                         (a, b) = Promote(a, b);
-                    return HybInstance.Bool(!a.innerObject.Equals(b.innerObject));
+                    return HybInstance.Bool(!a.InnerObject.Equals(b.InnerObject));
                 }
-                else if (aType.compiledType == typeof(string))
-                    return HybInstance.Bool(!a.innerObject.Equals(b.innerObject));
+                else if (aType.CompiledType == typeof(string))
+                    return HybInstance.Bool(!a.InnerObject.Equals(b.InnerObject));
 
-                return HybInstance.Bool(a.innerObject != b.innerObject);
+                return HybInstance.Bool(a.InnerObject != b.InnerObject);
             }
 
             throw new NotImplementedException();
@@ -348,7 +348,7 @@ namespace Slowsharp
 
         public static HybInstance Or(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 if (a.Is<bool>() && b.Is<bool>())
                 {
@@ -362,7 +362,7 @@ namespace Slowsharp
         }
         public static HybInstance And(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 if (a.Is<bool>() && b.Is<bool>())
                 {
@@ -376,14 +376,14 @@ namespace Slowsharp
         }
         public static HybInstance Xor(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 if (a.Is<bool>() && b.Is<bool>())
                 {
                     return HybInstance.Bool(a.As<bool>() ^ b.As<bool>());
                 }
 
-                if (a.GetHybType().isPrimitive)
+                if (a.GetHybType().IsPrimitive)
                 {
                     if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() ^ b.As<Int32>());
                     if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() ^ b.As<Int32>());
@@ -394,7 +394,7 @@ namespace Slowsharp
         }
         public static HybInstance BitwiseAnd(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 if (a.Is<bool>() && b.Is<bool>())
                 {
@@ -406,13 +406,13 @@ namespace Slowsharp
 
             var bitwiseAndMethod = GetBitwiseAndMethod(a);
             if (bitwiseAndMethod != null)
-                return bitwiseAndMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return bitwiseAndMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance BitwiseOr(HybInstance a, HybInstance b)
         {
-            if (a.isCompiledType && b.isCompiledType)
+            if (a.IsCompiledType && b.IsCompiledType)
             {
                 if (a.Is<bool>() && b.Is<bool>())
                 {
@@ -424,16 +424,16 @@ namespace Slowsharp
 
             var bitwiseOrMethod = GetBitwiseOrMethod(a);
             if (bitwiseOrMethod != null)
-                return bitwiseOrMethod.target.Invoke(null, new HybInstance[] { a, b });
+                return bitwiseOrMethod.Target.Invoke(null, new HybInstance[] { a, b });
 
             throw new NotImplementedException();
         }
         public static HybInstance ShiftRight(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() >> b.As<Int32>());
                 if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() >> b.As<Int32>());
@@ -446,9 +446,9 @@ namespace Slowsharp
         public static HybInstance ShiftLeft(HybInstance a, HybInstance b)
         {
             if (a.IsNull())
-                throw new NullReferenceException(a.id);
+                throw new NullReferenceException(a.Id);
 
-            if (a.GetHybType().isPrimitive)
+            if (a.GetHybType().IsPrimitive)
             {
                 if (a.Is<Int32>()) return HybInstance.Int(a.As<Int32>() << b.As<Int32>());
                 if (a.Is<Int64>()) return HybInstance.Int64(a.As<Int64>() << b.As<Int32>());

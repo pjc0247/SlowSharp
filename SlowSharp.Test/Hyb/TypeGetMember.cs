@@ -23,12 +23,12 @@ namespace Slowsharp.Test
             Assert.AreEqual(
                 true, 
                 typeInt.GetMethods()
-                .Where(x => x.id == nameof(int.GetType)).Count() > 0);
+                .Where(x => x.Id == nameof(int.GetType)).Count() > 0);
             // class method
             Assert.AreEqual(
                 true,
                 typeInt.GetMethods()
-                .Where(x => x.id == nameof(int.ToString)).Count() > 0);
+                .Where(x => x.Id == nameof(int.ToString)).Count() > 0);
         }
         [TestMethod]
         public void GetStaticMethod()
@@ -39,13 +39,13 @@ namespace Slowsharp.Test
             Assert.AreEqual(
                 true,
                 typeInt.GetStaticMethods()
-                .Where(x => x.id == nameof(int.TryParse)).Count() > 0);
+                .Where(x => x.Id == nameof(int.TryParse)).Count() > 0);
             
             // instance method should not be visible
             Assert.AreEqual(
                 false,
                 typeInt.GetStaticMethods()
-                .Where(x => x.id == nameof(int.ToString)).Count() > 0);
+                .Where(x => x.Id == nameof(int.ToString)).Count() > 0);
         }
 
         [TestMethod]
@@ -56,15 +56,15 @@ namespace Slowsharp.Test
             Assert.AreEqual(
                 true,
                 typeInt.GetMethods()
-                .Where(x => x.id == nameof(Foo.Public)).Count() > 0);
+                .Where(x => x.Id == nameof(Foo.Public)).Count() > 0);
             Assert.AreEqual(
                 true,
                 typeInt.GetMethods()
-                .Where(x => x.id == "Protected").Count() > 0);
+                .Where(x => x.Id == "Protected").Count() > 0);
             Assert.AreEqual(
                 false,
                 typeInt.GetMethods()
-                .Where(x => x.id == "Private").Count() > 0);
+                .Where(x => x.Id == "Private").Count() > 0);
         }
     }
 }

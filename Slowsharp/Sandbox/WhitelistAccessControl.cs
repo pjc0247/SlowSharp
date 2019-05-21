@@ -37,10 +37,10 @@ namespace Slowsharp
         public bool IsSafeType(HybType type)
         {
             // Interpret type is always safe
-            if (type.isCompiledType == false)
+            if (type.IsCompiledType == false)
                 return true;
 
-            var ct = type.compiledType;
+            var ct = type.CompiledType;
             if (IsAllowedNamespace(ct.Namespace) == false)
                 return false;
             return klassFilters.Contains(ct.FullName);

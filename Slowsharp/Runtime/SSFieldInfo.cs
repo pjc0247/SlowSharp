@@ -27,17 +27,17 @@ namespace Slowsharp
 
         internal SSCompiledFieldInfo(FieldInfo field)
         {
-            this.origin = SSMemberOrigin.InterpretScript;
+            this.Origin = SSMemberOrigin.InterpretScript;
             this.fieldType = HybTypeCache.GetHybType(field.FieldType);
             this.fieldInfo = field;
 
-            this.isStatic = field.IsStatic;
+            this.IsStatic = field.IsStatic;
         }
 
         public override HybInstance GetValue(HybInstance _this)
-            => HybInstance.Object(fieldInfo.GetValue(isStatic ? null : _this.Unwrap()));
+            => HybInstance.Object(fieldInfo.GetValue(IsStatic ? null : _this.Unwrap()));
         public override void SetValue(HybInstance _this, HybInstance value)
-            => fieldInfo.SetValue(isStatic ? null : _this.Unwrap(), value);
+            => fieldInfo.SetValue(IsStatic ? null : _this.Unwrap(), value);
     }
     public class SSInterpretFieldInfo : SSFieldInfo
     {
@@ -48,36 +48,36 @@ namespace Slowsharp
 
         internal SSInterpretFieldInfo(Class klass)
         {
-            this.origin = SSMemberOrigin.InterpretScript;
-            this.declaringClass = klass;
+            this.Origin = SSMemberOrigin.InterpretScript;
+            this.DeclaringClass = klass;
         }
 
         public override HybInstance GetValue(HybInstance _this)
         {
-            if (isStatic)
+            if (IsStatic)
             {
-                return declaringClass.runner.globals
-                    .GetStaticField(declaringClass, id);
+                return DeclaringClass.Runner.Globals
+                    .GetStaticField(DeclaringClass, Id);
             }
 
             // it's fast enough to do like this
             if (fieldPtr == -1)
-                fieldPtr = _this.fields.GetPtr(id);
-            return _this.fields.GetByPtr(fieldPtr);
+                fieldPtr = _this.Fields.GetPtr(Id);
+            return _this.Fields.GetByPtr(fieldPtr);
         }
         public override void SetValue(HybInstance _this, HybInstance value)
         {
-            if (isStatic)
+            if (IsStatic)
             {
-                declaringClass.runner.globals
-                    .SetStaticField(declaringClass, id, value);
+                DeclaringClass.Runner.Globals
+                    .SetStaticField(DeclaringClass, Id, value);
                 return;
             }
 
             // it's fast enough to do like this
             if (fieldPtr == -1)
-                fieldPtr = _this.fields.GetPtr(id);
-            _this.fields.SetByPtr(fieldPtr, value);
+                fieldPtr = _this.Fields.GetPtr(Id);
+            _this.Fields.SetByPtr(fieldPtr, value);
         }
     }
 }

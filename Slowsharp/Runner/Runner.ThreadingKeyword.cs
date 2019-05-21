@@ -19,7 +19,7 @@ namespace Slowsharp
                 throw new NullReferenceException($"lock(value) cannot be a null");
 
             object lockObj = obj;
-            if (obj.isCompiledType)
+            if (obj.IsCompiledType)
                 lockObj = obj.Unwrap();
 
             Monitor.Enter(lockObj);
@@ -37,7 +37,7 @@ namespace Slowsharp
         {
             var task = RunExpression(node.Expression);
 
-            if (task.isCompiledType &&
+            if (task.IsCompiledType &&
                 task.Unwrap() is Task t)
             {
                 t.Wait();

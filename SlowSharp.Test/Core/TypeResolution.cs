@@ -15,7 +15,7 @@ namespace Slowsharp.Test
 
             Assert.AreEqual(
                 typeof(int[]),
-                resolver.GetType("int[]").compiledType);
+                resolver.GetType("int[]").CompiledType);
         }
     }
 }

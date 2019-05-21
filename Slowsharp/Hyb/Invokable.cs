@@ -20,49 +20,49 @@ namespace Slowsharp
             FuncInvoke
         }
 
-        public bool isCompiled => compiledMethod != null;
+        public bool IsCompiled => CompiledMethod != null;
 
-        internal BaseMethodDeclarationSyntax interpretMethod { get; }
-        internal MethodInfo compiledMethod { get; }
-        internal Func<HybInstance[], HybInstance> funcMethod { get; }
-        private InvokeType type { get; }
+        internal BaseMethodDeclarationSyntax InterpretMethod { get; }
+        internal MethodInfo CompiledMethod { get; }
+        internal Func<HybInstance[], HybInstance> FuncMethod { get; }
+        private InvokeType Type { get; }
 
-        private Runner runner;
-        private SSMethodInfo methodInfo;
+        private Runner Runner;
+        private SSMethodInfo MethodInfo;
 
         public Invokable(SSMethodInfo methodInfo, Runner runner, BaseMethodDeclarationSyntax declaration)
         { 
-            this.type = InvokeType.Interpret;
-            this.methodInfo = methodInfo;
-            this.runner = runner;
-            this.interpretMethod = declaration;
+            this.Type = InvokeType.Interpret;
+            this.MethodInfo = methodInfo;
+            this.Runner = runner;
+            this.InterpretMethod = declaration;
         }
         public Invokable(MethodInfo method)
         {
-            this.type = InvokeType.ReflectionInvoke;
-            this.compiledMethod = method;
+            this.Type = InvokeType.ReflectionInvoke;
+            this.CompiledMethod = method;
         }
         public Invokable(Runner runner, Func<HybInstance[], HybInstance> func)
         {
-            this.runner = runner;
-            this.type = InvokeType.FuncInvoke;
-            this.funcMethod = func;
+            this.Runner = runner;
+            this.Type = InvokeType.FuncInvoke;
+            this.FuncMethod = func;
         }
 
         public HybInstance Invoke(HybInstance _this, HybInstance[] args, bool hasRefOrOut = false)
         {
-            if (isCompiled)
-                Console.WriteLine($"Invoke {compiledMethod.Name}");
+            if (IsCompiled)
+                Console.WriteLine($"Invoke {CompiledMethod.Name}");
             else
                 Console.WriteLine($"Invoke ");
 
-            if (type == InvokeType.ReflectionInvoke)
+            if (Type == InvokeType.ReflectionInvoke)
             {
-                if (compiledMethod.GetParameters().Length > args.Length)
-                    args = ExpandArgs(args, compiledMethod);
+                if (CompiledMethod.GetParameters().Length > args.Length)
+                    args = ExpandArgs(args, CompiledMethod);
 
                 var unwrappedArgs = args.Unwrap();
-                var ret = compiledMethod.Invoke(_this?.innerObject, unwrappedArgs);
+                var ret = CompiledMethod.Invoke(_this?.InnerObject, unwrappedArgs);
 
                 if (hasRefOrOut)
                 {
@@ -72,21 +72,21 @@ namespace Slowsharp
 
                 return HybInstance.Object(ret);
             }
-            else if (type == InvokeType.FuncInvoke)
+            else if (Type == InvokeType.FuncInvoke)
             {
-                return runner.RunWrappedFunc(_this, funcMethod, args);
+                return Runner.RunWrappedFunc(_this, FuncMethod, args);
             }
-            else if (type == InvokeType.Interpret)
+            else if (Type == InvokeType.Interpret)
             {
-                var ps = interpretMethod.ParameterList.Parameters;
+                var ps = InterpretMethod.ParameterList.Parameters;
                 //if (args.Length != ps.Count)
                     //throw new SemanticViolationException($"Parameters.Count does not match");
 
-                return runner.RunMethod(
-                    _this as HybInstance, methodInfo, args);
+                return Runner.RunMethod(
+                    _this as HybInstance, MethodInfo, args);
             }
 
-            throw new NotImplementedException($"Unknown type: {type}");
+            throw new NotImplementedException($"Unknown type: {Type}");
         }
 
         private HybInstance[] ExpandArgs(HybInstance[] args, MethodInfo info)

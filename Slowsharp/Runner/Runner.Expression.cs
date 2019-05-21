@@ -72,11 +72,11 @@ namespace Slowsharp
 
         private HybInstance ResolveThis(ThisExpressionSyntax node)
         {
-            return ctx._this;
+            return Ctx._this;
         }
         private HybInstance ResolveLiteral(LiteralExpressionSyntax node)
         {
-            var cache = optCache.GetOrCreate(node, () => {
+            var cache = OptCache.GetOrCreate(node, () => {
                 var optNode = new OptLiteralNode();
 
                 if (node.Token.Value == null)
@@ -113,16 +113,16 @@ namespace Slowsharp
             var id = $"{node.Identifier}";
             HybInstance v = null;
 
-            if (vars.TryGetValue(id, out v))
+            if (Vars.TryGetValue(id, out v))
                 return v;
 
-            if (ctx._this != null)
+            if (Ctx._this != null)
             {
-                if (ctx._this.GetPropertyOrField(id, out v, AccessLevel.This))
+                if (Ctx._this.GetPropertyOrField(id, out v, AccessLevel.This))
                     return v;
             }
 
-            if (ctx.method.declaringType.GetStaticPropertyOrField(id, out v))
+            if (Ctx.Method.DeclaringType.GetStaticPropertyOrField(id, out v))
                 return v;
 
             /*
@@ -169,7 +169,7 @@ namespace Slowsharp
                 {
                     var key = $"{idNode.Identifier}";
                     HybType leftType;
-                    if (resolver.TryGetType(key, out leftType))
+                    if (Resolver.TryGetType(key, out leftType))
                     {
                         leftType.SetStaticPropertyOrField($"{ma.Name.Identifier}", right);
                         return;
@@ -217,7 +217,7 @@ namespace Slowsharp
                 {
                     var key = $"{idNode.Identifier}";
                     HybType leftType;
-                    if (resolver.TryGetType(key, out leftType))
+                    if (Resolver.TryGetType(key, out leftType))
                     {
                         leftType.GetStaticPropertyOrField($"{ma.Name.Identifier}", out left);
                         value = MadMath.Op(left, right, node.OperatorToken.Text.Substring(0, 1));
@@ -277,9 +277,9 @@ namespace Slowsharp
         /// </summary>
         private HybInstance RunCast(CastExpressionSyntax node)
         {
-            var cache = optCache.GetOrCreate(node, () => {
+            var cache = OptCache.GetOrCreate(node, () => {
                 return new OptCastNode() {
-                    type = resolver.GetType($"{node.Type}")
+                    type = Resolver.GetType($"{node.Type}")
                 };
             });
             var value = RunExpression(node.Expression);
@@ -293,7 +293,7 @@ namespace Slowsharp
         /// </summary>
         private HybInstance RunDefault(DefaultExpressionSyntax node)
         {
-            var type = resolver.GetType($"{node.Type}");
+            var type = Resolver.GetType($"{node.Type}");
             return type.GetDefault();
         }
         /// <summary>
@@ -316,7 +316,7 @@ namespace Slowsharp
         {
             var left = RunExpression(node.Expression);
 
-            ctx._bound = left;
+            Ctx._bound = left;
 
             if (left.IsNull() == false)
                 return RunExpression(node.WhenNotNull);
@@ -368,13 +368,13 @@ namespace Slowsharp
                 {
                     HybType leftType = null;
                     leftIsType = true;
-                    leftType = resolver.GetType($"{pd}");
+                    leftType = Resolver.GetType($"{pd}");
                     callsite = leftType.GetStaticMethods(rightName);
                 }
                 else if (ma.Expression is IdentifierNameSyntax id)
                 {
                     HybType leftType = null;
-                    if (resolver.TryGetType($"{id.Identifier}", out leftType))
+                    if (Resolver.TryGetType($"{id.Identifier}", out leftType))
                     {
                         leftIsType = true;
                         callsite = leftType.GetStaticMethods(rightName);
@@ -396,7 +396,7 @@ namespace Slowsharp
                 if (leftIsType == false &&
                         callsite.Length == 0)
                 {
-                    callsite = extResolver.GetCallablegExtensions(callee, $"{ma.Name}");
+                    callsite = ExtResolver.GetCallablegExtensions(callee, $"{ma.Name}");
 
                     args = (new HybInstance[] { callee }).Concat(args).ToArray();
                 }
@@ -411,15 +411,15 @@ namespace Slowsharp
                 if (id == null)
                 {
                     id = (node.Expression as MemberBindingExpressionSyntax)?.Name;
-                    callee = ctx._bound;
+                    callee = Ctx._bound;
                 }
                 else
-                    callee = ctx._this;
+                    callee = Ctx._this;
 
                 implicitGenericArgs = ResolveGenericArgumentsFromName(id);
                 callsite =
                     ResolveLocalMember(id)
-                    .Concat(ctx.method.declaringType.GetStaticMethods(id.Identifier.Text))
+                    .Concat(Ctx.Method.DeclaringType.GetStaticMethods(id.Identifier.Text))
                     .ToArray();
                 targetId = id.Identifier.Text;
             }
@@ -428,7 +428,7 @@ namespace Slowsharp
                 throw new NoSuchMethodException($"{calleeId}", targetId);
             
             var method = OverloadingResolver.FindMethodWithArguments(
-                resolver,
+                Resolver,
                 callsite, 
                 implicitGenericArgs.ToArray(),
                 ref args);
@@ -436,10 +436,10 @@ namespace Slowsharp
             if (method == null)
                 throw new SemanticViolationException($"No matching override for `{targetId}`");
 
-            if (callee != null && method.declaringType.parent == callee.GetHybType())
-                callee = callee.parent;
+            if (callee != null && method.DeclaringType.Parent == callee.GetHybType())
+                callee = callee.Parent;
 
-            var ret = method.target.Invoke(callee, args, hasRefOrOut);
+            var ret = method.Target.Invoke(callee, args, hasRefOrOut);
 
             // post-invoke
             if (hasRefOrOut)
@@ -462,7 +462,7 @@ namespace Slowsharp
                 var result = new HybType[gn.TypeArgumentList.Arguments.Count];
                 var count = 0;
                 foreach (var genericType in gn.TypeArgumentList.Arguments)
-                    result[count++] = resolver.GetType($"{genericType}");
+                    result[count++] = Resolver.GetType($"{genericType}");
                 return result;
             }
             return new HybType[] { };
@@ -485,7 +485,7 @@ namespace Slowsharp
         private SSMethodInfo[] ResolveLocalMember(SimpleNameSyntax node)
         {
             var id = node.Identifier.ValueText;
-            return ctx.method.declaringClass.GetMethods(id);
+            return Ctx.Method.DeclaringClass.GetMethods(id);
         }
 
         private HybInstance RunNameOf(SimpleNameSyntax node)
@@ -510,7 +510,7 @@ namespace Slowsharp
         }
         private HybInstance RunMemberAccess(MemberAccessExpressionSyntax node)
         {
-            var cache = optCache.GetOrCreate<MemberAccessExpressionSyntax, OptRunMemberAccessNode>(node,
+            var cache = OptCache.GetOrCreate<MemberAccessExpressionSyntax, OptRunMemberAccessNode>(node,
                 () => {
                     var result = new OptRunMemberAccessNode();
 
@@ -518,7 +518,7 @@ namespace Slowsharp
                     {
                         HybType type;
                         var id = $"{idNode.Identifier}";
-                        if (resolver.TryGetType(id, out type))
+                        if (Resolver.TryGetType(id, out type))
                         {
                             result.leftType = type;
                             result.isStaticMemberAccess = true;
@@ -535,7 +535,7 @@ namespace Slowsharp
 
             var accessLevel = AccessLevel.Outside;
             if (node.Expression is ThisExpressionSyntax ||
-                left.GetHybType() == ctx.method.declaringType)
+                left.GetHybType() == Ctx.Method.DeclaringType)
             {
                 // TODO: protected
                 accessLevel = AccessLevel.This;
@@ -552,7 +552,7 @@ namespace Slowsharp
             var right = node.Name.Identifier.Text;
 
             var accessLevel = AccessLevel.Outside;
-            if (ctx.method.declaringType == leftType)
+            if (Ctx.Method.DeclaringType == leftType)
                 accessLevel = AccessLevel.This;
 
             HybInstance value;
@@ -573,24 +573,24 @@ namespace Slowsharp
 
             if (node.Type is GenericNameSyntax gn)
             {
-                type = resolver.GetGenericType(
+                type = Resolver.GetGenericType(
                     $"{gn.Identifier}",
                     gn.TypeArgumentList.Arguments.Count);
 
                 var genericArgs = new HybType[gn.TypeArgumentList.Arguments.Count];
                 count = 0;
                 foreach (var arg in gn.TypeArgumentList.Arguments)
-                    genericArgs[count++] = resolver.GetType($"{arg}");
+                    genericArgs[count++] = Resolver.GetType($"{arg}");
                 type = type.MakeGenericType(genericArgs);
             }
             else
-                type = resolver.GetType($"{node.Type}");
+                type = Resolver.GetType($"{node.Type}");
 
-            if (type.isCompiledType)
+            if (type.IsCompiledType)
             {
-                if (type.compiledType == typeof(Action))
+                if (type.CompiledType == typeof(Action))
                     return args[0];
-                if (type.compiledType == typeof(Func<int>))
+                if (type.CompiledType == typeof(Func<int>))
                     return args[0];
             }
 
@@ -640,9 +640,9 @@ namespace Slowsharp
                     var value = RunExpression(expr);
                     var addArgs = new HybInstance[] { value };
                     var method = OverloadingResolver.FindMethodWithArguments(
-                        resolver, addMethods, new HybType[] { }, ref addArgs);
+                        Resolver, addMethods, new HybType[] { }, ref addArgs);
 
-                    method.target.Invoke(inst, addArgs);
+                    method.Target.Invoke(inst, addArgs);
                 }
             }
             else
@@ -682,12 +682,12 @@ namespace Slowsharp
 
         private HybInstance RunArrayCreation(ArrayCreationExpressionSyntax node)
         {
-            var rtAry = resolver.GetType($"{node.Type.ElementType}");
+            var rtAry = Resolver.GetType($"{node.Type.ElementType}");
 
             Array ary = null;
             Type elemType;
-            if (rtAry.isCompiledType)
-                elemType = rtAry.compiledType;
+            if (rtAry.IsCompiledType)
+                elemType = rtAry.CompiledType;
             else
                 elemType = typeof(HybInstance);
 
@@ -701,8 +701,8 @@ namespace Slowsharp
                 {
                     var value = RunExpression(expr);
 
-                    if (rtAry.isCompiledType)
-                        ary.SetValue(value.innerObject, count++);
+                    if (rtAry.IsCompiledType)
+                        ary.SetValue(value.InnerObject, count++);
                     else
                         ary.SetValue(value, count++);
                 }
@@ -723,7 +723,7 @@ namespace Slowsharp
         {
             var op = node.OperatorToken.Text;
             var operand = RunExpression(node.Operand);
-            var cache = optCache.GetOrCreate<PrefixUnaryExpressionSyntax, OptPrefixUnary>(node, () =>
+            var cache = OptCache.GetOrCreate<PrefixUnaryExpressionSyntax, OptPrefixUnary>(node, () =>
             {
                 return new OptPrefixUnary()
                 {
@@ -734,7 +734,7 @@ namespace Slowsharp
                     isPrimitiveIncOrDec = 
                         (op == "++" || op == "--") &&
                         node.Operand is IdentifierNameSyntax &&
-                        operand.GetHybType().isPrimitive
+                        operand.GetHybType().IsPrimitive
                 };
             });
 
@@ -746,7 +746,7 @@ namespace Slowsharp
                     operand,
                     HybInstanceCache.One,
                     op.Substring(1));
-                vars.SetValue(cache.operandId, applied);
+                Vars.SetValue(cache.operandId, applied);
             }
 
             return after;
@@ -755,7 +755,7 @@ namespace Slowsharp
         {
             var op = node.OperatorToken.Text;
             var operand = RunExpression(node.Operand);
-            var cache = optCache.GetOrCreate<PostfixUnaryExpressionSyntax, OptPostfixUnary>(node, () =>
+            var cache = OptCache.GetOrCreate<PostfixUnaryExpressionSyntax, OptPostfixUnary>(node, () =>
             {
                 return new OptPostfixUnary()
                 {
@@ -766,7 +766,7 @@ namespace Slowsharp
                     isPrimitiveIncOrDec =
                         (op == "++" || op == "--") &&
                         node.Operand is IdentifierNameSyntax &&
-                        operand.GetHybType().isPrimitive
+                        operand.GetHybType().IsPrimitive
                 };
             });
 
@@ -778,7 +778,7 @@ namespace Slowsharp
                     operand,
                     HybInstanceCache.One,
                     op.Substring(1));
-                vars.SetValue(cache.operandId, applied);
+                Vars.SetValue(cache.operandId, applied);
             }
 
             return operand;
@@ -786,20 +786,20 @@ namespace Slowsharp
 
         private HybInstance RunTypeof(TypeOfExpressionSyntax node)
         {
-            var cache = optCache.GetOrCreate<TypeOfExpressionSyntax, OptTypeofNode>(node,
+            var cache = OptCache.GetOrCreate<TypeOfExpressionSyntax, OptTypeofNode>(node,
                 () =>
                 {
-                    var type = resolver.GetType($"{node.Type}");
+                    var type = Resolver.GetType($"{node.Type}");
                     return new OptTypeofNode()
                     {
                         type = type
                     };
                 });
             
-            if (cache.type.isCompiledType)
-                return HybInstance.Type(cache.type.compiledType);
+            if (cache.type.IsCompiledType)
+                return HybInstance.FromType(cache.type.CompiledType);
             else
-                return HybInstance.Type(typeof(HybType));
+                return HybInstance.FromType(typeof(HybType));
         }
         private HybInstance RunSizeof(SizeOfExpressionSyntax node)
         {

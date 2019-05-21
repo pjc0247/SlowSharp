@@ -9,22 +9,22 @@ namespace Slowsharp
 {
     internal class IdLookup
     {
-        private List<string> usings = new List<string>();
-        private Assembly[] references;
+        private List<string> Usings = new List<string>();
+        private Assembly[] References;
 
         public IdLookup(Assembly[] references)
         {
-            this.references = references;
+            this.References = references;
         }
 
         public void Add(string ns)
         {
-            usings.Add(ns);
+            Usings.Add(ns);
         }
 
         public MemberInfo[] GetMembers(string typename, string membername)
         {
-            foreach (var asm in references)
+            foreach (var asm in References)
             {
                 foreach (var type in asm.GetTypes())
                 {

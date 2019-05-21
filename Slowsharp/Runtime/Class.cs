@@ -12,30 +12,30 @@ namespace Slowsharp
 {
     internal class Class
     {
-        public string id { get; }
+        public string Id { get; }
 
-        public HybType parent { get; }
-        public HybType[] interfaces { get; }
-        public HybType type { get; }
+        public HybType Parent { get; }
+        public HybType[] Interfaces { get; }
+        public HybType Type { get; }
 
-        internal Runner runner;
+        internal Runner Runner;
 
         //private Dictionary<string, object> properties = new Dictionary<string, object>();
-        private Dictionary<string, SSFieldInfo> fields = new Dictionary<string, SSFieldInfo>();
-        private Dictionary<string, SSPropertyInfo> properties = new Dictionary<string, SSPropertyInfo>();
-        private Dictionary<string, List<SSMethodInfo>> methods = new Dictionary<string, List<SSMethodInfo>>();
+        private Dictionary<string, SSFieldInfo> Fields = new Dictionary<string, SSFieldInfo>();
+        private Dictionary<string, SSPropertyInfo> Properties = new Dictionary<string, SSPropertyInfo>();
+        private Dictionary<string, List<SSMethodInfo>> Methods = new Dictionary<string, List<SSMethodInfo>>();
 
         public Class(Runner runner, string id)
         {
-            this.runner = runner;
-            this.id = id;
-            this.type = new HybType(this);
+            this.Runner = runner;
+            this.Id = id;
+            this.Type = new HybType(this);
         }
         public Class(Runner runner, string id, HybType parent, HybType[] interfaces) :
             this(runner, id)
         {
-            this.parent = parent;
-            this.interfaces = interfaces;
+            this.Parent = parent;
+            this.Interfaces = interfaces;
 
             if (parent != null)
                 InheritFrom(parent);
@@ -43,135 +43,135 @@ namespace Slowsharp
 
         private void InheritFrom(HybType parent)
         {
-            if (parent.isSealed)
+            if (parent.IsSealed)
                 throw new SemanticViolationException($"Sealed class cannot be inherited.");
 
-            if (parent.isCompiledType)
+            if (parent.IsCompiledType)
             {
                 foreach (var m in parent.GetMethods())
                 {
-                    if (m.accessModifier == AccessModifier.Private)
+                    if (m.AccessModifier == AccessModifier.Private)
                         continue;
 
-                    if (methods.ContainsKey(m.id) == false)
-                        methods[m.id] = new List<SSMethodInfo>();
-                    methods[m.id].Add(m);
+                    if (Methods.ContainsKey(m.Id) == false)
+                        Methods[m.Id] = new List<SSMethodInfo>();
+                    Methods[m.Id].Add(m);
                 }
             }
             else
             {
-                var klass = parent.interpretKlass;
-                foreach (var f in klass.fields
-                    .Where(x => x.Value.accessModifier != AccessModifier.Private))
-                    fields.Add(f.Key, f.Value);
-                foreach (var m in klass.methods)
+                var klass = parent.InterpretKlass;
+                foreach (var f in klass.Fields
+                    .Where(x => x.Value.AccessModifier != AccessModifier.Private))
+                    Fields.Add(f.Key, f.Value);
+                foreach (var m in klass.Methods)
                 {
                     var nonPrivateMethods = m.Value
-                        .Where(x => x.accessModifier != AccessModifier.Private)
+                        .Where(x => x.AccessModifier != AccessModifier.Private)
                         .ToList();
-                    methods.Add(m.Key, nonPrivateMethods);
+                    Methods.Add(m.Key, nonPrivateMethods);
                 }
             }
         }
 
         private void EnsureMethodKey(string id)
         {
-            if (methods.ContainsKey(id) == false)
-                methods[id] = new List<SSMethodInfo>();
+            if (Methods.ContainsKey(id) == false)
+                Methods[id] = new List<SSMethodInfo>();
         }
         public SSMethodInfo AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
         {
             EnsureMethodKey(id);
 
             var signature = MemberSignature.GetSignature(
-                runner.resolver, id, method);
+                Runner.Resolver, id, method);
 
-            var methodInfo = new SSMethodInfo(runner, id, type, method)
+            var methodInfo = new SSMethodInfo(Runner, id, Type, method)
             {
-                id = id,
-                isStatic = method.Modifiers.IsStatic(),
-                declaringClass = this,
-                declaration = method,
-                jumps = jumps,
+                Id = id,
+                IsStatic = method.Modifiers.IsStatic(),
+                DeclaringClass = this,
+                Declaration = method,
+                Jumps = jumps,
 
-                accessModifier = AccessModifierParser.Parse(method.Modifiers)
+                AccessModifier = AccessModifierParser.Parse(method.Modifiers)
             };
 
-            methods[id].RemoveAll(x => x.signature == signature);
-            methods[id].Add(methodInfo);
+            Methods[id].RemoveAll(x => x.Signature == signature);
+            Methods[id].Add(methodInfo);
 
             return methodInfo;
         }
         public SSInterpretPropertyInfo AddProperty(string id, BasePropertyDeclarationSyntax property)
         {
-            var propertyInfo = new SSInterpretPropertyInfo(this, runner, id, property)
+            var propertyInfo = new SSInterpretPropertyInfo(this, Runner, id, property)
             {
-                isStatic = property.Modifiers.IsStatic(),
-                declaringClass = this,
+                IsStatic = property.Modifiers.IsStatic(),
+                DeclaringClass = this,
 
-                accessModifier = AccessModifierParser.Parse(property.Modifiers)
+                AccessModifier = AccessModifierParser.Parse(property.Modifiers)
             };
-            properties.Add(id, propertyInfo);
+            Properties.Add(id, propertyInfo);
             return propertyInfo;
         }
         public SSFieldInfo AddField(string id, FieldDeclarationSyntax field, VariableDeclaratorSyntax declarator)
         {
             var fieldInfo = new SSInterpretFieldInfo(this)
             {
-                id = id,
-                fieldType = runner.resolver.GetType($"{field.Declaration.Type}"),
-                isStatic = field.Modifiers.IsStatic() | field.Modifiers.IsConst(),
+                Id = id,
+                fieldType = Runner.Resolver.GetType($"{field.Declaration.Type}"),
+                IsStatic = field.Modifiers.IsStatic() | field.Modifiers.IsConst(),
                 isConst = field.Modifiers.IsConst(),
                 field = field,
-                declaringClass = this,
+                DeclaringClass = this,
                 declartor = declarator,
 
-                accessModifier = AccessModifierParser.Parse(field.Modifiers)
+                AccessModifier = AccessModifierParser.Parse(field.Modifiers)
             };
-            fields.Add(id, fieldInfo);
+            Fields.Add(id, fieldInfo);
             return fieldInfo;
         }
         public void AddField(SSFieldInfo field)
         {
-            fields.Add(field.id, field);
+            Fields.Add(field.Id, field);
         }
 
         public SSMethodInfo[] GetMethods()
         {
-            return methods.SelectMany(x => x.Value).ToArray();
+            return Methods.SelectMany(x => x.Value).ToArray();
         }
         public SSMethodInfo[] GetMethods(string id)
         {
-            if (methods.ContainsKey(id) == false)
+            if (Methods.ContainsKey(id) == false)
                 return new SSMethodInfo[] { };
 
-            return methods[id].ToArray();
+            return Methods[id].ToArray();
         }
         public SSFieldInfo[] GetFields()
         {
-            return fields
+            return Fields
                 .Select(x => x.Value)
                 .ToArray();
         }
         public SSPropertyInfo[] GetProperties()
         {
-            return properties
+            return Properties
                 .Select(x => x.Value)
                 .ToArray();
         }
 
         public bool HasStaticField(string id)
         {
-            if (fields.ContainsKey(id) == false)
+            if (Fields.ContainsKey(id) == false)
                 return false;
-            return fields[id].isStatic == true;
+            return Fields[id].IsStatic == true;
         }
         public bool HasField(string id, MemberFlag flag = MemberFlag.None)
         {
-            if (fields.ContainsKey(id) == false)
+            if (Fields.ContainsKey(id) == false)
                 return false;
 
-            var field = fields[id];
+            var field = Fields[id];
             return field.IsMatch(flag);
         }
         public bool TryGetField(string id, out SSFieldInfo field)
@@ -179,28 +179,28 @@ namespace Slowsharp
             field = null;
             if (HasField(id) == false)
                 return false;
-            field = fields[id];
+            field = Fields[id];
             return true;
         }
         public SSFieldInfo GetField(string id)
         {
             if (HasField(id) == false)
                 throw new ArgumentException($"No such field: {id}");
-            return fields[id];
+            return Fields[id];
         }
 
         public bool HasStaticProperty(string id)
         {
-            if (properties.ContainsKey(id) == false)
+            if (Properties.ContainsKey(id) == false)
                 return false;
-            return properties[id].isStatic == true;
+            return Properties[id].IsStatic == true;
         }
         public bool HasProperty(string id, MemberFlag flag = MemberFlag.None)
         {
-            if (properties.ContainsKey(id) == false)
+            if (Properties.ContainsKey(id) == false)
                 return false;
 
-            var property = properties[id];
+            var property = Properties[id];
             return property.IsMatch(flag);
         }
         public bool TryGetProperty(string id, out SSPropertyInfo property)
@@ -208,14 +208,14 @@ namespace Slowsharp
             property = null;
             if (HasProperty(id) == false)
                 return false;
-            property = properties[id];
+            property = Properties[id];
             return true;
         }
         public SSPropertyInfo GetProperty(string id)
         {
             if (HasProperty(id) == false)
                 throw new ArgumentException($"No such property: {id}");
-            return properties[id];
+            return Properties[id];
         }
     }
 }

@@ -8,25 +8,25 @@ namespace Slowsharp
 {
     internal class GlobalStorage
     {
-        public Dictionary<string, HybInstance> storage = new Dictionary<string, HybInstance>();
+        public Dictionary<string, HybInstance> Storage = new Dictionary<string, HybInstance>();
 
         public void SetStaticField(Class klass, string id, HybInstance value)
         {
 #if SS_TRACE
             Console.WriteLine($"set_{GetFieldSignature(klass, id)} = {value}");
 #endif
-            storage[GetFieldSignature(klass, id)] = value;
+            Storage[GetFieldSignature(klass, id)] = value;
         }
         public HybInstance GetStaticField(Class klass, string id)
         {
 #if SS_TRACE
-            Console.WriteLine($"get_{GetFieldSignature(klass, id)} => {storage[GetFieldSignature(klass, id)]}");
+            Console.WriteLine($"get_{GetFieldSignature(klass, id)} => {Storage[GetFieldSignature(klass, id)]}");
 #endif
-            return storage[GetFieldSignature(klass, id)];
+            return Storage[GetFieldSignature(klass, id)];
         }
         private string GetFieldSignature(Class klass, string id)
         {
-            return $"{klass.id}_f_{id}";
+            return $"{klass.Id}_f_{id}";
         }
     }
 }

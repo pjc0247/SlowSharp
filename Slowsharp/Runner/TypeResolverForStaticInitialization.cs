@@ -23,11 +23,11 @@ namespace Slowsharp
         public override bool TryGetType(string id, out HybType type, Assembly hintAssembly = null)
         {
             var ret = resolver.TryGetType(id, out type, hintAssembly);
-            if (type != null && type.isCompiledType == false)
+            if (type != null && type.IsCompiledType == false)
             {
                 if (initializedTypes.Add(type))
                 {
-                    runner.RunStaticInitializer(type.interpretKlass);
+                    runner.RunStaticInitializer(type.InterpretKlass);
                 }
             }
             return ret;
@@ -35,11 +35,11 @@ namespace Slowsharp
         public override HybType GetType(string id)
         {
             var type = resolver.GetType(id);
-            if (type != null && type.isCompiledType == false)
+            if (type != null && type.IsCompiledType == false)
             {
                 if (initializedTypes.Add(type))
                 {
-                    runner.RunStaticInitializer(type.interpretKlass);
+                    runner.RunStaticInitializer(type.InterpretKlass);
                 }
             }
             return type;

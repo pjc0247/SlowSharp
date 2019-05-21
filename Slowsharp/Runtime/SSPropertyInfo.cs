@@ -11,10 +11,10 @@ namespace Slowsharp
 {
     public abstract class SSPropertyInfo : SSMemberInfo
     {
-        public HybType type { get; protected set; }
+        public HybType Type { get; protected set; }
 
-        public SSMethodInfo setMethod { get; protected set; }
-        public SSMethodInfo getMethod { get; protected set; }
+        public SSMethodInfo SetMethod { get; protected set; }
+        public SSMethodInfo GetMethod { get; protected set; }
 
         //public abstract HybInstance GetValue(HybInstance _this);
         //public abstract HybInstance SetValue(HybInstance _this, HybInstance value);
@@ -24,33 +24,33 @@ namespace Slowsharp
     {
         internal SSCompiledPropertyInfo(PropertyInfo property)
         {
-            this.type = HybTypeCache.GetHybType(property.PropertyType);
-            this.getMethod = property.CanRead ? new SSMethodInfo(property.GetMethod) : null;
-            this.setMethod = property.CanWrite ? new SSMethodInfo(property.SetMethod) : null;
+            this.Type = HybTypeCache.GetHybType(property.PropertyType);
+            this.GetMethod = property.CanRead ? new SSMethodInfo(property.GetMethod) : null;
+            this.SetMethod = property.CanWrite ? new SSMethodInfo(property.SetMethod) : null;
         }
     }
     public class SSInterpretPropertyInfo : SSPropertyInfo
     {
-        public BasePropertyDeclarationSyntax property { get; }
-        public EqualsValueClauseSyntax initializer
+        public BasePropertyDeclarationSyntax Property { get; }
+        public EqualsValueClauseSyntax Initializer
         {
             get
             {
-                if (property is PropertyDeclarationSyntax pd)
+                if (Property is PropertyDeclarationSyntax pd)
                     return pd.Initializer;
                 return null;
             }
         }
 
-        internal SSFieldInfo backingField { get; private set; }
-        internal bool hasBackingField => backingField != null;
+        internal SSFieldInfo BackingField { get; private set; }
+        internal bool HasBackingField => BackingField != null;
 
         internal SSInterpretPropertyInfo(Class klass, Runner runner, string id, BasePropertyDeclarationSyntax node)
         {
-            this.id = id;
-            this.property = node;
-            this.declaringClass = klass;
-            this.type = runner.resolver.GetType($"{node.Type}");
+            this.Id = id;
+            this.Property = node;
+            this.DeclaringClass = klass;
+            this.Type = runner.Resolver.GetType($"{node.Type}");
 
             if (node is PropertyDeclarationSyntax pd &&
                 pd.ExpressionBody != null)
@@ -64,9 +64,9 @@ namespace Slowsharp
             {
                 return runner.RunExpression(node.ExpressionBody.Expression);
             });
-            getMethod = new SSMethodInfo(
-                runner, $"get_{id}", declaringType, invokable,
-                new HybType[] { }, type);
+            GetMethod = new SSMethodInfo(
+                runner, $"get_{Id}", DeclaringType, invokable,
+                new HybType[] { }, Type);
         }
         private void InitializeWithAccessor(Runner runner, BasePropertyDeclarationSyntax node)
         {
@@ -85,7 +85,7 @@ namespace Slowsharp
                         return runner.RunExpression(get.ExpressionBody.Expression);
                     else if (get.Body != null)
                     {
-                        var vf = new VarFrame(runner.vars);
+                        var vf = new VarFrame(runner.Vars);
                         if (node is IndexerDeclarationSyntax id)
                         {
                             var cnt = 0;
@@ -94,22 +94,22 @@ namespace Slowsharp
                         }
 
                         runner.RunBlock(get.Body, vf);
-                        return runner.ret;
+                        return runner.Ret;
                     }
                     else
                     {
-                        if (isStatic)
-                            return runner.globals.GetStaticField(declaringClass, backingField.id);
+                        if (IsStatic)
+                            return runner.Globals.GetStaticField(DeclaringClass, BackingField.Id);
 
                         HybInstance value;
-                        if (runner.ctx._this.GetPropertyOrField($"__{this.id}", out value, AccessLevel.This))
+                        if (runner.Ctx._this.GetPropertyOrField($"__{this.Id}", out value, AccessLevel.This))
                             return value;
                         throw new InvalidOperationException();
                     }
                 });
-                getMethod = new SSMethodInfo(
-                    runner, $"get_{id}", declaringType, invokable,
-                    new HybType[] { }, type);
+                GetMethod = new SSMethodInfo(
+                    runner, $"get_{Id}", DeclaringType, invokable,
+                    new HybType[] { }, Type);
             }
 
             var set = accs.Where(x => x.Keyword.Text == "set")
@@ -125,7 +125,7 @@ namespace Slowsharp
                         return runner.RunExpression(set.ExpressionBody.Expression);
                     else if (set.Body != null)
                     {
-                        var vf = new VarFrame(runner.vars);
+                        var vf = new VarFrame(runner.Vars);
                         vf.SetValue("value", args[1]);
 
                         if (node is IndexerDeclarationSyntax id)
@@ -136,40 +136,40 @@ namespace Slowsharp
                         }
 
                         runner.RunBlock(set.Body, vf);
-                        return runner.ret;
+                        return runner.Ret;
                     }
                     else
                     {
-                        if (isStatic)
+                        if (IsStatic)
                         {
-                            runner.globals.SetStaticField(declaringClass, backingField.id, args[0]);
+                            runner.Globals.SetStaticField(DeclaringClass, BackingField.Id, args[0]);
                             return null;
                         }
 
-                        if (runner.ctx._this.SetPropertyOrField($"__{this.id}", args[0], AccessLevel.This))
+                        if (runner.Ctx._this.SetPropertyOrField($"__{this.Id}", args[0], AccessLevel.This))
                             return null;
                         throw new InvalidOperationException();
                     }
                 });
-                setMethod = new SSMethodInfo(
-                    runner, $"set_{id}", declaringType, invokable,
-                    new HybType[] { type }, HybTypeCache.Void);
+                SetMethod = new SSMethodInfo(
+                    runner, $"set_{Id}", DeclaringType, invokable,
+                    new HybType[] { Type }, HybTypeCache.Void);
             }
         }
 
         private void AddBackingFieldIfNotExist(Runner runner, BasePropertyDeclarationSyntax node)
         {
-            var id = $"__{this.id}";
-            if (declaringClass.HasField(id))
+            var id = $"__{this.Id}";
+            if (DeclaringClass.HasField(id))
                 return;
 
-            backingField = new SSInterpretFieldInfo(declaringClass)
+            BackingField = new SSInterpretFieldInfo(DeclaringClass)
             {
-                id = id,
-                fieldType = runner.resolver.GetType($"{node.Type}"),
-                accessModifier = AccessModifier.Private
+                Id = id,
+                fieldType = runner.Resolver.GetType($"{node.Type}"),
+                AccessModifier = AccessModifier.Private
             };
-            declaringClass.AddField(backingField);
+            DeclaringClass.AddField(BackingField);
         }
     }
 }

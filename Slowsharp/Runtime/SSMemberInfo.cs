@@ -21,15 +21,15 @@ namespace Slowsharp
 
     public class SSMemberInfo
     {
-        public string id;
-        public string signature;
-        public bool isStatic;
+        public string Id;
+        public string Signature;
+        public bool IsStatic;
 
-        public SSMemberOrigin origin { get; protected set; }
+        public SSMemberOrigin Origin { get; protected set; }
 
-        public AccessModifier accessModifier;
+        public AccessModifier AccessModifier;
 
-        public HybType declaringType;
-        internal Class declaringClass;
+        public HybType DeclaringType;
+        internal Class DeclaringClass;
     }
 }

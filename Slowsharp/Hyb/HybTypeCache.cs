@@ -29,7 +29,7 @@ namespace Slowsharp
         public static readonly HybType Decimal = new HybType(typeof(decimal));
         public static readonly HybType Type = new HybType(typeof(Type));
 
-        private static ThreadLocal<Dictionary<Type, HybType>> compiledTypes = new ThreadLocal<Dictionary<Type, HybType>>(() =>
+        private static ThreadLocal<Dictionary<Type, HybType>> CompiledTypes = new ThreadLocal<Dictionary<Type, HybType>>(() =>
         {
             return new Dictionary<Type, HybType>();
         });
@@ -41,7 +41,7 @@ namespace Slowsharp
 
         public static HybType GetHybType(Type type)
         {
-            var cache = compiledTypes.Value;
+            var cache = CompiledTypes.Value;
             HybType result = null;
 
             if (cache.TryGetValue(type, out result))

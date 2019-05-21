@@ -73,11 +73,11 @@ public static object Main() {
             return root;
         }
 
-        private Runner runner { get; }
+        private Runner Runner { get; }
 
         public CScript(Runner runner)
         {
-            this.runner = runner;
+            this.Runner = runner;
         }
 
         public HybInstance Eval(string src)
@@ -86,7 +86,7 @@ public static object Main() {
 
             var glob = root.ChildNodes().First() as GlobalStatementSyntax;
             if (glob.Statement is ExpressionStatementSyntax expr) {
-                return runner.RunExpression(expr.Expression);
+                return Runner.RunExpression(expr.Expression);
             }
 
             throw new ArgumentException("src is not a expression");
@@ -94,24 +94,24 @@ public static object Main() {
         public void LoadScript(string src)
         {
             var root = ParseAndValidate(src);
-            runner.LoadSyntax(root);
+            Runner.LoadSyntax(root);
         }
         public void UpdateMethodsOnly(string src)
         {
             var root = ParseAndValidate(src);
-            runner.UpdateMethodsOnly(root);
+            Runner.UpdateMethodsOnly(root);
         }
 
         public HybInstance RunMain(params object[] args)
-            => runner.RunMain(args);
+            => Runner.RunMain(args);
         public HybInstance Instantiate(string id, params object[] args)
-            => runner.Instantiate(id, args);
+            => Runner.Instantiate(id, args);
         public HybInstance Override(string id, object parentObject, params object[] args)
-            => runner.Override(id, parentObject, args);
+            => Runner.Override(id, parentObject, args);
 
         public DumpSnapshot GetDebuggerDump()
-            => runner.GetDebuggerDump();
+            => Runner.GetDebuggerDump();
         public HybType[] GetTypes()
-            => runner.GetTypes();
+            => Runner.GetTypes();
     }
 }

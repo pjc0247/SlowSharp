@@ -8,9 +8,9 @@ namespace Slowsharp
 {
     public class SSParamInfo
     {
-        public string id;
-        public HybInstance defaultValue;
+        public string Id;
+        public HybInstance DefaultValue;
 
-        public bool isParams;
+        public bool IsParams;
     }
 }

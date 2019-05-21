@@ -10,29 +10,29 @@ namespace Slowsharp
 {
     internal class CatchFrame
     {
-        private Runner runner;
-        private TryStatementSyntax tryNode;
+        private Runner Runner;
+        private TryStatementSyntax TryNode;
 
         public CatchFrame(Runner runner, TryStatementSyntax node)
         {
-            this.runner = runner;
-            this.tryNode = node;
+            this.Runner = runner;
+            this.TryNode = node;
         }
 
         public bool RunCatch(Exception e)
         {
-            foreach (var c in tryNode.Catches)
+            foreach (var c in TryNode.Catches)
             {
                 var type = $"{c.Declaration.Type}";
-                var rt = runner.resolver.GetType(type);
+                var rt = Runner.Resolver.GetType(type);
 
                 if (rt == null)
                     continue;
                 if (e.GetType().IsSubclassOf(rt))
                 {
-                    var vf = new VarFrame(runner.vars);
+                    var vf = new VarFrame(Runner.Vars);
                     vf.SetValue($"{c.Declaration.Identifier}", HybInstance.Object(e));
-                    runner.RunBlock(c.Block, vf);
+                    Runner.RunBlock(c.Block, vf);
                     return true;
                 }
             }

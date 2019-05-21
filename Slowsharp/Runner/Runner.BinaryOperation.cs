@@ -36,7 +36,7 @@ namespace Slowsharp
         private HybInstance RunIs(BinaryExpressionSyntax node)
         {
             var left = RunExpression(node.Left);
-            var type = resolver.GetType($"{node.Right}");
+            var type = Resolver.GetType($"{node.Right}");
 
             if (type == null)
                 throw new SemanticViolationException($"Unrecognized type: {node.Right}");

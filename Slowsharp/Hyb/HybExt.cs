@@ -10,14 +10,14 @@ namespace Slowsharp
     {
         public static object Unwrap(this HybInstance _this)
         {
-            if (_this.isCompiledType)
-                return _this.innerObject;
+            if (_this.IsCompiledType)
+                return _this.InnerObject;
             return _this;
         }
         public static Type Unwrap(this HybType _this)
         {
-            if (_this.isCompiledType)
-                return _this.compiledType;
+            if (_this.IsCompiledType)
+                return _this.CompiledType;
             return typeof(HybInstance);
         }
         public static Type[] Unwrap(this HybType[] _this)
@@ -25,7 +25,7 @@ namespace Slowsharp
             var objs = new Type[_this.Length];
 
             for (int i = 0; i < _this.Length; i++)
-                objs[i] = _this[i].compiledType;
+                objs[i] = _this[i].CompiledType;
 
             return objs;
         }
@@ -62,10 +62,10 @@ namespace Slowsharp
         {
             if (_this == typeof(object))
                 return true;
-            if (type.isCompiledType == false)
+            if (type.IsCompiledType == false)
                 return false;
 
-            var cType = type.compiledType;
+            var cType = type.CompiledType;
             if (_this.IsGenericType)
             {
                 var gs = _this.GetGenericArguments();
@@ -124,14 +124,14 @@ namespace Slowsharp
                 }
             }
 
-            return _this.IsAssignableFrom(type.compiledType);
+            return _this.IsAssignableFrom(type.CompiledType);
         }
         public static bool IsSubclassOf(this Type _this, HybType type)
         {
-            if (type.isCompiledType == false)
+            if (type.IsCompiledType == false)
                 return false;
 
-            return _this.IsSubclassOf(type.compiledType);
+            return _this.IsSubclassOf(type.CompiledType);
         }
     }
 }

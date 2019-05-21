@@ -17,13 +17,13 @@ namespace Slowsharp
 
             foreach (var member in members)
             {
-                if (member.target.isCompiled)
+                if (member.Target.IsCompiled)
                 {
                     args = originalArgs;
 
                     var genericBound = new Dictionary<string, Type>();
                     var genericArgs = new List<HybType>(implicitGenercArgs);
-                    var method = member.target.compiledMethod;
+                    var method = member.Target.CompiledMethod;
                     var ps = method.GetParameters();
 
                     if (args.Length > ps.Length)
@@ -62,10 +62,10 @@ namespace Slowsharp
                         {
                             // Second change,
                             // Check whether parent can be assignable
-                            if (args[i].isVirtualDerived &&
-                                p.IsAssignableFromEx(args[i].parent.GetHybType(), genericBound))
+                            if (args[i].IsVirtualDerived &&
+                                p.IsAssignableFromEx(args[i].Parent.GetHybType(), genericBound))
                             {
-                                args[i] = args[i].parent;
+                                args[i] = args[i].Parent;
                             }
                             else
                             {
@@ -100,7 +100,7 @@ namespace Slowsharp
                         }
 
                         if (methodGenericArgs.Length != genericArgs.Count)
-                            throw new SemanticViolationException($"Insufficient generic arguments for `{member.id}`");
+                            throw new SemanticViolationException($"Insufficient generic arguments for `{member.Id}`");
 
                         return member.MakeGenericMethod(genericArgs.ToArray());
                     }
@@ -108,9 +108,9 @@ namespace Slowsharp
                 }
                 else
                 {
-                    var ps = member.target.interpretMethod.ParameterList.Parameters;
+                    var ps = member.Target.InterpretMethod.ParameterList.Parameters;
 
-                    if (member.isVaArg == false &&
+                    if (member.IsVaArg == false &&
                         args.Length > ps.Count)
                         continue;
 

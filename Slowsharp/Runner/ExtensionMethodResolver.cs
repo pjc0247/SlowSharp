@@ -34,7 +34,7 @@ namespace Slowsharp
         {
             var result = new List<SSMethodInfo>();
 
-            if (value.isCompiledType)
+            if (value.IsCompiledType)
             {
                 foreach (var method in extensions)
                 {

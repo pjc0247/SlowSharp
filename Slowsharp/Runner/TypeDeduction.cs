@@ -30,7 +30,7 @@ namespace Slowsharp
             var finalCandidate = candidates[0];
             foreach (var candidate in candidates)
             {
-                if (candidate.isCompiledType == false)
+                if (candidate.IsCompiledType == false)
                     finalCandidate = HybTypeCache.Object;
             }
 

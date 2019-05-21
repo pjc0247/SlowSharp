@@ -11,99 +11,99 @@ namespace Slowsharp
 {
     public class SSMethodInfo : SSMemberInfo
     {
-        public Invokable target;
+        public Invokable Target;
 
         /// <summary>
         /// Whether method has `params` modifier in last parameter.
         /// </summary>
-        public bool isVaArg { get; }
-        public HybType returnType { get; }
+        public bool IsVaArg { get; }
+        public HybType ReturnType { get; }
 
-        public SSParamInfo[] parameters { get; }
+        public SSParamInfo[] Parameters { get; }
 
-        internal JumpDestination[] jumps;
-        internal BaseMethodDeclarationSyntax declaration;
+        internal JumpDestination[] Jumps;
+        internal BaseMethodDeclarationSyntax Declaration;
 
         internal SSMethodInfo(Runner runner, string id, HybType declaringType, BaseMethodDeclarationSyntax declaration)
         {
-            this.id = id;
-            this.signature = MemberSignature.GetSignature(
-                runner.resolver, id, declaration);
-            this.declaringType = declaringType;
-            this.target = new Invokable(this, runner, declaration);
+            this.Id = id;
+            this.Signature = MemberSignature.GetSignature(
+                runner.Resolver, id, declaration);
+            this.DeclaringType = declaringType;
+            this.Target = new Invokable(this, runner, declaration);
 
             if (declaration is MethodDeclarationSyntax md)
-                this.returnType = runner.resolver.GetType($"{md.ReturnType}");
-            this.isVaArg =
+                this.ReturnType = runner.Resolver.GetType($"{md.ReturnType}");
+            this.IsVaArg =
                 declaration.ParameterList.Parameters.LastOrDefault()
                 ?.Modifiers.IsParams() ?? false;
 
-            this.parameters = new SSParamInfo[declaration.ParameterList.Parameters.Count];
-            for (int i = 0; i < this.parameters.Length; i++)
+            this.Parameters = new SSParamInfo[declaration.ParameterList.Parameters.Count];
+            for (int i = 0; i < this.Parameters.Length; i++)
             {
                 var p = declaration.ParameterList.Parameters[i];
-                this.parameters[i] = new SSParamInfo()
+                this.Parameters[i] = new SSParamInfo()
                 {
-                    id = p.Identifier.Text,
-                    defaultValue = p.Default != null ? runner.RunExpression(p.Default.Value) : null,
-                    isParams = p.Modifiers.IsParams()
+                    Id = p.Identifier.Text,
+                    DefaultValue = p.Default != null ? runner.RunExpression(p.Default.Value) : null,
+                    IsParams = p.Modifiers.IsParams()
                 };
             }
         }
         internal SSMethodInfo(Runner runner, string id, HybType declaringType, Invokable body, HybType[] parameterTypes, HybType returnType)
         {
-            this.id = id;
-            this.signature = id; // ??
-            this.declaringType = declaringType;
-            this.target = body;
+            this.Id = id;
+            this.Signature = id; // ??
+            this.DeclaringType = declaringType;
+            this.Target = body;
 
-            this.returnType = returnType;
-            this.isVaArg = false; // for now
+            this.ReturnType = returnType;
+            this.IsVaArg = false; // for now
 
-            this.parameters = new SSParamInfo[parameterTypes.Length];
-            for (int i = 0; i < this.parameters.Length; i++)
+            this.Parameters = new SSParamInfo[parameterTypes.Length];
+            for (int i = 0; i < this.Parameters.Length; i++)
             {
-                this.parameters[i] = new SSParamInfo()
+                this.Parameters[i] = new SSParamInfo()
                 {
-                    id = $"{i}",
-                    defaultValue = null,
-                    isParams = false
+                    Id = $"{i}",
+                    DefaultValue = null,
+                    IsParams = false
                 };
             }
         }
         internal SSMethodInfo(MethodInfo methodInfo)
         {
-            this.id = methodInfo.Name;
-            this.signature = MemberSignature.GetSignature(methodInfo);
-            this.declaringType = HybTypeCache.GetHybType(methodInfo.DeclaringType);
-            this.target = new Invokable(methodInfo);
+            this.Id = methodInfo.Name;
+            this.Signature = MemberSignature.GetSignature(methodInfo);
+            this.DeclaringType = HybTypeCache.GetHybType(methodInfo.DeclaringType);
+            this.Target = new Invokable(methodInfo);
 
-            this.returnType = HybTypeCache.GetHybType(methodInfo.ReturnType);
-            this.isVaArg =
+            this.ReturnType = HybTypeCache.GetHybType(methodInfo.ReturnType);
+            this.IsVaArg =
                 methodInfo.GetParameters().LastOrDefault()
                 ?.IsDefined(typeof(ParamArrayAttribute), false) ?? false;
 
             var ps = methodInfo.GetParameters();
-            this.parameters = new SSParamInfo[ps.Length];
-            for (int i = 0; i < this.parameters.Length; i++)
+            this.Parameters = new SSParamInfo[ps.Length];
+            for (int i = 0; i < this.Parameters.Length; i++)
             {
                 var p = ps[i];
-                this.parameters[i] = new SSParamInfo()
+                this.Parameters[i] = new SSParamInfo()
                 {
-                    id = p.Name,
-                    defaultValue = p.HasDefaultValue ? HybInstance.Object(p.DefaultValue) : null,
-                    isParams = this.isVaArg && i == this.parameters.Length - 1
+                    Id = p.Name,
+                    DefaultValue = p.HasDefaultValue ? HybInstance.Object(p.DefaultValue) : null,
+                    IsParams = this.IsVaArg && i == this.Parameters.Length - 1
                 };
             }
         }
 
         public Type[] GetGenericArgumentsFromDefinition()
         {
-            if (target.isCompiled)
+            if (Target.IsCompiled)
             {
-                if (target.compiledMethod.IsGenericMethod)
+                if (Target.CompiledMethod.IsGenericMethod)
                 {
-                    return target.compiledMethod
+                    return Target.CompiledMethod
                         .GetGenericMethodDefinition()
                         .GetGenericArguments();
                 }
@@ -112,15 +112,15 @@ namespace Slowsharp
         }
         public int GetGenericArgumentCount()
         {
-            if (target.isCompiled)
-                return target.compiledMethod.GetGenericArguments().Length;
+            if (Target.IsCompiled)
+                return Target.CompiledMethod.GetGenericArguments().Length;
             return 0;
         }
         public SSMethodInfo MakeGenericMethod(HybType[] genericArgs)
         {
-            if (target.isCompiled)
+            if (Target.IsCompiled)
             {
-                var method = target.compiledMethod
+                var method = Target.CompiledMethod
                     .MakeGenericMethod(genericArgs.Unwrap());
                 return new SSMethodInfo(method);
             }
@@ -129,6 +129,6 @@ namespace Slowsharp
         }
 
         public HybInstance Invoke(HybInstance _this, params HybInstance[] args)
-            => target.Invoke(_this, args);
+            => Target.Invoke(_this, args);
     }
 }

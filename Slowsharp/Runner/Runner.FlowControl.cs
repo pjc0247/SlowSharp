@@ -13,8 +13,8 @@ namespace Slowsharp
         private void RunGoto(GotoStatementSyntax node)
         {
             var label = $"{node.Expression.GetText()}";
-            var dst = ctx.method.jumps
-                .Where(x => x.label == label)
+            var dst = Ctx.Method.Jumps
+                .Where(x => x.Label == label)
                 .FirstOrDefault();
 
             if (dst == null)
@@ -22,7 +22,7 @@ namespace Slowsharp
 
             // TODO: frame unwinding
             //   goto is very unstalbe in current implementation
-            RunBlock((BlockSyntax)dst.statement, vars, dst.pc);
+            RunBlock((BlockSyntax)dst.Statement, Vars, dst.Pc);
         }
 
         private void RunIf(IfStatementSyntax node)
@@ -40,8 +40,8 @@ namespace Slowsharp
 
             try
             {
-                if (obj.isCompiledType &&
-                    Convert.ToInt32(obj.innerObject) == 0)
+                if (obj.IsCompiledType &&
+                    Convert.ToInt32(obj.InnerObject) == 0)
                     return false;
             }
             catch { }
@@ -68,7 +68,7 @@ namespace Slowsharp
                         {
                             Run(statement);
 
-                            if (halt != HaltType.None)
+                            if (Halt != HaltType.None)
                                 break;
                         }
                     }
@@ -82,27 +82,27 @@ namespace Slowsharp
                             {
                                 Run(statement);
 
-                                if (halt != HaltType.None)
+                                if (Halt != HaltType.None)
                                     break;
                             }
                         }
                     }
 
-                    if (halt != HaltType.None)
+                    if (Halt != HaltType.None)
                         break;
                 }
 
-                if (halt != HaltType.None)
+                if (Halt != HaltType.None)
                     break;
             }
 
-            if (halt == HaltType.Break)
-                halt = HaltType.None;
+            if (Halt == HaltType.Break)
+                Halt = HaltType.None;
         }
 
         private void RunFor(ForStatementSyntax node)
         {
-            vars = new VarFrame(vars);
+            Vars = new VarFrame(Vars);
 
             Run(node.Declaration);
 
@@ -117,18 +117,18 @@ namespace Slowsharp
 
                 Run(node.Statement);
 
-                if (halt == HaltType.Continue)
-                    halt = HaltType.None;
-                if (halt != HaltType.None) break;
+                if (Halt == HaltType.Continue)
+                    Halt = HaltType.None;
+                if (Halt != HaltType.None) break;
 
                 foreach (var expr in node.Incrementors)
                     RunExpression(expr);
             }
 
-            if (halt == HaltType.Break)
-                halt = HaltType.None;
+            if (Halt == HaltType.Break)
+                Halt = HaltType.None;
 
-            vars = vars.parent;
+            Vars = Vars.Parent;
         }
 
         private void RunForEach(ForEachStatementSyntax node)
@@ -136,25 +136,25 @@ namespace Slowsharp
             var list = RunExpression(node.Expression);
             var e = list.GetEnumerator();
 
-            vars = new VarFrame(vars);
+            Vars = new VarFrame(Vars);
             while (true)
             {
                 if (e.MoveNext() == false)
                     break;
                 
-                vars.SetValue($"{node.Identifier}", e.Current.Wrap());
+                Vars.SetValue($"{node.Identifier}", e.Current.Wrap());
 
                 Run(node.Statement);
 
-                if (halt == HaltType.Continue || 
-                    halt == HaltType.YieldReturn)
-                    halt = HaltType.None;
-                if (halt != HaltType.None) break;
+                if (Halt == HaltType.Continue || 
+                    Halt == HaltType.YieldReturn)
+                    Halt = HaltType.None;
+                if (Halt != HaltType.None) break;
             }
-            vars = vars.parent;
+            Vars = Vars.Parent;
 
-            if (halt == HaltType.Break)
-                halt = HaltType.None;
+            if (Halt == HaltType.Break)
+                Halt = HaltType.None;
         }
         private void RunWhile(WhileStatementSyntax node)
         {
@@ -166,22 +166,22 @@ namespace Slowsharp
 
                 Run(node.Statement);
 
-                if (halt == HaltType.Continue)
-                    halt = HaltType.None;
-                if (halt != HaltType.None) break;
+                if (Halt == HaltType.Continue)
+                    Halt = HaltType.None;
+                if (Halt != HaltType.None) break;
             }
 
-            if (halt == HaltType.Break)
-                halt = HaltType.None;
+            if (Halt == HaltType.Break)
+                Halt = HaltType.None;
         }
 
         private void RunBreak(BreakStatementSyntax node)
         {
-            halt = HaltType.Break;
+            Halt = HaltType.Break;
         }
         private void RunContinue(ContinueStatementSyntax node)
         {
-            halt = HaltType.Continue;
+            Halt = HaltType.Continue;
         }
     }
 }

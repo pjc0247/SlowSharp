@@ -23,17 +23,17 @@ namespace Slowsharp.JSON
             }
 
             var type = obj.GetHybType();
-            if (type.isPrimitive)
+            if (type.IsPrimitive)
             {
-                if (type.compiledType == typeof(string))
+                if (type.CompiledType == typeof(string))
                     sb.Append("\"");
-                sb.Append(obj.innerObject.ToString());
-                if (type.compiledType == typeof(string))
+                sb.Append(obj.InnerObject.ToString());
+                if (type.CompiledType == typeof(string))
                     sb.Append("\"");
                 return;
             }
 
-            if (type.isArray)
+            if (type.IsArray)
             {
                 sb.Append("[");
 

@@ -11,25 +11,23 @@ namespace Slowsharp
 {
     internal class RunContext
     {
-        public RunConfig config { get; }
-        public Dictionary<string, Class> types { get; }
+        public RunConfig Config { get; }
+        public Dictionary<string, Class> Types { get; }
 
         public HybInstance _this { get; set; }
         public HybInstance _bound { get; set; }
-        public SSMethodInfo method { get; private set; }
-        public SyntaxNode lastNode { get; set; }
-        public Stack<SSMethodInfo> methodStack { get; private set; }
-        public Stack<CallFrame> callstack { get; private set; }
+        public SSMethodInfo Method { get; private set; }
+        public SyntaxNode LastNode { get; set; }
+        public Stack<CallFrame> Callstack { get; private set; }
 
         private DateTime startsAt;
 
         public RunContext(RunConfig config)
         {
-            this.config = config;
+            this.Config = config;
 
-            this.types = new Dictionary<string, Class>();
-            this.methodStack = new Stack<SSMethodInfo>();
-            this.callstack = new Stack<CallFrame>();
+            this.Types = new Dictionary<string, Class>();
+            this.Callstack = new Stack<CallFrame>();
 
             // This prevents bug
             Reset();
@@ -38,24 +36,22 @@ namespace Slowsharp
         {
             startsAt = DateTime.Now;
         }
-        public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= config.Timeout;
+        public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= Config.Timeout;
 
         public void PushMethod(SSMethodInfo methodInfo)
         {
-            methodStack.Push(methodInfo);
-            callstack.Push(new CallFrame()
+            Callstack.Push(new CallFrame()
             {
                 _this = _this,
-                method = method
+                Method = Method
             });
-            method = methodInfo;
+            Method = methodInfo;
         }
         public void PopMethod()
         {
-            methodStack.Pop();
-            var prevCallframe = callstack.Pop();
+            var prevCallframe = Callstack.Pop();
             _this = prevCallframe._this;
-            method = prevCallframe.method;
+            Method = prevCallframe.Method;
         }
     }
 }

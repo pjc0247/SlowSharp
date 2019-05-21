@@ -59,8 +59,8 @@ namespace Slowsharp
             else if (id == "ulong") return HybType.Uint64;
             else if (id == "object") return HybType.Object;
 
-            if (ctx.types.ContainsKey(id))
-                return new HybType(ctx.types[id]);
+            if (ctx.Types.ContainsKey(id))
+                return new HybType(ctx.Types[id]);
 
             if (hintAssembly != null)
             {

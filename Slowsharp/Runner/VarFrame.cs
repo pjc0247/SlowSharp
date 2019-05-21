@@ -8,13 +8,13 @@ namespace Slowsharp
 {
     internal class VarFrame
     {
-        public VarFrame parent { get; }
+        public VarFrame Parent { get; }
 
-        private Dictionary<string, HybInstance> values = new Dictionary<string, HybInstance>();
+        private Dictionary<string, HybInstance> Values = new Dictionary<string, HybInstance>();
 
         public VarFrame(VarFrame parent)
         {
-            this.parent = parent;
+            this.Parent = parent;
         }
 
         public HybInstance GetValue(string key)
@@ -26,19 +26,19 @@ namespace Slowsharp
         }
         public bool TryGetValue(string key, out HybInstance value)
         {
-            if (values.ContainsKey(key))
+            if (Values.ContainsKey(key))
             {
-                value = values[key];
+                value = Values[key];
                 return true;
             }
 
-            if (parent == null)
+            if (Parent == null)
             {
                 value = null;
                 return false;
             }
 
-            return parent.TryGetValue(key, out value);
+            return Parent.TryGetValue(key, out value);
         }
 
         public bool UpdateValue(string key, HybInstance value)
@@ -52,18 +52,18 @@ namespace Slowsharp
             Console.WriteLine($"{key} = {value}");
 
             if (SetValueUpwards(key, value) == false)
-                values[key] = value;
+                Values[key] = value;
         }
         private bool SetValueUpwards(string key, HybInstance value)
         {
-            if (values.ContainsKey(key))
+            if (Values.ContainsKey(key))
             {
-                values[key] = value;
+                Values[key] = value;
                 return true;
             }
 
-            if (parent == null) return false;
-            return parent.SetValueUpwards(key, value);
+            if (Parent == null) return false;
+            return Parent.SetValueUpwards(key, value);
         }
 
         public Dictionary<string, HybInstance> Flatten()
@@ -74,11 +74,11 @@ namespace Slowsharp
         }
         private void FlattenUpwards(Dictionary<string, HybInstance> dict)
         {
-            foreach (var pair in values)
+            foreach (var pair in Values)
                 dict[pair.Key] = pair.Value;
 
-            if (parent != null)
-                parent.FlattenUpwards(dict);
+            if (Parent != null)
+                Parent.FlattenUpwards(dict);
         }
     }
 }

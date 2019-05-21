@@ -9,26 +9,26 @@ namespace Slowsharp
 {
     public class DynamicHybInstance : DynamicObject
     {
-        private HybInstance obj;
+        private HybInstance Obj;
 
         public DynamicHybInstance(HybInstance obj)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
 
-            this.obj = obj;
+            this.Obj = obj;
         }
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            result = obj.Invoke(binder.Name, args);
+            result = Obj.Invoke(binder.Name, args);
             return true;
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
         {
             HybInstance value;
-            if (obj.GetIndexer(indexes, out value))
+            if (Obj.GetIndexer(indexes, out value))
             {
                 result = value.Unwrap();
                 return true;
@@ -40,7 +40,7 @@ namespace Slowsharp
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             HybInstance value;
-            if (obj.GetPropertyOrField(binder.Name, out value))
+            if (Obj.GetPropertyOrField(binder.Name, out value))
             {
                 result = value.Unwrap();
                 return true;
@@ -49,7 +49,7 @@ namespace Slowsharp
         }
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            if (obj.SetPropertyOrField(binder.Name, value.Wrap()))
+            if (Obj.SetPropertyOrField(binder.Name, value.Wrap()))
                 return true;
             throw new ArgumentException($"No such member: {binder.Name}");
         }

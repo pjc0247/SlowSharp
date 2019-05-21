@@ -14,22 +14,22 @@ namespace Slowsharp
 
         private void AddUsing(UsingDirectiveSyntax node)
         {
-            lookup.Add($"{node.Name}");
-            resolver.AddLookupNamespace($"{node.Name}");
+            Lookup.Add($"{node.Name}");
+            Resolver.AddLookupNamespace($"{node.Name}");
         }
 
         private void AddEnum(EnumDeclarationSyntax node)
         {
             var id = $"{node.Identifier}";
 
-            klass = new EnumClass(this, id);
-            ctx.types.Add(id, klass);
+            Klass = new EnumClass(this, id);
+            Ctx.Types.Add(id, Klass);
         }
         private void AddEnumMember(EnumMemberDeclarationSyntax node)
         {
-            var value = ((EnumClass)klass).AddMember(node);
-            globals.SetStaticField(
-                klass, node.Identifier.Text, HybInstance.Int(value));
+            var value = ((EnumClass)Klass).AddMember(node);
+            Globals.SetStaticField(
+                Klass, node.Identifier.Text, HybInstance.Int(value));
         }
 
         private void AddClass(ClassDeclarationSyntax node)
@@ -38,7 +38,7 @@ namespace Slowsharp
 
             if (node.Modifiers.Contains("partial"))
                 throw new SemanticViolationException($"partial keyword is not supported: {id}");
-            if (ctx.types.ContainsKey(id))
+            if (Ctx.Types.ContainsKey(id))
                 throw new SemanticViolationException($"Class redefination is not supported: {id}");
 
             HybType parentType = null;
@@ -47,12 +47,12 @@ namespace Slowsharp
             {
                 foreach (var b in node.BaseList.Types)
                 {
-                    var type = resolver.GetType($"{b.Type}");
-                    if (type.isInterface == false)
+                    var type = Resolver.GetType($"{b.Type}");
+                    if (type.IsInterface == false)
                     {
                         if (parentType != null)
                             throw new SemanticViolationException($"Cannot be derived from more than 2 base classes.");
-                        if (type.isSealed)
+                        if (type.IsSealed)
                             throw new SemanticViolationException($"Sealed class cannot be inherited.");
 
                         parentType = type;
@@ -64,69 +64,69 @@ namespace Slowsharp
                 }
             }
 
-            klass = new Class(this, id, parentType, interfaceTypes.ToArray());
-            ctx.types.Add(id, klass);
+            Klass = new Class(this, id, parentType, interfaceTypes.ToArray());
+            Ctx.Types.Add(id, Klass);
         }
         private void AddIndexer(IndexerDeclarationSyntax node)
         {
-            var type = resolver.GetType($"{node.Type}");
-            var propertyInfo = klass.AddProperty("[]", node);
+            var type = Resolver.GetType($"{node.Type}");
+            var propertyInfo = Klass.AddProperty("[]", node);
         }
         private void AddProperty(PropertyDeclarationSyntax node)
         {
             var isStatic = node.Modifiers.IsStatic();
-            var type = resolver.GetType($"{node.Type}");
+            var type = Resolver.GetType($"{node.Type}");
             var id = $"{node.Identifier}";
 
-            var propertyInfo = klass.AddProperty(id, node);
+            var propertyInfo = Klass.AddProperty(id, node);
 
-            if (propertyInfo.isStatic)
+            if (propertyInfo.IsStatic)
                 InitializeStaticProperty(propertyInfo);
         }
         private void AddField(FieldDeclarationSyntax node)
         {
-            var type = resolver.GetType($"{node.Declaration.Type}");
+            var type = Resolver.GetType($"{node.Declaration.Type}");
 
             foreach (var f in node.Declaration.Variables)
             {
                 var id = $"{f.Identifier}";
 
-                var fieldInfo = klass.AddField(id, node, f);
-                if (fieldInfo.isStatic)
+                var fieldInfo = Klass.AddField(id, node, f);
+                if (fieldInfo.IsStatic)
                     InitializeStaticField(f, id, type);
             }
         }
 
         private void InitializeStaticProperty(SSInterpretPropertyInfo info)
         {
-            if (info.hasBackingField == false)
+            if (info.HasBackingField == false)
                 return;
 
-            var backingField = info.backingField;
+            var backingField = info.BackingField;
 
-            if (info.initializer == null)
-                globals.SetStaticField(klass, backingField.id, info.type.GetDefault());
+            if (info.Initializer == null)
+                Globals.SetStaticField(Klass, backingField.Id, info.Type.GetDefault());
             else
             {
-                var capturedKlass = klass;
+                var capturedKlass = Klass;
                 AddLazyInitializer(() =>
                 {
-                    globals.SetStaticField(
+                    Globals.SetStaticField(
                         capturedKlass,
-                        backingField.id, RunExpression(info.initializer.Value));
+                        backingField.Id, RunExpression(info.Initializer.Value));
                 });
             }
         }
         private void InitializeStaticField(VariableDeclaratorSyntax field, string id, HybType type)
         {
             if (field.Initializer == null)
-                globals.SetStaticField(klass, id, type.GetDefault());
+                Globals.SetStaticField(Klass, id, type.GetDefault());
             else
             {
-                var capturedKlass = klass;
+                var capturedKlass = Klass;
                 AddLazyInitializer(() =>
                 {
-                    globals.SetStaticField(
+                    Globals.SetStaticField(
                         capturedKlass,
                         id, RunExpression(field.Initializer.Value));
                 });
@@ -135,16 +135,16 @@ namespace Slowsharp
 
         private void AddConstructorMethod(ConstructorDeclarationSyntax node)
         {
-            var methodInfo = klass.AddMethod(
+            var methodInfo = Klass.AddMethod(
                 "$_ctor", node,
                 BuildJumps(node.Body));
 
-            if (methodInfo.isStatic)
-                staticInitializers[klass] = methodInfo;
+            if (methodInfo.IsStatic)
+                staticInitializers[Klass] = methodInfo;
         }
         private void AddMethod(MethodDeclarationSyntax node)
         {
-            klass.AddMethod(
+            Klass.AddMethod(
                 node.Identifier.ValueText,
                 node, 
                 BuildJumps(node.Body));
@@ -170,10 +170,10 @@ namespace Slowsharp
                 if (child is LabeledStatementSyntax lb)
                 {
                     jumps.Add(new JumpDestination() {
-                        label = lb.Identifier.Text,
-                        statement = (StatementSyntax)node,
-                        pc = i,
-                        frameDepth = depth
+                        Label = lb.Identifier.Text,
+                        Statement = (StatementSyntax)node,
+                        Pc = i,
+                        FrameDepth = depth
                     });
                 }
 

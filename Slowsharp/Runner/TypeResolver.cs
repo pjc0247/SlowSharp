@@ -9,22 +9,22 @@ namespace Slowsharp
 {
     internal class TypeResolver
     {
-        private RunContext ctx;
-        private Assembly[] assemblies;
+        private RunContext Ctx;
+        private Assembly[] Assemblies;
 
-        private TypeCache typeCache;
+        private TypeCache TypeCache;
 
         public TypeResolver(RunContext ctx, Assembly[] assemblies)
         {
-            this.ctx = ctx;
-            this.assemblies = assemblies;
+            this.Ctx = ctx;
+            this.Assemblies = assemblies;
 
-            this.typeCache = new TypeCache(ctx, assemblies);
+            this.TypeCache = new TypeCache(ctx, assemblies);
         }
 
         public void AddLookupNamespace(string ns)
         {
-            typeCache.AddLookupNamespace(ns);
+            TypeCache.AddLookupNamespace(ns);
         }
 
         public void CacheType(Type type)
@@ -32,7 +32,7 @@ namespace Slowsharp
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            typeCache.CacheType(type);
+            TypeCache.CacheType(type);
         }
 
         private bool IsGeneric(string id)
@@ -111,11 +111,11 @@ namespace Slowsharp
             if (isGeneric)
                 sig = GetSignatureName(id, out genericArgs);
 
-            type = typeCache.GetType(sig, hintAssembly);
+            type = TypeCache.GetType(sig, hintAssembly);
             if (type == null)
                 return false;    
 
-            var ac = ctx.config.AccessControl;
+            var ac = Ctx.Config.AccessControl;
             if (ac.IsSafeType(type) == false)
                 throw new SandboxException($"{id} is not allowed to use.");
 
@@ -144,7 +144,7 @@ namespace Slowsharp
         {
             id = $"{id}`{n}";
 
-            foreach (var asm in assemblies)
+            foreach (var asm in Assemblies)
             {
                 foreach (var type in asm.GetTypesSafe())
                 {

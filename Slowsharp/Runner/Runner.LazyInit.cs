@@ -33,15 +33,15 @@ namespace Slowsharp
         /// </summary>
         private void InitializeTypes()
         {
-            var oldTypeResolver = resolver;
-            resolver = new TypeResolverForStaticInitialization(this, resolver);
+            var oldTypeResolver = Resolver;
+            Resolver = new TypeResolverForStaticInitialization(this, Resolver);
 
             foreach (var init in staticInitializers)
             {
                 RunStaticInitializer(init.Key);
             }
 
-            resolver = oldTypeResolver;
+            Resolver = oldTypeResolver;
         }
         internal void RunStaticInitializer(Class klass)
         {

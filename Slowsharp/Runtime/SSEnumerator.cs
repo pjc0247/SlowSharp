@@ -26,7 +26,7 @@ namespace Slowsharp
             this.vf = vf;
         }
 
-        public object Current => runner.ret.Unwrap();
+        public object Current => runner.Ret.Unwrap();
         public void Dispose()
         {
             // releases gc refs just in case

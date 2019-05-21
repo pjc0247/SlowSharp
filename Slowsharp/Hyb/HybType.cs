@@ -32,85 +32,85 @@ namespace Slowsharp
         public static HybType Decimal => HybTypeCache.Decimal;
         public static HybType Type => HybTypeCache.Type;
 
-        public string id { get; }
-        public string fullName { get; }
-        public bool isCompiledType => compiledType != null;
-        public bool isInterface { get; }
-        public bool isSealed { get; }
-        public bool isValueType { get; }
-        public bool isPrimitive { get; }
+        public string Id { get; }
+        public string FullName { get; }
+        public bool IsCompiledType => CompiledType != null;
+        public bool IsInterface { get; }
+        public bool IsSealed { get; }
+        public bool IsValueType { get; }
+        public bool IsPrimitive { get; }
 
-        public Type compiledType { get; }
-        internal Class interpretKlass { get; }
+        public Type CompiledType { get; }
+        internal Class InterpretKlass { get; }
 
-        public bool isArray { get; }
-        public int arrayRank { get; }
-        public HybType elementType { get; }
-        public HybType[] interfaces
+        public bool IsArray { get; }
+        public int ArrayRank { get; }
+        public HybType ElementType { get; }
+        public HybType[] Interfaces
         {
             get
             {
-                if (_interfaces == null)
+                if (_Interfaces == null)
                 {
-                    if (isCompiledType)
+                    if (IsCompiledType)
                     {
-                        _interfaces = compiledType.GetInterfaces()
+                        _Interfaces = CompiledType.GetInterfaces()
                             .Select(x => HybTypeCache.GetHybType(x))
                             .ToArray();
                     }
                     else
-                        _interfaces = interpretKlass.interfaces;
+                        _Interfaces = InterpretKlass.Interfaces;
                 }
-                return _interfaces;
+                return _Interfaces;
             }
         }
-        private HybType[] _interfaces;
-        public HybType parent
+        private HybType[] _Interfaces;
+        public HybType Parent
         {
             get
             {
-                if (_parent == null)
+                if (_Parent == null)
                 {
-                    if (isCompiledType)
+                    if (IsCompiledType)
                     {
-                        _parent = compiledType.BaseType != null ?
-                            HybTypeCache.GetHybType(compiledType.BaseType) :
+                        _Parent = CompiledType.BaseType != null ?
+                            HybTypeCache.GetHybType(CompiledType.BaseType) :
                             null;
                     }
                     else
-                        _parent = interpretKlass.parent;
+                        _Parent = InterpretKlass.Parent;
                 }
-                return _parent;
+                return _Parent;
             }
         }
-        private HybType _parent;
+        private HybType _Parent;
 
         internal HybType(Type type)
         {
-            this.id = type.Name;
-            this.fullName = type.FullName;
-            this.isSealed = type.IsSealed;
-            this.isInterface = type.IsInterface;
-            this.isValueType = type.IsValueType;
-            this.isPrimitive = type.IsPrimitive;
-            this.compiledType = type;
+            this.Id = type.Name;
+            this.FullName = type.FullName;
+            this.IsSealed = type.IsSealed;
+            this.IsInterface = type.IsInterface;
+            this.IsValueType = type.IsValueType;
+            this.IsPrimitive = type.IsPrimitive;
+            this.CompiledType = type;
         }
         internal HybType(Class klass)
         {
-            this.id = klass.id;
-            this.fullName = klass.id;
-            this.isSealed = false;
-            this.isInterface = false;
-            this.isValueType = false;
-            this.isPrimitive = false;
-            this.interpretKlass = klass;
+            this.Id = klass.Id;
+            this.FullName = klass.Id;
+            this.IsSealed = false;
+            this.IsInterface = false;
+            this.IsValueType = false;
+            this.IsPrimitive = false;
+            this.InterpretKlass = klass;
         }
         internal HybType(Class klass, HybType elementType, int arrayRank) :
             this(klass)
         {
-            this.isArray = true;
-            this.elementType = elementType;
-            this.arrayRank = arrayRank;
+            this.IsArray = true;
+            this.ElementType = elementType;
+            this.ArrayRank = arrayRank;
         }
 
         public HybType MakeArrayType(int rank)
@@ -118,22 +118,22 @@ namespace Slowsharp
             if (rank < 1)
                 throw new ArgumentException(nameof(rank));
 
-            if (isCompiledType)
+            if (IsCompiledType)
             {
                 if (rank == 1)
-                    return HybTypeCache.GetHybType(compiledType.MakeArrayType());
-                return HybTypeCache.GetHybType(compiledType.MakeArrayType(rank));
+                    return HybTypeCache.GetHybType(CompiledType.MakeArrayType());
+                return HybTypeCache.GetHybType(CompiledType.MakeArrayType(rank));
             }
-            return new HybType(interpretKlass, this, arrayRank);
+            return new HybType(InterpretKlass, this, ArrayRank);
         }
         public HybType MakeGenericType(HybType[] genericArgs)
         {
             if (genericArgs == null)
                 throw new ArgumentNullException(nameof(genericArgs));
 
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                return HybTypeCache.GetHybType(compiledType.MakeGenericType(genericArgs.Unwrap()));
+                return HybTypeCache.GetHybType(CompiledType.MakeGenericType(genericArgs.Unwrap()));
             }
             return null;
         }
@@ -144,14 +144,14 @@ namespace Slowsharp
         }
         public HybInstance CreateInstance(Runner runner, HybInstance[] args)
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
                 return new HybInstance(
                     this,
-                    Activator.CreateInstance(compiledType, args.Unwrap()));
+                    Activator.CreateInstance(CompiledType, args.Unwrap()));
             }
             // Array with interpret type
-            else if (isArray)
+            else if (IsArray)
             {
                 var inst = Array.CreateInstance(typeof(HybInstance),
                     args.Unwrap().Select(x => (int)x).ToArray());
@@ -164,14 +164,14 @@ namespace Slowsharp
         private HybInstance CreateInstanceInterpretType(Runner runner, HybInstance[] args,
              object parentObject = null)
         {
-            var inst = new HybInstance(runner, this, interpretKlass, parentObject);
+            var inst = new HybInstance(runner, this, InterpretKlass, parentObject);
             var ctors = GetMethods("$_ctor");
 
             if (ctors.Length > 0)
             {
                 var ctor = OverloadingResolver
-                    .FindMethodWithArguments(runner.resolver, ctors, new HybType[] { }, ref args);
-                ctor.target.Invoke(inst, args);
+                    .FindMethodWithArguments(runner.Resolver, ctors, new HybType[] { }, ref args);
+                ctor.Target.Invoke(inst, args);
             }
 
             return inst;
@@ -181,12 +181,12 @@ namespace Slowsharp
         /// Returns whether type implements the given interface or not.
         /// </summary>
         public bool HasInterface(HybType type)
-            => interfaces.Any(x => x == type);
+            => Interfaces.Any(x => x == type);
         /// <summary>
         /// Returns whether type implements the given interface or not.
         /// </summary>
         public bool HasInterface(Type type)
-            => interfaces.Any(x => x.isCompiledType && x.compiledType == type);
+            => Interfaces.Any(x => x.IsCompiledType && x.CompiledType == type);
 
         public SSPropertyInfo GetProperty(string id)
         {
@@ -207,9 +207,9 @@ namespace Slowsharp
         private Dictionary<string, SSPropertyInfo> _Properties = null;
         private SSPropertyInfo _GetProperty(string id)
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                var property = compiledType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
+                var property = CompiledType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (property != null)
@@ -217,10 +217,10 @@ namespace Slowsharp
             }
             else
             {
-                if (interpretKlass.HasProperty(id))
-                    return interpretKlass.GetProperty(id);
-                if (parent != null)
-                    return parent.GetProperty(id);
+                if (InterpretKlass.HasProperty(id))
+                    return InterpretKlass.GetProperty(id);
+                if (Parent != null)
+                    return Parent.GetProperty(id);
             }
 
             return null;
@@ -245,9 +245,9 @@ namespace Slowsharp
         private Dictionary<string, SSFieldInfo> _Fields = null;
         private SSFieldInfo _GetField(string id)
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                var field = compiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
+                var field = CompiledType.GetFields(BindingFlags.Static | BindingFlags.Public)
                     .Where(x => x.Name == id)
                     .FirstOrDefault();
                 if (field != null)
@@ -255,10 +255,10 @@ namespace Slowsharp
             }
             else
             {
-                if (interpretKlass.HasField(id))
-                    return interpretKlass.GetField(id);
-                if (parent != null)
-                    return parent.GetField(id);
+                if (InterpretKlass.HasField(id))
+                    return InterpretKlass.GetField(id);
+                if (Parent != null)
+                    return Parent.GetField(id);
             }
 
             return null;
@@ -273,16 +273,16 @@ namespace Slowsharp
             SSPropertyInfo property = GetProperty(id);
             if (property != null)
             {
-                if (property.accessModifier.IsAcceesible(accessLevel) == false)
+                if (property.AccessModifier.IsAcceesible(accessLevel) == false)
                     throw new SemanticViolationException($"Invalid access: {id}");
-                property.setMethod.Invoke(null, new HybInstance[] { value });
+                property.SetMethod.Invoke(null, new HybInstance[] { value });
                 return true;
             }
 
             SSFieldInfo field = GetField(id);
             if (field != null)
             {
-                if (field.accessModifier.IsAcceesible(accessLevel) == false)
+                if (field.AccessModifier.IsAcceesible(accessLevel) == false)
                     throw new SemanticViolationException($"Invalid access: {id}");
                 field.SetValue(null, value);
                 return true;
@@ -300,16 +300,16 @@ namespace Slowsharp
             SSPropertyInfo property = GetProperty(id);
             if (property != null)
             {
-                if (property.accessModifier.IsAcceesible(accessLevel) == false)
+                if (property.AccessModifier.IsAcceesible(accessLevel) == false)
                     throw new SemanticViolationException($"Invalid access: {id}");
-                value = property.getMethod.Invoke(null, new HybInstance[] { });
+                value = property.GetMethod.Invoke(null, new HybInstance[] { });
                 return true;
             }
 
             SSFieldInfo field = GetField(id);
             if (field != null)
             {
-                if (field.accessModifier.IsAcceesible(accessLevel) == false)
+                if (field.AccessModifier.IsAcceesible(accessLevel) == false)
                     throw new SemanticViolationException($"Invalid access: {id}");
                 value = field.GetValue(null);
                 return true;
@@ -322,12 +322,12 @@ namespace Slowsharp
         public SSMethodInfo[] GetStaticMethods(string id)
         {
             return GetStaticMethods()
-                .Where(x => x.id == id)
+                .Where(x => x.Id == id)
                 .ToArray();
         }
         internal SSMethodInfo GetStaticMethodFirst(string id)
         {
-            return GetStaticMethods().Where(x => x.id == id).FirstOrDefault();
+            return GetStaticMethods().Where(x => x.Id == id).FirstOrDefault();
         }
         public SSMethodInfo[] GetStaticMethods()
         {
@@ -338,23 +338,23 @@ namespace Slowsharp
         private SSMethodInfo[] _StaticMethods;
         private SSMethodInfo[] _GetStaticMethods()
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                return CompiledType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                    .Select(x => new SSMethodInfo(x)
                    {
-                       id = x.Name,
-                       isStatic = x.IsStatic,
-                       accessModifier = AccessModifierParser.Get(x)
+                       Id = x.Name,
+                       IsStatic = x.IsStatic,
+                       AccessModifier = AccessModifierParser.Get(x)
                    })
                    .ToArray();
             }
             else
             {
-                if (parent == null)
-                    return interpretKlass.GetMethods();
-                return interpretKlass.GetMethods()
-                    .Concat(parent.GetStaticMethods())
+                if (Parent == null)
+                    return InterpretKlass.GetMethods();
+                return InterpretKlass.GetMethods()
+                    .Concat(Parent.GetStaticMethods())
                     .ToArray();
             }
         }
@@ -362,12 +362,12 @@ namespace Slowsharp
         public SSMethodInfo[] GetMethods(string id)
         {
             return GetMethods()
-                .Where(x => x.id == id)
+                .Where(x => x.Id == id)
                 .ToArray();
         }
         internal SSMethodInfo GetMethodFirst(string id)
         {
-            return GetMethods().Where(x => x.id == id).FirstOrDefault();
+            return GetMethods().Where(x => x.Id == id).FirstOrDefault();
         }
         public SSMethodInfo[] GetMethods()
         {
@@ -378,26 +378,26 @@ namespace Slowsharp
         private SSMethodInfo[] _Methods;
         private SSMethodInfo[] _GetMethods()
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                return compiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+                return CompiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
                    .Where(x => x.IsPrivate == false)
                    .Select(x => new SSMethodInfo(x)
                    {
-                       id = x.Name,
-                       isStatic = x.IsStatic,
-                       accessModifier = AccessModifierParser.Get(x)
+                       Id = x.Name,
+                       IsStatic = x.IsStatic,
+                       AccessModifier = AccessModifierParser.Get(x)
                    })
                    .ToArray();
             }
             else
             {
-                if (parent == null)
-                    return interpretKlass.GetMethods();
+                if (Parent == null)
+                    return InterpretKlass.GetMethods();
 
-                return parent.GetMethods()
-                    .Concat(interpretKlass.GetMethods())
-                    .GroupBy(x => x.signature)
+                return Parent.GetMethods()
+                    .Concat(InterpretKlass.GetMethods())
+                    .GroupBy(x => x.Signature)
                     .Select(x => x.Last())
                     .ToArray();
             }
@@ -405,10 +405,10 @@ namespace Slowsharp
 
         public HybInstance GetDefault()
         {
-            if (isCompiledType)
+            if (IsCompiledType)
             {
-                if (compiledType.IsValueType)
-                    return HybInstance.Object(Activator.CreateInstance(compiledType));
+                if (CompiledType.IsValueType)
+                    return HybInstance.Object(Activator.CreateInstance(CompiledType));
                 return HybInstance.Null();
             }
             return HybInstance.Null();
@@ -416,12 +416,12 @@ namespace Slowsharp
 
         public bool IsSubclassOf(HybType other)
         {
-            if (other.isCompiledType)
+            if (other.IsCompiledType)
             {
-                if (isCompiledType)
+                if (IsCompiledType)
                 {
-                    return compiledType
-                        .IsSubclassOf(other.compiledType);
+                    return CompiledType
+                        .IsSubclassOf(other.CompiledType);
                 }
                 return false;
             }
@@ -429,30 +429,30 @@ namespace Slowsharp
         }
         public bool IsSubclassOf(Type other)
         {
-            if (isCompiledType)
-                return compiledType.IsSubclassOf(other);
+            if (IsCompiledType)
+                return CompiledType.IsSubclassOf(other);
 
-            var type = parent;
+            var type = Parent;
             while (type != null)
             {
-                if (type.isCompiledType &&
-                    type.compiledType == other) return true;
-                type = type.parent;
+                if (type.IsCompiledType &&
+                    type.CompiledType == other) return true;
+                type = type.Parent;
             }
             return false;
         }
         public bool IsAssignableFrom(HybType other)
         {
-            if (other.isCompiledType)
+            if (other.IsCompiledType)
             {
-                if (isCompiledType)
+                if (IsCompiledType)
                 {
-                    if (compiledType.IsPrimitive && other.compiledType.IsPrimitive)
-                        return TypeDescriptor.GetConverter(other.compiledType)
-                            .CanConvertTo(compiledType);
+                    if (CompiledType.IsPrimitive && other.CompiledType.IsPrimitive)
+                        return TypeDescriptor.GetConverter(other.CompiledType)
+                            .CanConvertTo(CompiledType);
 
-                    return compiledType
-                        .IsAssignableFrom(other.compiledType);
+                    return CompiledType
+                        .IsAssignableFrom(other.CompiledType);
                 }
                 return false;
             }
@@ -461,32 +461,32 @@ namespace Slowsharp
 
         public override string ToString()
         {
-            if (isCompiledType)
-                return compiledType.Name;
-            return interpretKlass.id;
+            if (IsCompiledType)
+                return CompiledType.Name;
+            return InterpretKlass.Id;
         }
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
             if (obj is HybType type)
             {
-                if (isCompiledType)
+                if (IsCompiledType)
                 {
-                    if (type.isCompiledType == false)
+                    if (type.IsCompiledType == false)
                         return false;
-                    return compiledType == type.compiledType;
+                    return CompiledType == type.CompiledType;
                 }
                 else
                 {
-                    return interpretKlass == type.interpretKlass;
+                    return InterpretKlass == type.InterpretKlass;
                 }
             }
             return false;
         }
         public override int GetHashCode()
         {
-            if (isCompiledType) return compiledType.GetHashCode();
-            return interpretKlass.GetHashCode();
+            if (IsCompiledType) return CompiledType.GetHashCode();
+            return InterpretKlass.GetHashCode();
         }
 
         public static bool operator ==(HybType obj1, HybType obj2)

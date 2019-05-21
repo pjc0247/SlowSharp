@@ -27,7 +27,7 @@ namespace Slowsharp
             foreach(var p in ps)
             {
                 var type = resolver.GetType($"{p.Type}");
-                sb.Append($"{type.fullName},");
+                sb.Append($"{type.FullName},");
             }
             return sb.ToString();
         }

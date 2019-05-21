@@ -10,7 +10,7 @@ namespace Slowsharp
 {
     internal class EnumClass : Class
     {
-        private int nextValue = 0;
+        private int NextValue = 0;
 
         public EnumClass(Runner runner, string id)
             : base(runner, id)
@@ -21,16 +21,16 @@ namespace Slowsharp
         {
             AddField(new SSInterpretFieldInfo(this)
             {
-                id = node.Identifier.Text,
-                accessModifier = AccessModifier.Public,
-                isStatic = true
+                Id = node.Identifier.Text,
+                AccessModifier = AccessModifier.Public,
+                IsStatic = true
             });
 
-            var value = nextValue;
+            var value = NextValue;
 
             if (node.EqualsValue != null)
-                value = runner.RunExpression(node.EqualsValue.Value).As<int>();
-            nextValue = value + 1;
+                value = Runner.RunExpression(node.EqualsValue.Value).As<int>();
+            NextValue = value + 1;
 
             return value;
         }

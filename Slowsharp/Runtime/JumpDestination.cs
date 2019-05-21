@@ -10,10 +10,10 @@ namespace Slowsharp
 {
     internal class JumpDestination
     {
-        public string label;
+        public string Label;
 
-        public StatementSyntax statement;
-        public int pc;
-        public int frameDepth;
+        public StatementSyntax Statement;
+        public int Pc;
+        public int FrameDepth;
     }
 }

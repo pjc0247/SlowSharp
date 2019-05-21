@@ -13,21 +13,21 @@ namespace Slowsharp
     /// </summary>
     internal class OptNodeCache
     {
-        private Dictionary<SyntaxNode, OptNodeBase> cache = new Dictionary<SyntaxNode, OptNodeBase>();
+        private Dictionary<SyntaxNode, OptNodeBase> Cache = new Dictionary<SyntaxNode, OptNodeBase>();
 
         public bool IsOptimized(SyntaxNode node)
-            => cache.ContainsKey(node);
+            => Cache.ContainsKey(node);
 
         public TOptNode GetOrCreate<TNode, TOptNode>(TNode node, Func<TOptNode> creator)
             where TNode : SyntaxNode
             where TOptNode : OptNodeBase
         {
             OptNodeBase optNode = null;
-            if (cache.TryGetValue(node, out optNode))
+            if (Cache.TryGetValue(node, out optNode))
                 return (TOptNode)optNode;
 
             optNode = creator();
-            cache[node] = optNode;
+            Cache[node] = optNode;
             return (TOptNode)optNode;
         }
     }
