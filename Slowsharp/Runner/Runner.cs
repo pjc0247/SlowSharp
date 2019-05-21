@@ -14,59 +14,59 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        internal ScriptConfig scriptConfig { get; }
-        internal RunContext ctx;
-        internal GlobalStorage globals { get; }
-        internal ExtensionMethodResolver extResolver { get; }
-        internal TypeResolver resolver { get; private set; }
-        private IdLookup lookup;
-        private Class klass;
-        internal VarFrame vars { get; private set; }
-        private Stack<CatchFrame> catches;
-        private OptNodeCache optCache;
+        internal ScriptConfig ScriptConfig { get; }
+        internal RunContext Ctx;
+        internal GlobalStorage Globals { get; }
+        internal ExtensionMethodResolver ExtResolver { get; }
+        internal TypeResolver Resolver { get; private set; }
+        private IdLookup Lookup;
+        private Class Klass;
+        internal VarFrame Vars { get; private set; }
+        private Stack<CatchFrame> Catches;
+        private OptNodeCache OptCache;
 
-        private Stack<VarFrame> frames { get; }
+        private Stack<VarFrame> Frames { get; }
 
-        internal HybInstance ret;
-        private HaltType halt;
+        internal HybInstance Ret;
+        private HaltType Halt;
 
-        private RunMode runMode;
+        private RunMode RunMode;
 
-        private Dictionary<string, SyntaxNode> pendingSyntaxs = new Dictionary<string, SyntaxNode>();
-        private HashSet<SyntaxNode> loadedSyntaxs = new HashSet<SyntaxNode>();
+        private Dictionary<string, SyntaxNode> PendingSyntaxs = new Dictionary<string, SyntaxNode>();
+        private HashSet<SyntaxNode> LoadedSyntaxs = new HashSet<SyntaxNode>();
 
         public Runner(ScriptConfig scriptConfig, RunConfig config)
         {
-            this.ctx = new RunContext(config);
-            this.scriptConfig = scriptConfig;
-            this.globals = new GlobalStorage();
+            this.Ctx = new RunContext(config);
+            this.ScriptConfig = scriptConfig;
+            this.Globals = new GlobalStorage();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            this.optCache = new OptNodeCache();
-            this.lookup = new IdLookup(assemblies);
-            this.catches = new Stack<CatchFrame>();
-            this.frames = new Stack<VarFrame>();
-            this.extResolver = new ExtensionMethodResolver(assemblies);
-            this.resolver = new TypeResolver(ctx, assemblies);
+            this.OptCache = new OptNodeCache();
+            this.Lookup = new IdLookup(assemblies);
+            this.Catches = new Stack<CatchFrame>();
+            this.Frames = new Stack<VarFrame>();
+            this.ExtResolver = new ExtensionMethodResolver(assemblies);
+            this.Resolver = new TypeResolver(Ctx, assemblies);
 
             AddDefaultUsings();
             PrewarmTypes();
         }
         private void AddDefaultUsings()
         {
-            foreach (var ns in scriptConfig.DefaultUsings)
-                resolver.AddLookupNamespace(ns);
+            foreach (var ns in ScriptConfig.DefaultUsings)
+                Resolver.AddLookupNamespace(ns);
         }
         private void PrewarmTypes()
         {
-            foreach (var type in scriptConfig.PrewarmTypes)
-                resolver.CacheType(type);
+            foreach (var type in ScriptConfig.PrewarmTypes)
+                Resolver.CacheType(type);
         }
 
         public HybType[] GetTypes()
         {
-            return ctx.types
+            return Ctx.Types
                 .Select(x => x.Value)
                 .Select(x => new HybType(x))
                 .ToArray();
@@ -82,44 +82,44 @@ namespace Slowsharp
 
         public void LoadSyntax(SyntaxNode node)
         {
-            runMode = RunMode.Parse;
+            RunMode = RunMode.Parse;
             Run(node);
-            runMode = RunMode.Execution;
+            RunMode = RunMode.Execution;
         }
         public void LoadSyntax(SyntaxNode[] nodes)
         {
-            runMode = RunMode.Preparse;
+            RunMode = RunMode.Preparse;
             foreach (var node in nodes)
                 Run(node);
-            runMode = RunMode.Parse;
+            RunMode = RunMode.Parse;
             foreach (var node in nodes)
                 Run(node);
-            runMode = RunMode.Execution;
+            RunMode = RunMode.Execution;
         }
         public void UpdateMethodsOnly(SyntaxNode node)
         {
-            runMode = RunMode.HotLoadMethodsOnly;
+            RunMode = RunMode.HotLoadMethodsOnly;
             Run(node);
-            runMode = RunMode.Execution;
+            RunMode = RunMode.Execution;
         }
 
         internal void BindThis(HybInstance _this)
         {
-            ctx._this = _this;
+            Ctx._this = _this;
         }
 
         internal HybInstance RunMain(params object[] args)
         {
-            ctx.Reset();
+            Ctx.Reset();
             RunLazyInitializers();
 
-            foreach (var type in ctx.types)
+            foreach (var type in Ctx.Types)
             {
                 var mains = type.Value.GetMethods("Main");
                 if (mains.Length == 0)
                     continue;
 
-                return mains[0].target.Invoke(null, args.Wrap());
+                return mains[0].Target.Invoke(null, args.Wrap());
             }
 
             throw new InvalidOperationException($"No class found that contains static Main()");
@@ -134,7 +134,7 @@ namespace Slowsharp
         public HybInstance Instantiate(string id, params object[] args)
         {
             RunLazyInitializers();
-            return resolver.GetType(id).CreateInstance(this, args.Wrap());
+            return Resolver.GetType(id).CreateInstance(this, args.Wrap());
         }
         /// <summary>
         /// Overrides an object with already instantiated object.
@@ -148,12 +148,12 @@ namespace Slowsharp
         public HybInstance Override(string id, object parentObject, params object[] args)
         {
             RunLazyInitializers();
-            return resolver.GetType(id).Override(this, args.Wrap(), parentObject);
+            return Resolver.GetType(id).Override(this, args.Wrap(), parentObject);
         }
 
         public void Run(SyntaxNode node)
         {
-            ctx.lastNode = node;
+            Ctx.LastNode = node;
 
             var treatAsBlock = new Type[]
             {
@@ -163,7 +163,7 @@ namespace Slowsharp
                 typeof(EnumDeclarationSyntax)
             };
 
-            switch (runMode)
+            switch (RunMode)
             {
                 case RunMode.Preparse:
                     RunAsPreparse(node);
@@ -182,17 +182,17 @@ namespace Slowsharp
             if (treatAsBlock.Contains(node.GetType()))
                 RunChildren(node);
 
-            if (ctx.IsExpird())
+            if (Ctx.IsExpird())
                 throw new TimeoutException();
         }
         public void RunAsPreparse(SyntaxNode node)
         {
             if (node is ClassDeclarationSyntax cd)
-                pendingSyntaxs[cd.Identifier.Text] = node;
+                PendingSyntaxs[cd.Identifier.Text] = node;
         }
         public void RunAsParse(SyntaxNode node)
         {
-            if (loadedSyntaxs.Contains(node))
+            if (LoadedSyntaxs.Contains(node))
                 return;
 
             if (node is UsingDirectiveSyntax)
@@ -214,14 +214,14 @@ namespace Slowsharp
             else if (node is EnumMemberDeclarationSyntax)
                 AddEnumMember(node as EnumMemberDeclarationSyntax);
 
-            loadedSyntaxs.Add(node);
+            LoadedSyntaxs.Add(node);
         }
         public void RunAsHotReloadMethodsOnly(SyntaxNode node)
         {
             if (node is UsingDirectiveSyntax)
                 AddUsing(node as UsingDirectiveSyntax);
             else if (node is ClassDeclarationSyntax classDeclaration)
-                klass = ctx.types[classDeclaration.Identifier.Text];
+                Klass = Ctx.Types[classDeclaration.Identifier.Text];
             else if (node is MethodDeclarationSyntax)
                 AddMethod(node as MethodDeclarationSyntax);
         }
@@ -282,36 +282,36 @@ namespace Slowsharp
         }
         private HybInstance RunArrowExpressionClause(ArrowExpressionClauseSyntax node, VarFrame vf)
         {
-            vars = vf;
+            Vars = vf;
             var ret = RunExpression(node.Expression);
-            vars = vars.parent;
+            Vars = Vars.Parent;
             return ret;
         }
 
         internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
         {
-            ret = null;
-            ctx.PushMethod(method);
+            Ret = null;
+            Ctx.PushMethod(method);
 
-            var node = method.declaration;
+            var node = method.Declaration;
             var vf = new VarFrame(null);
             var count = 0;
 
-            foreach (var p in method.parameters)
+            foreach (var p in method.Parameters)
             {
-                if (p.defaultValue == null) continue;
-                vf.SetValue(p.id, p.defaultValue);
+                if (p.DefaultValue == null) continue;
+                vf.SetValue(p.Id, p.DefaultValue);
             }
             foreach (var arg in args)
             {
-                var p = method.parameters[count++];
-                if (p.isParams)
+                var p = method.Parameters[count++];
+                if (p.IsParams)
                     break;
 
-                vf.SetValue(p.id, arg);
+                vf.SetValue(p.Id, arg);
             }
 
-            if (method.isVaArg)
+            if (method.IsVaArg)
             {
                 var paramId = node.ParameterList.Parameters.Last()
                     .Identifier.Text;
@@ -320,39 +320,39 @@ namespace Slowsharp
                 vf.SetValue(paramId, HybInstance.ObjectArray(vaArgs));
             }
 
-            frames.Push(vars);
-            vars = null;
+            Frames.Push(Vars);
+            Vars = null;
 
             if (node.Body != null)
             {
-                if (method.returnType != null && // ctor doesn't have return type
-                    method.returnType.isCompiledType &&
-                    method.returnType.compiledType == typeof(IEnumerator))
+                if (method.ReturnType != null && // ctor doesn't have return type
+                    method.ReturnType.IsCompiledType &&
+                    method.ReturnType.CompiledType == typeof(IEnumerator))
                 {
                     var enumerator = new SSEnumerator(this, node.Body, vf);
-                    ret = HybInstance.Object(enumerator);
+                    Ret = HybInstance.Object(enumerator);
                 }
                 else
                     RunBlock(node.Body, vf);
             }
             else
-                ret = RunArrowExpressionClause(node.ExpressionBody, vf);
+                Ret = RunArrowExpressionClause(node.ExpressionBody, vf);
 
-            vars = frames.Pop();
+            Vars = Frames.Pop();
 
-            if (halt == HaltType.Return)
-                halt = HaltType.None;
+            if (Halt == HaltType.Return)
+                Halt = HaltType.None;
 
-            ctx.PopMethod();
+            Ctx.PopMethod();
 
-            return ret;
+            return Ret;
         }
         internal HybInstance RunWrappedFunc(HybInstance _this, Func<HybInstance[], HybInstance> func, HybInstance[] args)
         {
             BindThis(_this);
             var ret = func.Invoke(args);
-            if (halt == HaltType.Return)
-                halt = HaltType.None;
+            if (Halt == HaltType.Return)
+                Halt = HaltType.None;
             return ret;
         }
         internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
@@ -363,14 +363,14 @@ namespace Slowsharp
         
         private void UpdateVariable(string key, HybInstance value)
         {
-            if (vars.UpdateValue(key, value) == false)
+            if (Vars.UpdateValue(key, value) == false)
             {
-                if (ctx._this != null)
+                if (Ctx._this != null)
                 {
-                    if (ctx._this.SetPropertyOrField(key, value, AccessLevel.This))
+                    if (Ctx._this.SetPropertyOrField(key, value, AccessLevel.This))
                         return;
                 }
-                if (ctx.method.declaringType.SetStaticPropertyOrField(key, value, AccessLevel.This))
+                if (Ctx.Method.DeclaringType.SetStaticPropertyOrField(key, value, AccessLevel.This))
                     return;
             }
             else
