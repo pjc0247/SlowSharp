@@ -1,4 +1,4 @@
-SlowSharp
+SlowSharp [![Build Status](https://travis-ci.com/pjc0247/SlowSharp.svg?branch=master)](https://travis-ci.com/pjc0247/SlowSharp)
 ====
 
 Slow version of C# interpreter because modern JITs are too fast.
