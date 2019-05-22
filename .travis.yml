@@ -1,0 +1,7 @@
+language: csharp
+mono: none
+dotnet: 2.1.502
+solution: Slowsharp.sln
+script:
+  - dotnet restore
+  - dotnet test
