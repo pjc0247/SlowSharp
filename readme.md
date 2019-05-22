@@ -82,9 +82,15 @@ Limitation
 ----
 Since __SlowSharp__ is an interpreter, there're some differences and limitations.
 
-__Lazy semantic validation__
+__Lazy semantic validation__<br>
+__SlowSharp__ does not validate whole syntaxs during the parse time. It only checks the overall form is valid or not.<br>
+As a result, some mistakes won't be detected until it's fully reached and executed.
 ```cs
 Console.WriteLine("Hello");
+
+// There's not method `WriteLn` in `Conosle` class.
+// However, this will not throw an exception util SlowSharp actually 
+// evaluates the below line.
 Console.WriteLn("World");
 ```
 ```cs
