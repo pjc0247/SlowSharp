@@ -347,6 +347,14 @@ namespace Slowsharp
 
             return Ret;
         }
+        /// <summary>
+        /// Runs method with `_this`.
+        /// </summary>
+        internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
+        {
+            BindThis(_this);
+            return RunMethod(method, args);
+        }
         internal HybInstance RunWrappedFunc(HybInstance _this, Func<HybInstance[], HybInstance> func, HybInstance[] args)
         {
             BindThis(_this);
@@ -355,12 +363,7 @@ namespace Slowsharp
                 Halt = HaltType.None;
             return ret;
         }
-        internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
-        {
-            BindThis(_this);
-            return RunMethod(method, args);
-        }
-        
+
         private void UpdateVariable(string key, HybInstance value)
         {
             if (Vars.UpdateValue(key, value) == false)
