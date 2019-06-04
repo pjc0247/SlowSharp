@@ -26,18 +26,18 @@ namespace Slowsharp
     }
     internal class ValidationRule
     {
-        private List<Type> accept = new List<Type>();
-        private List<Type> deny = new List<Type>();
-        private object obj;
+        private List<Type> Accept = new List<Type>();
+        private List<Type> Deny = new List<Type>();
+        private object Obj;
 
         public ValidationRule(object obj)
         {
-            this.obj = obj;
+            this.Obj = obj;
         }
 
         public ValidationRule ShouldNotEmptyIdent()
         {
-            if (obj is IdentifierNameSyntax id &&
+            if (Obj is IdentifierNameSyntax id &&
                 string.IsNullOrEmpty(id.Identifier.Text))
             {
                 throw new SemanticViolationException($"ident should not be empty");
@@ -46,17 +46,17 @@ namespace Slowsharp
         }
         public ValidationRule ShouldBe<T>()
         {
-            accept.Add(typeof(T));
+            Accept.Add(typeof(T));
             return this;
         }
         public ValidationRule ShouldNotBe<T>()
         {
-            deny.Add(typeof(T));
+            Deny.Add(typeof(T));
             return this;
         }
         public ValidationRule ShouldNotBeIdent(string ident)
         {
-            if (obj is IdentifierNameSyntax id &&
+            if (Obj is IdentifierNameSyntax id &&
                 id.Identifier.Text == ident)
             {
                 throw new SemanticViolationException($"illigal ident: {ident}");
@@ -65,22 +65,22 @@ namespace Slowsharp
         }
         public void ThrowIfNot()
         {
-            if (obj == null)
+            if (Obj == null)
                 return;
 
             var pass = false;
-            foreach (var type in accept)
+            foreach (var type in Accept)
             {
                 //if (obj.GetType().IsAssignableFrom(acc))
-                if (type.IsAssignableFrom(obj.GetType()))
+                if (type.IsAssignableFrom(Obj.GetType()))
                 {
                     pass = true;
                     break;
                 }
             }
-            foreach (var type in deny)
+            foreach (var type in Deny)
             {
-                if (type.IsAssignableFrom(obj.GetType()))
+                if (type.IsAssignableFrom(Obj.GetType()))
                 {
                     pass = false;
                     break;
@@ -90,7 +90,7 @@ namespace Slowsharp
             if (pass == false)
             {
 #if DEBUG
-                throw new SemanticViolationException($"{obj}, {obj.GetType()} is not expected");
+                throw new SemanticViolationException($"{Obj}, {Obj.GetType()} is not expected");
 #else
                 throw new SemanticViolationException($"{obj} is not expected");
 #endif
