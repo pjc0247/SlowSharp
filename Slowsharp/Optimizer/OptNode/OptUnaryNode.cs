@@ -10,8 +10,6 @@ namespace Slowsharp
     {
         public string operandId;
         public bool isPrimitiveIncOrDec;
-
-        public bool isInc, isDec;
     }
     internal class OptPrefixUnary : OptUnaryBase
     {

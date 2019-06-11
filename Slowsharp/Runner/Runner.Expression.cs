@@ -729,8 +729,6 @@ namespace Slowsharp
                 {
                     operandId = (node.Operand is IdentifierNameSyntax id) ?
                         $"{id.Identifier}" : null,
-                    isInc = op == "++",
-                    isDec = op == "--",
                     isPrimitiveIncOrDec = 
                         (op == "++" || op == "--") &&
                         node.Operand is IdentifierNameSyntax &&
@@ -761,8 +759,6 @@ namespace Slowsharp
                 {
                     operandId = (node.Operand is IdentifierNameSyntax id) ?
                         $"{id.Identifier}" : null,
-                    isInc = op == "++", 
-                    isDec = op == "--",
                     isPrimitiveIncOrDec =
                         (op == "++" || op == "--") &&
                         node.Operand is IdentifierNameSyntax &&
