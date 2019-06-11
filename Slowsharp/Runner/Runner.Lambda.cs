@@ -12,6 +12,11 @@ namespace Slowsharp
 {
     public partial class Runner
     {
+        /// <summary>Cached methods for `Func`</summary>
+        private MethodInfo[] CvtF = new MethodInfo[8];
+        /// <summary>Cached methods for `Action`</summary>
+        private MethodInfo[] CvtA = new MethodInfo[8];
+
         private HybInstance RunParenthesizedLambda(ParenthesizedLambdaExpressionSyntax node)
         {
             // Detects the lambda is `Func` or `Action`.
@@ -26,11 +31,7 @@ namespace Slowsharp
             // `Func`
             if (hasReturn)
             {
-                converter = typeof(Runner)
-                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
-                    .Where(x => x.Name == nameof(ConvertF))
-                    .Where(x => x.GetGenericArguments().Length == ps.Count + 1)
-                    .First();
+                converter = GetConverterF(ps.Count);
 
                 var genericArgs = new Type[ps.Count + 1];
                 for (int i = 0; i < ps.Count; i++) {
@@ -99,11 +100,7 @@ namespace Slowsharp
             // `Action`
             else
             {
-                converter = typeof(Runner)
-                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
-                    .Where(x => x.Name == nameof(ConvertA))
-                    .Where(x => x.GetGenericArguments().Length == ps.Count)
-                    .First();
+                converter = GetConverterA(ps.Count);
 
                 var genericArgs = new Type[ps.Count];
                 for (int i = 0; i < ps.Count; i++)
@@ -195,6 +192,31 @@ namespace Slowsharp
                 Halt = HaltType.None;
 
             return Ret.Unwrap();
+        }
+
+        private MethodInfo GetConverterF(int paramCount)
+        {
+            if (CvtF[paramCount] == null)
+            {
+                CvtF[paramCount] = typeof(Runner)
+                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                    .Where(x => x.Name == nameof(ConvertF))
+                    .Where(x => x.GetGenericArguments().Length == paramCount)
+                    .First();
+            }
+            return CvtF[paramCount];
+        }
+        private MethodInfo GetConverterA(int paramCount)
+        {
+            if (CvtA[paramCount] == null)
+            {
+                CvtA[paramCount] = typeof(Runner)
+                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                    .Where(x => x.Name == nameof(ConvertF))
+                    .Where(x => x.GetGenericArguments().Length == paramCount)
+                    .First();
+            }
+            return CvtA[paramCount];
         }
 
         private static Action ConvertA(Action func)
