@@ -17,7 +17,7 @@ Zero-binding
 Even this can be possible:
 ```cs
 CScript.Run(@"
-   CScript.RunSimple("" Console.WriteLine(""hello from inception""); "");
+   CScript.Run("" Console.WriteLine(""hello from inception""); "");
 ");
 ```
 
