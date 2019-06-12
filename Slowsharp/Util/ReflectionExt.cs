@@ -9,6 +9,9 @@ namespace Slowsharp
 {
     internal static class ReflectionExt
     {
+        /// <summary>
+        /// Retrives types from assembly, without ReflectionTypeLoadException.
+        /// </summary>
         public static Type[] GetTypesSafe(this Assembly _this)
         {
             try

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
+    /// <summary>
+    /// Represents target member is being accessed by.
+    /// </summary>
     internal enum AccessLevel
     {
         This, 

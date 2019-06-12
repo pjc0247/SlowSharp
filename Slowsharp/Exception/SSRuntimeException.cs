@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
+    /// <summary>
+    /// A baseclass of SlowSharp runtime exceptions.
+    /// </summary>
     public class SSRuntimeException : Exception
     {
         public SSRuntimeException()
