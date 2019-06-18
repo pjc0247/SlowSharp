@@ -43,13 +43,13 @@ namespace Slowsharp
 
         public bool UpdateValue(string key, HybInstance value)
         {
-            Console.WriteLine($"{key} = {value}");
+            C.WriteLine($"{key} = {value}");
 
             return SetValueUpwards(key, value);
         }
         public void SetValue(string key, HybInstance value)
         {
-            Console.WriteLine($"{key} = {value}");
+            C.WriteLine($"{key} = {value}");
 
             if (SetValueUpwards(key, value) == false)
                 Values[key] = value;

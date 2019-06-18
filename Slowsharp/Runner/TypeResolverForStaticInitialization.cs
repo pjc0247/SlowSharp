@@ -9,44 +9,44 @@ namespace Slowsharp
 {
     internal class TypeResolverForStaticInitialization : TypeResolver
     {
-        private HashSet<HybType> initializedTypes = new HashSet<HybType>();
-        private Runner runner;
-        private TypeResolver resolver;
+        private HashSet<HybType> InitializedTypes = new HashSet<HybType>();
+        private Runner Runner;
+        private TypeResolver Resolver;
 
         public TypeResolverForStaticInitialization(Runner runner, TypeResolver resolver) :
             base (null, null)
         {
-            this.runner = runner;
-            this.resolver = resolver;
+            this.Runner = runner;
+            this.Resolver = resolver;
         }
 
         public override bool TryGetType(string id, out HybType type, Assembly hintAssembly = null)
         {
-            var ret = resolver.TryGetType(id, out type, hintAssembly);
+            var ret = Resolver.TryGetType(id, out type, hintAssembly);
             if (type != null && type.IsCompiledType == false)
             {
-                if (initializedTypes.Add(type))
+                if (InitializedTypes.Add(type))
                 {
-                    runner.RunStaticInitializer(type.InterpretKlass);
+                    Runner.RunStaticInitializer(type.InterpretKlass);
                 }
             }
             return ret;
         }
         public override HybType GetType(string id)
         {
-            var type = resolver.GetType(id);
+            var type = Resolver.GetType(id);
             if (type != null && type.IsCompiledType == false)
             {
-                if (initializedTypes.Add(type))
+                if (InitializedTypes.Add(type))
                 {
-                    runner.RunStaticInitializer(type.InterpretKlass);
+                    Runner.RunStaticInitializer(type.InterpretKlass);
                 }
             }
             return type;
         }
         public override HybType GetGenericType(string id, int n)
         {
-            return resolver.GetGenericType(id, n);
+            return Resolver.GetGenericType(id, n);
         }
     }
 }
