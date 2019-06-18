@@ -36,6 +36,12 @@ namespace Slowsharp
             result = null;
             return false;
         }
+        public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object value)
+        {
+            if (Obj.SetIndexer(indexes, value.Wrap()))
+                return true;
+            return false;
+        }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {

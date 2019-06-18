@@ -285,6 +285,10 @@ namespace Slowsharp
                .FirstOrDefault();
         }
 
+        public bool SetIndexer(object[] args, HybInstance value)
+        {
+            return SetIndexer(args.Wrap(), value);
+        }
         public bool SetIndexer(HybInstance[] args, HybInstance value)
         {
             if (IsCompiledType)
