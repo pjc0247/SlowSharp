@@ -161,6 +161,7 @@
     <Compile Include="SyntaxRule\ValidationRule.cs" />
     <Compile Include="SyntaxRule\Validator.ClassDefinition.cs" />
     <Compile Include="SyntaxRule\Validator.cs" />
+    <Compile Include="Util\C.cs" />
     <Compile Include="Util\GetPropertyOrFieldExt.cs" />
     <Compile Include="Util\ModifierExt.cs" />
     <Compile Include="Runner\VarFrame.cs" />
