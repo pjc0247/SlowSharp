@@ -111,8 +111,12 @@ namespace Slowsharp
                         .GetType($"{ps[i].Type}")
                         .Unwrap();
                 }
-                converter = converter
-                    .MakeGenericMethod(genericArgs);
+
+                if (ps.Count > 0)
+                {
+                    converter = converter
+                        .MakeGenericMethod(genericArgs);
+                }
 
                 if (ps.Count == 0)
                 {
@@ -212,7 +216,7 @@ namespace Slowsharp
             {
                 CvtA[paramCount] = typeof(Runner)
                     .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
-                    .Where(x => x.Name == nameof(ConvertF))
+                    .Where(x => x.Name == nameof(ConvertA))
                     .Where(x => x.GetGenericArguments().Length == paramCount)
                     .First();
             }
