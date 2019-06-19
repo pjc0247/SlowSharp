@@ -60,6 +60,7 @@ Finally, there will be two instances, but act as derivered one object.
 Sandboxing
 ----
 ### Access control
+Prevents malicious function call such as `Threading` or `File`.
 ```cs
 var ac = new AccessControl();
 ac.AddBlockedType("System.Threading.Thread");
@@ -71,6 +72,7 @@ new RunConfig() {
 ```
 
 ### Timeout
+Prevents long-running tasks with a timeout option.
 ```cs
 new RunConfig() {
   timeout = 1000 /* ms */
@@ -78,7 +80,7 @@ new RunConfig() {
 ```
 
 
-Limitation
+Limitations
 ----
 Since __SlowSharp__ is an interpreter, there're some differences and limitations.
 
