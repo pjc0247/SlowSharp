@@ -60,7 +60,7 @@ Finally, there will be two instances, but act as derivered one object.
 Sandboxing
 ----
 ### Access control
-Prevents malicious function call such as `Threading` or `File`.
+Prevents malicious function call such as `Threading` and `File`.
 ```cs
 var ac = new AccessControl();
 ac.AddBlockedType("System.Threading.Thread");
