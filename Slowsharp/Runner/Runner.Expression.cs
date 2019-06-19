@@ -590,8 +590,17 @@ namespace Slowsharp
             {
                 if (type.CompiledType == typeof(Action))
                     return args[0];
-                if (type.CompiledType == typeof(Func<int>))
-                    return args[0];
+
+                var genericDefinition = type.CompiledType.GetGenericTypeDefinition();
+                if (genericDefinition != null)
+                {
+                    if (genericDefinition.Namespace == nameof(System))
+                    {
+                        if (genericDefinition.Name.StartsWith("Action`") ||
+                            genericDefinition.Name.StartsWith("Func`"))
+                            return args[0];
+                    }
+                }
             }
 
             var inst = type.CreateInstance(this, args);
