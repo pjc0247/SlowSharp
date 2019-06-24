@@ -101,6 +101,20 @@ public static object Main() {
             var root = ParseAndValidate(src);
             Runner.UpdateMethodsOnly(root);
         }
+        
+        public void Trap(MethodInfo target, MethodInfo replace)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (replace == null) throw new ArgumentNullException(nameof(replace));
+
+            Runner.Trap(target, replace);
+        }
+        public void Untrap(MethodInfo target)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+
+            Runner.Untrap(target);
+        }
 
         public HybInstance RunMain(params object[] args)
             => Runner.RunMain(args);

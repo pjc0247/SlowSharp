@@ -110,6 +110,7 @@
     <Compile Include="Runner\RunMode.cs" />
     <Compile Include="Runner\Runner.Lambda.cs" />
     <Compile Include="Runner\Runner.LazyInit.cs" />
+    <Compile Include="Runner\Runner.Trap.cs" />
     <Compile Include="Runner\ScriptConfig.cs" />
     <Compile Include="Runner\TypeCache.cs" />
     <Compile Include="Runner\TypeResolverForStaticInitialization.cs" />

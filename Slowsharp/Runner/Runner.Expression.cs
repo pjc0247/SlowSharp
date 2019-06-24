@@ -70,6 +70,10 @@ namespace Slowsharp
             return null;
         }
 
+        /// <summary>
+        /// Returns current `this` instance
+        ///   [Syntax] this
+        /// </summary>
         private HybInstance ResolveThis(ThisExpressionSyntax node)
         {
             return Ctx._this;
@@ -110,37 +114,23 @@ namespace Slowsharp
             if (string.IsNullOrEmpty(node.Identifier.Text))
                 throw new SemanticViolationException($"Invalid syntax: {node.Parent}");
 
+            // Lookup priority
+            //   1. local variables
             var id = $"{node.Identifier}";
             HybInstance v = null;
-
             if (Vars.TryGetValue(id, out v))
                 return v;
 
+            //  2. instance properties
             if (Ctx._this != null)
             {
                 if (Ctx._this.GetPropertyOrField(id, out v, AccessLevel.This))
                     return v;
             }
 
+            //  3. static properties
             if (Ctx.Method.DeclaringType.GetStaticPropertyOrField(id, out v))
                 return v;
-
-            /*
-            Class klass = ctx.method.declaringClass;
-            SSFieldInfo field;
-            if (klass.TryGetField(id, out field))
-            {
-                if (field.isStatic)
-                    return globals.GetStaticField(klass, id);
-            }
-            SSPropertyInfo property;
-            if (klass.TryGetProperty(id, out property))
-            {
-                if (property.isStatic)
-                    return property.getMethod.Invoke(null, new HybInstance[] { });
-            }
-            */
-            //if (field.)
 
             throw new NoSuchMemberException($"{id}");
         }
@@ -439,7 +429,11 @@ namespace Slowsharp
             if (callee != null && method.DeclaringType.Parent == callee.GetHybType())
                 callee = callee.Parent;
 
-            var ret = method.Target.Invoke(callee, args, hasRefOrOut);
+            var target = method.Target;
+            if (target.IsCompiled && traps.ContainsKey(target.CompiledMethod))
+                target = new Invokable(traps[target.CompiledMethod]);
+
+            var ret = target.Invoke(callee, args, hasRefOrOut);
 
             // post-invoke
             if (hasRefOrOut)
