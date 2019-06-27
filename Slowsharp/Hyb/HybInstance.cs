@@ -241,6 +241,22 @@ namespace Slowsharp
                 return method.Target.Invoke(this, wrappedArgs);
             return method.Target.Invoke(Parent, wrappedArgs);
         }
+        /// <summary>
+        /// Invokes given method without any exceptions.
+        /// This method actually made for UniScript/SendMessage
+        /// </summary>
+        public HybInstance InvokeSafe(string name, params object[] args)
+        {
+            try
+            {
+                return Invoke(name, args);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return HybInstance.Null();
+        }
 
         public SSMethodInfo[] GetMethods(string id)
         {
