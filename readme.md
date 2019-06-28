@@ -1,7 +1,8 @@
 SlowSharp [![Build Status](https://travis-ci.com/pjc0247/SlowSharp.svg?branch=master)](https://travis-ci.com/pjc0247/SlowSharp)
 ====
 
-Slow version of C# interpreter because modern JITs are too fast.
+Slow version of C# interpreter because modern JITs are too fast.<br>
+[Web Playground](https://pjc0247.github.io/UniScript/uniplayground/)
 
 Pros
 ----
