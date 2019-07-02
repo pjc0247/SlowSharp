@@ -5,10 +5,6 @@ using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 namespace Slowsharp
 {
     enum KeyCode
@@ -168,6 +164,11 @@ private static int acac = 123;
 
         static int Main(int n) {
 
+var c = new Action<int>((int a) => { Console.WriteLine(a); });
+c.Invoke(1234879);
+
+return 1;
+
 var a = new int[] {1,2,3,4}
 return a.Any((int x) => { return x > 2; });
 
@@ -192,18 +193,12 @@ class Fooo : Bar {
     }
 }
 ";
-            src = System.IO.File.ReadAllText("a.cs");
+            //src = System.IO.File.ReadAllText("a.cs");
 
             Console.WriteLine(nameof(Console));
             Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
 
             Console.WriteLine(src);
-
-            CSharpParseOptions options = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
-            var tree = CSharpSyntaxTree.ParseText(src);
-            var root = tree.GetCompilationUnitRoot();
-
-            Dump(root);
 
             var config = ScriptConfig.Default;
 
@@ -211,58 +206,27 @@ class Fooo : Bar {
 
             var run = CScript.CreateRunner(src, config);
             SSDebugger.runner = run;
+
+            run.Trap(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }),
+                typeof(Program).GetMethod("NewWriteLine"));
+
             var myList = run.RunMain();
             Console.WriteLine(myList.Is<List<int>>());
 
-            var vd = new Validator();
-            vd.Visit(root);
-
-            var r = new Runner(config, new RunConfig() {
-            });
-            r.Run(root);
-
-            Console.WriteLine(r.RunMain(5));
-            Console.WriteLine(Goo());
-
             return;
+        }
 
-            tree = CSharpSyntaxTree.ParseText(hotReloadSrc);
-            root = tree.GetCompilationUnitRoot();
-            r.UpdateMethodsOnly(root);
-
-            r.RunMain(5);
-
-            return;
-
-            var bar = new Bar();
-            //dynamic d = new DynamicHybInstance(r.Override("Boor", bar));
-            //d.Boo();
-            //d.SayHello();
-            var boor = r.Override("Boor", bar);
-            boor.Invoke("MoveForward");
-
-            Console.WriteLine(bar.transform.position.x);
-
-            //Console.WriteLine(r.Instantiate("Fooo").Invoke("Foo", 1));
-
-            var a = new List<int>() { };
-            a.Any();
-            Any(a, (int x) => true);
+        public static void NewWriteLine(int n)
+        {
+            Console.WriteLine(n * 2);
         }
 
         private static void Any<T1, T2>(IEnumerable<T1> f, Func<T2, bool> ff)
         {
-            
+
         }
 
-        private static void Dump(SyntaxNode syntax, int depth = 0)
-        {
-            for (int i = 0; i < depth; i++) Console.Write("  ");
-            Console.WriteLine(syntax.GetType() + " " + syntax);
-
-            foreach (var child in syntax.ChildNodes())
-                Dump(child, depth + 1);
-        }
+        
 
         private static int Goo()
         {

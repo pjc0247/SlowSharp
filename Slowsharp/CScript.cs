@@ -45,13 +45,15 @@ public static object Main() {
                 config = RunConfig.Default;
 
             var r = new Runner(scriptConfig, config);
+            var roots = new List<SyntaxNode>();
             foreach (var src in srcs)
             {
                 var root = ParseAndValidate(src);
                 r.LoadSyntax(root);
+                roots.Add(root);
             }
 
-            return new CScript(r);
+            return new CScript(r, roots.ToArray());
         }
         public static CScript CreateRunner(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
             => CreateRunner(new string[] { src }, scriptConfig, config);
@@ -74,10 +76,26 @@ public static object Main() {
         }
 
         private Runner Runner { get; }
+        private SyntaxNode[] Roots { get; }
 
-        public CScript(Runner runner)
+        public CScript(Runner runner, SyntaxNode[] roots)
         {
             this.Runner = runner;
+            this.Roots = roots;
+        }
+
+        public void Dump()
+        {
+            foreach (var root in Roots)
+                Dump(root, 0);
+        }
+        public void Dump(SyntaxNode syntax, int depth)
+        {
+            for (int i = 0; i < depth; i++) Console.Write("  ");
+            Console.WriteLine(syntax.GetType() + " " + syntax);
+
+            foreach (var child in syntax.ChildNodes())
+                Dump(child, depth + 1);
         }
 
         public HybInstance Eval(string src)
