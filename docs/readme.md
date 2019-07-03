@@ -52,3 +52,45 @@ fooType.GetStaticMethods("Hello")
       .First()
       .Invoke();
 ```
+
+Script Debugger
+----
+Demonstrate how to use script debugging API and create a simple REPL.
+```cs
+// script_host.cs
+public class SSDebugger
+{
+    public static CScript runner;
+
+    public static void Stop()
+    {
+        var dump = runner.GetDebuggerDump();
+
+        // Read Eval Print Loop
+        while (true)
+        {
+            Console.WriteLine("<<");
+            var src = Console.ReadLine();
+            Console.WriteLine(">>");
+            Console.WriteLine(runner.Eval(src));
+        }
+    }
+}
+```
+```cs
+// test.csx
+
+var a = 1234;
+var b = "hello";
+
+SSDebugger.Stop();
+```
+
+__RESULT__
+```
+<< a
+>> 1234
+
+<< b
+>> hello
+```
