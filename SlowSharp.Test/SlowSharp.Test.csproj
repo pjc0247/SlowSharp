@@ -52,6 +52,7 @@
     <Compile Include="Core\AccessControl.cs" />
     <Compile Include="Core\CScript.cs" />
     <Compile Include="Core\HotReload.cs" />
+    <Compile Include="Core\Multifile.cs" />
     <Compile Include="Core\TypeResolution.cs" />
     <Compile Include="DotNet\LINQ.cs" />
     <Compile Include="DotNet\Primitive\Integer.cs" />
