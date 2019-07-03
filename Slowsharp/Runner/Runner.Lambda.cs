@@ -205,7 +205,7 @@ namespace Slowsharp
                 CvtF[paramCount] = typeof(Runner)
                     .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                     .Where(x => x.Name == nameof(ConvertF))
-                    .Where(x => x.GetGenericArguments().Length == paramCount)
+                    .Where(x => x.GetGenericArguments().Length == paramCount + 1)
                     .First();
             }
             return CvtF[paramCount];
