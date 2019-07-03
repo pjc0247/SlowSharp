@@ -264,7 +264,7 @@ namespace Slowsharp
             {
                 return Obj.GetType().GetMethods()
                    .Where(x => x.Name == id)
-                   .Select(x => new SSMethodInfo(x) {
+                   .Select(x => new SSCompiledMethodInfo(x) {
                        Id = x.Name,
                        IsStatic = x.IsStatic,
                        AccessModifier = AccessModifierParser.Get(x)
@@ -285,13 +285,13 @@ namespace Slowsharp
         {
             var idxer = GetIndexerProperty();
             if (idxer == null) return null;
-            return new SSMethodInfo(idxer.GetSetMethod());
+            return new SSCompiledMethodInfo(idxer.GetSetMethod());
         }
         public SSMethodInfo GetGetIndexerMethod()
         {
             var idxer = GetIndexerProperty();
             if (idxer == null) return null;
-            return new SSMethodInfo(idxer.GetGetMethod());
+            return new SSCompiledMethodInfo(idxer.GetGetMethod());
         }
         private PropertyInfo GetIndexerProperty()
         {

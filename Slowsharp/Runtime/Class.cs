@@ -86,7 +86,7 @@ namespace Slowsharp
             var signature = MemberSignature.GetSignature(
                 Runner.Resolver, id, method);
 
-            var methodInfo = new SSMethodInfo(Runner, id, Type, method)
+            var methodInfo = new SSInterpretMethodInfo(Runner, id, Type, method)
             {
                 Id = id,
                 IsStatic = method.Modifiers.IsStatic(),

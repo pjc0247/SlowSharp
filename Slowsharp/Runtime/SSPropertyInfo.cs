@@ -25,8 +25,8 @@ namespace Slowsharp
         internal SSCompiledPropertyInfo(PropertyInfo property)
         {
             this.Type = HybTypeCache.GetHybType(property.PropertyType);
-            this.GetMethod = property.CanRead ? new SSMethodInfo(property.GetMethod) : null;
-            this.SetMethod = property.CanWrite ? new SSMethodInfo(property.SetMethod) : null;
+            this.GetMethod = property.CanRead ? new SSCompiledMethodInfo(property.GetMethod) : null;
+            this.SetMethod = property.CanWrite ? new SSCompiledMethodInfo(property.SetMethod) : null;
         }
     }
     public class SSInterpretPropertyInfo : SSPropertyInfo
@@ -64,7 +64,7 @@ namespace Slowsharp
             {
                 return runner.RunExpression(node.ExpressionBody.Expression);
             });
-            GetMethod = new SSMethodInfo(
+            GetMethod = new SSInterpretMethodInfo(
                 runner, $"get_{Id}", DeclaringType, invokable,
                 new HybType[] { }, Type);
         }
@@ -107,7 +107,7 @@ namespace Slowsharp
                         throw new InvalidOperationException();
                     }
                 });
-                GetMethod = new SSMethodInfo(
+                GetMethod = new SSInterpretMethodInfo(
                     runner, $"get_{Id}", DeclaringType, invokable,
                     new HybType[] { }, Type);
             }
@@ -151,7 +151,7 @@ namespace Slowsharp
                         throw new InvalidOperationException();
                     }
                 });
-                SetMethod = new SSMethodInfo(
+                SetMethod = new SSInterpretMethodInfo(
                     runner, $"set_{Id}", DeclaringType, invokable,
                     new HybType[] { Type }, HybTypeCache.Void);
             }

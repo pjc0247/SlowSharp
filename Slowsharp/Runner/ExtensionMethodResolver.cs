@@ -45,7 +45,7 @@ namespace Slowsharp
                         continue;
 
                     if (first.IsAssignableFrom(value.GetHybType()))
-                        result.Add(new SSMethodInfo(method));
+                        result.Add(new SSCompiledMethodInfo(method));
                 }
 
                 return result.ToArray();

@@ -140,6 +140,13 @@ namespace Slowsharp
 
         public HybInstance Override(Runner runner, HybInstance[] args, object parentObject)
         {
+            if (parentObject == null)
+                throw new ArgumentNullException(nameof(parentObject));
+            if (parentObject is HybType || parentObject is HybInstance)
+                throw new ArgumentException($"{nameof(parentObject)} cannot be HybType or HybInstance");
+            if (IsCompiledType)
+                throw new InvalidOperationException("Override can be only performed with script type");
+            
             return CreateInstanceInterpretType(runner, args, parentObject);
         }
         public HybInstance CreateInstance(Runner runner, HybInstance[] args)
@@ -341,12 +348,7 @@ namespace Slowsharp
             if (IsCompiledType)
             {
                 return CompiledType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                   .Select(x => new SSMethodInfo(x)
-                   {
-                       Id = x.Name,
-                       IsStatic = x.IsStatic,
-                       AccessModifier = AccessModifierParser.Get(x)
-                   })
+                   .Select(x => new SSCompiledMethodInfo(x))
                    .ToArray();
             }
             else
@@ -382,12 +384,7 @@ namespace Slowsharp
             {
                 return CompiledType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
                    .Where(x => x.IsPrivate == false)
-                   .Select(x => new SSMethodInfo(x)
-                   {
-                       Id = x.Name,
-                       IsStatic = x.IsStatic,
-                       AccessModifier = AccessModifierParser.Get(x)
-                   })
+                   .Select(x => new SSCompiledMethodInfo(x))
                    .ToArray();
             }
             else
