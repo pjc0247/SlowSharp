@@ -22,7 +22,6 @@ namespace Slowsharp
         public SSParamInfo[] Parameters { get; protected set; }
 
         internal JumpDestination[] Jumps;
-        internal BaseMethodDeclarationSyntax Declaration;
 
         protected SSMethodInfo()
         {
@@ -94,11 +93,16 @@ namespace Slowsharp
     }
     public class SSInterpretMethodInfo : SSMethodInfo
     {
+        internal BaseMethodDeclarationSyntax Declaration;
+
+        private SSAttributeInfo[] Attributes;
+
         internal SSInterpretMethodInfo(Runner runner, string id, HybType declaringType, BaseMethodDeclarationSyntax declaration)
         {
             this.Id = id;
             this.Signature = MemberSignature.GetSignature(
                 runner.Resolver, id, declaration);
+            this.Declaration = declaration;
             this.DeclaringType = declaringType;
             this.Target = new Invokable(this, runner, declaration);
 
@@ -119,6 +123,8 @@ namespace Slowsharp
                     IsParams = p.Modifiers.IsParams()
                 };
             }
+
+            
         }
         internal SSInterpretMethodInfo(Runner runner, string id, HybType declaringType, Invokable body, HybType[] parameterTypes, HybType returnType)
         {
@@ -140,6 +146,31 @@ namespace Slowsharp
                     IsParams = false
                 };
             }
+
+            this.Attributes = new SSAttributeInfo[] { };
+        }
+
+        public override SSAttributeInfo[] GetCustomAttributes()
+        {
+            if (Attributes == null)
+                BuildAttributes();
+            return Attributes;
+        }
+        private void BuildAttributes()
+        {
+            if (Declaration == null)
+            {
+                Attributes = new SSAttributeInfo[] { };
+                return;
+            }
+
+            var attributes = new List<SSAttributeInfo>();
+            foreach (var attr in Declaration.AttributeLists
+                .SelectMany(x => x.Attributes))
+            {
+                attributes.Add(new SSAttributeInfo(attr));
+            }
+            Attributes = attributes.ToArray();
         }
     }
 }

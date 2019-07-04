@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowSharp.Test", "SlowSharp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowSharp.JSON", "SlowSharp.JSON\SlowSharp.JSON.csproj", "{91419467-FEA5-43B2-8608-F831D920B2BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testbed", "testbed\testbed.csproj", "{14324352-FC54-418B-B3DD-5CC419DE7393}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{91419467-FEA5-43B2-8608-F831D920B2BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91419467-FEA5-43B2-8608-F831D920B2BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91419467-FEA5-43B2-8608-F831D920B2BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14324352-FC54-418B-B3DD-5CC419DE7393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14324352-FC54-418B-B3DD-5CC419DE7393}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14324352-FC54-418B-B3DD-5CC419DE7393}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14324352-FC54-418B-B3DD-5CC419DE7393}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

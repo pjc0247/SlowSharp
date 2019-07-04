@@ -31,5 +31,8 @@ namespace Slowsharp
 
         public HybType DeclaringType;
         internal Class DeclaringClass;
+
+        public virtual SSAttributeInfo[] GetCustomAttributes()
+            => new SSAttributeInfo[] { };
     }
 }

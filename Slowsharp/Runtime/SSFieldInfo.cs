@@ -14,8 +14,8 @@ namespace Slowsharp
     /// </summary>
     public abstract class SSFieldInfo : SSMemberInfo
     {
-        public HybType fieldType;
-        public bool isConst;
+        public HybType FieldType;
+        public bool IsConst;
 
         public abstract HybInstance GetValue(HybInstance _this);
         public abstract void SetValue(HybInstance _this, HybInstance value);
@@ -28,7 +28,7 @@ namespace Slowsharp
         internal SSCompiledFieldInfo(FieldInfo field)
         {
             this.Origin = SSMemberOrigin.InterpretScript;
-            this.fieldType = HybTypeCache.GetHybType(field.FieldType);
+            this.FieldType = HybTypeCache.GetHybType(field.FieldType);
             this.fieldInfo = field;
 
             this.IsStatic = field.IsStatic;
@@ -41,10 +41,10 @@ namespace Slowsharp
     }
     public class SSInterpretFieldInfo : SSFieldInfo
     {
-        internal VariableDeclaratorSyntax declartor;
-        internal FieldDeclarationSyntax field;
+        internal VariableDeclaratorSyntax Declartor;
+        internal FieldDeclarationSyntax Field;
 
-        private int fieldPtr = -1;
+        private int FieldPtr = -1;
 
         internal SSInterpretFieldInfo(Class klass)
         {
@@ -61,9 +61,9 @@ namespace Slowsharp
             }
 
             // it's fast enough to do like this
-            if (fieldPtr == -1)
-                fieldPtr = _this.Fields.GetPtr(Id);
-            return _this.Fields.GetByPtr(fieldPtr);
+            if (FieldPtr == -1)
+                FieldPtr = _this.Fields.GetPtr(Id);
+            return _this.Fields.GetByPtr(FieldPtr);
         }
         public override void SetValue(HybInstance _this, HybInstance value)
         {
@@ -75,9 +75,19 @@ namespace Slowsharp
             }
 
             // it's fast enough to do like this
-            if (fieldPtr == -1)
-                fieldPtr = _this.Fields.GetPtr(Id);
-            _this.Fields.SetByPtr(fieldPtr, value);
+            if (FieldPtr == -1)
+                FieldPtr = _this.Fields.GetPtr(Id);
+            _this.Fields.SetByPtr(FieldPtr, value);
+        }
+
+        public override SSAttributeInfo[] GetCustomAttributes()
+        {
+            var attributes = new List<SSAttributeInfo>();
+            foreach (var attr in Field.AttributeLists.SelectMany(x => x.Attributes))
+            {
+                attributes.Add(new SSAttributeInfo(attr));
+            }
+            return attributes.ToArray();
         }
     }
 }
