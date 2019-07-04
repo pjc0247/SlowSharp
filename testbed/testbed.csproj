@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Slowsharp\Slowsharp.csproj">
+      <Project>{40cdde9b-948f-4c53-a846-9c1625b5d192}</Project>
+      <Name>Slowsharp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

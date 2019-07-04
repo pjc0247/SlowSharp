@@ -48,7 +48,7 @@ namespace Slowsharp
             if (initializedTypes.Add(klass) == false)
                 return;
 
-            SSMethodInfo methodInfo = null;
+            SSInterpretMethodInfo methodInfo = null;
             if (staticInitializers.TryGetValue(klass, out methodInfo))
             {
                 RunMethod(methodInfo, new HybInstance[] { });

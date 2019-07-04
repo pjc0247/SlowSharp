@@ -136,15 +136,15 @@ namespace Slowsharp
                 .Where(x => x.IsStatic == false)
                 .OfType<SSInterpretFieldInfo>())
             {
-                if (field.declartor == null || field.declartor.Initializer == null)
+                if (field.Declartor == null || field.Declartor.Initializer == null)
                 {
                     Fields.Add(field.Id, 
-                        HybInstance.Object(field.fieldType.GetDefault()));
+                        HybInstance.Object(field.FieldType.GetDefault()));
                 }
                 else
                 {
                     Fields.Add(field.Id,
-                        Runner.RunExpression(field.declartor.Initializer.Value));
+                        Runner.RunExpression(field.Declartor.Initializer.Value));
                 }
             }
         }

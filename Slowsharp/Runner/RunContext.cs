@@ -16,7 +16,7 @@ namespace Slowsharp
 
         public HybInstance _this { get; set; }
         public HybInstance _bound { get; set; }
-        public SSMethodInfo Method { get; private set; }
+        public SSInterpretMethodInfo Method { get; private set; }
         public SyntaxNode LastNode { get; set; }
         public Stack<CallFrame> Callstack { get; private set; }
 
@@ -38,7 +38,7 @@ namespace Slowsharp
         }
         public bool IsExpird() => (DateTime.Now - startsAt).TotalMilliseconds >= Config.Timeout;
 
-        public void PushMethod(SSMethodInfo methodInfo)
+        public void PushMethod(SSInterpretMethodInfo methodInfo)
         {
             Callstack.Push(new CallFrame()
             {

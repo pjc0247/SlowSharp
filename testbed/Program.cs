@@ -105,8 +105,6 @@ namespace Slowsharp
                 Console.WriteLine(">>");
                 Console.WriteLine(runner.Eval(src));
             }
-
-            ;
         }
     }
 
@@ -162,6 +160,7 @@ yield return 3;
 
 private static int acac = 123;
 
+        [Aa]
         static int Main(int n) {
 
 var c = new Action<int>((int a) => { Console.WriteLine(a); });
@@ -188,6 +187,7 @@ Console.WriteLin(aa);
 
             var hotReloadSrc = @"
 class Fooo : Bar {
+    [Aa]
     public void Foo() {
         Console.WriteLine(12341234);
     }
@@ -205,6 +205,7 @@ class Fooo : Bar {
             config.PrewarmTypes = new Type[] { typeof(Console) };
 
             var run = CScript.CreateRunner(src, config);
+            run.Dump();
             SSDebugger.runner = run;
 
             run.Trap(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }),

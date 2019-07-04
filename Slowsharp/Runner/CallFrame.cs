@@ -9,6 +9,6 @@ namespace Slowsharp
     internal class CallFrame
     {
         public HybInstance _this;
-        public SSMethodInfo Method;
+        public SSInterpretMethodInfo Method;
     }
 }

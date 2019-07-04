@@ -10,7 +10,7 @@ namespace Slowsharp
 {
     public partial class Runner
     {
-        private Dictionary<Class, SSMethodInfo> staticInitializers = new Dictionary<Class, SSMethodInfo>();
+        private Dictionary<Class, SSInterpretMethodInfo> staticInitializers = new Dictionary<Class, SSInterpretMethodInfo>();
 
         private void AddUsing(UsingDirectiveSyntax node)
         {

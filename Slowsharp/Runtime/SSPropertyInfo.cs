@@ -166,7 +166,7 @@ namespace Slowsharp
             BackingField = new SSInterpretFieldInfo(DeclaringClass)
             {
                 Id = id,
-                fieldType = runner.Resolver.GetType($"{node.Type}"),
+                FieldType = runner.Resolver.GetType($"{node.Type}"),
                 AccessModifier = AccessModifier.Private
             };
             DeclaringClass.AddField(BackingField);

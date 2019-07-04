@@ -9,24 +9,24 @@ namespace Slowsharp
     public class DumpSnapshot
     {
         public HybInstance _this { get; }
-        public Dictionary<string, HybInstance> locals { get; }
-        public string methodSrc { get; }
-        public int breakLine { get; }
-        public CallStackFrame[] callStack { get; }
+        public Dictionary<string, HybInstance> Locals { get; }
+        public string MethodSrc { get; }
+        public int BreakLine { get; }
+        public CallStackFrame[] Callstack { get; }
 
-        private Runner runner { get; }
+        private Runner Runner { get; }
 
         public DumpSnapshot(Runner runner)
         {
-            this.runner = runner;
+            this.Runner = runner;
             this._this = runner.Ctx._this;
-            this.locals = runner.Vars.Flatten();
-            this.methodSrc = runner.Ctx.Method.Declaration.ToString();
+            this.Locals = runner.Vars.Flatten();
+            this.MethodSrc = runner.Ctx.Method.Declaration.ToString();
 
             var method = runner.Ctx.Method;
             var methodLine = method.Declaration.GetLocation().GetLineSpan().StartLinePosition.Line;
             var nodeLine = runner.Ctx.LastNode.GetLocation().GetLineSpan().StartLinePosition.Line;
-            breakLine = nodeLine - methodLine;
+            BreakLine = nodeLine - methodLine;
 
             var frames = new List<CallStackFrame>();
             foreach (var m in runner.Ctx.Callstack)
@@ -35,7 +35,7 @@ namespace Slowsharp
                     signature = m.Method.Signature
                 });  
             }
-            this.callStack = frames.ToArray();
+            this.Callstack = frames.ToArray();
         }
     }
 }

@@ -28,9 +28,9 @@ namespace Slowsharp
         private InvokeType Type { get; }
 
         private Runner Runner;
-        private SSMethodInfo MethodInfo;
+        private SSInterpretMethodInfo MethodInfo;
 
-        public Invokable(SSMethodInfo methodInfo, Runner runner, BaseMethodDeclarationSyntax declaration)
+        public Invokable(SSInterpretMethodInfo methodInfo, Runner runner, BaseMethodDeclarationSyntax declaration)
         { 
             this.Type = InvokeType.Interpret;
             this.MethodInfo = methodInfo;
@@ -52,9 +52,9 @@ namespace Slowsharp
         public HybInstance Invoke(HybInstance _this, HybInstance[] args, bool hasRefOrOut = false)
         {
             if (IsCompiled)
-                Console.WriteLine($"Invoke {CompiledMethod.Name}");
+                C.WriteLine($"Invoke {CompiledMethod.Name}");
             else
-                Console.WriteLine($"Invoke ");
+                C.WriteLine($"Invoke ");
 
             if (Type == InvokeType.ReflectionInvoke)
             {

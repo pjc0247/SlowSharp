@@ -140,6 +140,7 @@
     <Compile Include="Runtime\EnumClass.cs" />
     <Compile Include="Runtime\JumpDestination.cs" />
     <Compile Include="Runtime\MemberFlag.cs" />
+    <Compile Include="Runtime\SSAttributeInfo.cs" />
     <Compile Include="Runtime\SSEnumerator.cs" />
     <Compile Include="Runtime\SSMemberInfo.cs" />
     <Compile Include="Runtime\SSMethodInfo.cs" />

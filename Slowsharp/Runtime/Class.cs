@@ -79,7 +79,7 @@ namespace Slowsharp
             if (Methods.ContainsKey(id) == false)
                 Methods[id] = new List<SSMethodInfo>();
         }
-        public SSMethodInfo AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
+        public SSInterpretMethodInfo AddMethod(string id, BaseMethodDeclarationSyntax method, JumpDestination[] jumps)
         {
             EnsureMethodKey(id);
 
@@ -119,12 +119,12 @@ namespace Slowsharp
             var fieldInfo = new SSInterpretFieldInfo(this)
             {
                 Id = id,
-                fieldType = Runner.Resolver.GetType($"{field.Declaration.Type}"),
+                FieldType = Runner.Resolver.GetType($"{field.Declaration.Type}"),
                 IsStatic = field.Modifiers.IsStatic() | field.Modifiers.IsConst(),
-                isConst = field.Modifiers.IsConst(),
-                field = field,
+                IsConst = field.Modifiers.IsConst(),
+                Field = field,
                 DeclaringClass = this,
-                declartor = declarator,
+                Declartor = declarator,
 
                 AccessModifier = AccessModifierParser.Parse(field.Modifiers)
             };

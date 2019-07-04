@@ -288,12 +288,12 @@ namespace Slowsharp
             return ret;
         }
 
-        internal HybInstance RunMethod(SSMethodInfo method, HybInstance[] args)
+        internal HybInstance RunMethod(SSInterpretMethodInfo method, HybInstance[] args)
         {
             Ret = null;
             Ctx.PushMethod(method);
 
-            var node = method.Declaration;
+            var node = ((SSInterpretMethodInfo)method).Declaration;
             var vf = new VarFrame(null);
             var count = 0;
 
@@ -350,7 +350,7 @@ namespace Slowsharp
         /// <summary>
         /// Runs method with `_this`.
         /// </summary>
-        internal HybInstance RunMethod(HybInstance _this, SSMethodInfo method, HybInstance[] args)
+        internal HybInstance RunMethod(HybInstance _this, SSInterpretMethodInfo method, HybInstance[] args)
         {
             BindThis(_this);
             return RunMethod(method, args);
