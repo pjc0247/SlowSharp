@@ -9,5 +9,6 @@ namespace Slowsharp
     internal class OptTypeofNode : OptNodeBase
     {
         public HybType type;
+        public HybInstance typeInstance;
     }
 }

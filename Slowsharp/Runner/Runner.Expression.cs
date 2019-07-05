@@ -794,14 +794,14 @@ namespace Slowsharp
                     var type = Resolver.GetType($"{node.Type}");
                     return new OptTypeofNode()
                     {
-                        type = type
+                        type = type,
+                        typeInstance = type.IsCompiledType ?
+                            HybInstance.FromType(type.CompiledType) :
+                            HybInstance.FromType(typeof(HybType))
                     };
                 });
-            
-            if (cache.type.IsCompiledType)
-                return HybInstance.FromType(cache.type.CompiledType);
-            else
-                return HybInstance.FromType(typeof(HybType));
+
+            return cache.typeInstance;
         }
         private HybInstance RunSizeof(SizeOfExpressionSyntax node)
         {
