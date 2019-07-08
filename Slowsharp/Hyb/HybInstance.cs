@@ -46,7 +46,7 @@ namespace Slowsharp
         private Runner Runner;
 
         public static HybInstance Null()
-            => new HybInstance(HybType.Object, null);
+            => HybInstanceCache.Null;
         public static HybInstance Object(object o)
         {
             if (o == null)
@@ -111,6 +111,7 @@ namespace Slowsharp
             InitializeFields();
             InitializeProperties();
         }
+
         private void InstantiateParent()
         {
             if (Klass.Parent.IsCompiledType)
