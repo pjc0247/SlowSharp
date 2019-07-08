@@ -12,6 +12,9 @@ namespace Slowsharp
 {
     public sealed class HybInstance
     {
+        /// <summary>
+        /// Identifier for each instances, for debugging purpose.
+        /// </summary>
         public string Id { get; private set; }
 
         public bool IsCompiledType => Type.IsCompiledType;
@@ -303,9 +306,7 @@ namespace Slowsharp
         }
 
         public bool SetIndexer(object[] args, HybInstance value)
-        {
-            return SetIndexer(args.Wrap(), value);
-        }
+            => SetIndexer(args.Wrap(), value);
         public bool SetIndexer(HybInstance[] args, HybInstance value)
         {
             if (IsCompiledType)
@@ -343,9 +344,7 @@ namespace Slowsharp
             return false;
         }
         public bool GetIndexer(object[] args, out HybInstance value)
-        {
-            return GetIndexer(args.Wrap(), out value);
-        }
+            => GetIndexer(args.Wrap(), out value);
         public bool GetIndexer(HybInstance[] args, out HybInstance value)
         {
             value = null;
@@ -387,9 +386,7 @@ namespace Slowsharp
         }
 
         public bool SetPropertyOrField(string id, HybInstance value)
-        {
-            return SetPropertyOrField(id, value, AccessLevel.Outside);
-        }
+            => SetPropertyOrField(id, value, AccessLevel.Outside);
         internal bool SetPropertyOrField(string id, HybInstance value, AccessLevel level)
         {
             if (IsCompiledType)
@@ -450,9 +447,7 @@ namespace Slowsharp
         }
 
         public bool GetPropertyOrField(string id, out HybInstance value)
-        {
-            return GetPropertyOrField(id, out value, AccessLevel.Outside);
-        }
+            => GetPropertyOrField(id, out value, AccessLevel.Outside);
         internal bool GetPropertyOrField(string id, out HybInstance value, AccessLevel level)
         {
             if (IsCompiledType)
