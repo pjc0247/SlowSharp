@@ -111,13 +111,14 @@ public static object Main() {
         public HybInstance Eval(string src)
         {
             var root = ParseAndValidate(src, isScript: true);
-
-            var glob = root.ChildNodes().First() as GlobalStatementSyntax;
-            if (glob.Statement is ExpressionStatementSyntax expr) {
-                return Runner.RunScriptExpression(expr);
+            HybInstance ret = null;
+            foreach (var child in root.ChildNodes())
+            {
+                if (child is GlobalStatementSyntax gstmt)
+                    ret = Runner.RunScriptStatement(gstmt.Statement);
             }
-
-            throw new ArgumentException("src is not a expression");
+            return ret;
+            //throw new ArgumentException("src is not a expression");
         }
         public void LoadScript(string src)
         {
