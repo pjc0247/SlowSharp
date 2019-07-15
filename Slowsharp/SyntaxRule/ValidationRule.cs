@@ -92,7 +92,7 @@ namespace Slowsharp
 #if DEBUG
                 throw new SemanticViolationException($"{Obj}, {Obj.GetType()} is not expected");
 #else
-                throw new SemanticViolationException($"{obj} is not expected");
+                throw new SemanticViolationException($"{Obj} is not expected");
 #endif
             }
         }

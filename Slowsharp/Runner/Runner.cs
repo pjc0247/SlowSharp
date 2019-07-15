@@ -239,8 +239,6 @@ namespace Slowsharp
         }
         public void RunAsExecution(SyntaxNode node)
         {
-            Console.WriteLine(node);
-
             if (node is BlockSyntax)
                 RunBlock(node as BlockSyntax);
             else if (node is ArrowExpressionClauseSyntax)
