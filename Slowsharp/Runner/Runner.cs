@@ -108,6 +108,16 @@ namespace Slowsharp
             Ctx._this = _this;
         }
 
+        public HybInstance RunScriptExpression(ExpressionStatementSyntax node)
+        {
+            Ctx.PushMethod(new SSInterpretMethodInfo(this, 
+                "__scripteval", 
+                HybTypeCache.Void, null, new HybType[] { }, HybTypeCache.Void));
+            var ret = RunExpression(node.Expression);
+            Ctx.PopMethod();
+            return ret;
+        }
+
         internal HybInstance RunMain(params object[] args)
         {
             Ctx.Reset();

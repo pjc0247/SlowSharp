@@ -34,6 +34,16 @@ public static object Main() {
             return ret.Unwrap();
         }
 
+        public static CScript CreateRunner(ScriptConfig scriptConfig = null, RunConfig config = null)
+        {
+            if (scriptConfig == null)
+                scriptConfig = ScriptConfig.Default;
+            if (config == null)
+                config = RunConfig.Default;
+
+            var r = new Runner(scriptConfig, config);
+            return new CScript(r, new SyntaxNode[] { });
+        }
         public static CScript CreateRunner(string[] srcs, ScriptConfig scriptConfig = null, RunConfig config = null)
         {
             if (srcs == null || srcs.Length == 0)
@@ -104,7 +114,7 @@ public static object Main() {
 
             var glob = root.ChildNodes().First() as GlobalStatementSyntax;
             if (glob.Statement is ExpressionStatementSyntax expr) {
-                return Runner.RunExpression(expr.Expression);
+                return Runner.RunScriptExpression(expr);
             }
 
             throw new ArgumentException("src is not a expression");
