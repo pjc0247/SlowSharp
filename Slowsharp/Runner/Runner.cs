@@ -374,15 +374,21 @@ namespace Slowsharp
             return ret;
         }
 
+        /// <summary>
+        /// Updates variable with given key and value.
+        /// </summary>
         private void UpdateVariable(string key, HybInstance value)
         {
+            // 1. Local variable
             if (Vars.UpdateValue(key, value) == false)
             {
                 if (Ctx._this != null)
                 {
+                    // 2. Member property
                     if (Ctx._this.SetPropertyOrField(key, value, AccessLevel.This))
                         return;
                 }
+                // 3. Static property
                 if (Ctx.Method.DeclaringType.SetStaticPropertyOrField(key, value, AccessLevel.This))
                     return;
             }
