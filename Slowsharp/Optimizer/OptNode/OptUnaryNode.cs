@@ -6,15 +6,14 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class OptUnaryBase : OptNodeBase
+    internal struct OptPrefixUnary : OptNodeBase
     {
         public string operandId;
         public bool isPrimitiveIncOrDec;
     }
-    internal class OptPrefixUnary : OptUnaryBase
+    internal struct OptPostfixUnary : OptNodeBase
     {
-    }
-    internal class OptPostfixUnary : OptUnaryBase
-    {
+        public string operandId;
+        public bool isPrimitiveIncOrDec;
     }
 }

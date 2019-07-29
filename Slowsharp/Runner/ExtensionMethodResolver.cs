@@ -30,7 +30,7 @@ namespace Slowsharp
             }
         }
 
-        public SSMethodInfo[] GetCallablegExtensions(HybInstance value, string id)
+        public SSMethodInfo[] GetCallableExtensions(HybInstance value, string id)
         {
             var result = new List<SSMethodInfo>();
 

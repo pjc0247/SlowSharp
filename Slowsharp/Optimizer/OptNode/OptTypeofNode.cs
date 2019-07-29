@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class OptTypeofNode : OptNodeBase
+    internal struct OptTypeofNode : OptNodeBase
     {
         public HybType type;
         public HybInstance typeInstance;

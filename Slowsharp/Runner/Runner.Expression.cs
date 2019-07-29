@@ -348,7 +348,14 @@ namespace Slowsharp
         ///            Foo(1234);
         /// </summary>
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
-        {
+        { 
+            var cache = OptCache.GetOrCreate(node, () =>
+            {
+                var optNode = new OptInvocationNode();
+
+                return optNode;
+            });
+
             string calleeId = "";
             string targetId = "";
             HybInstance callee = null;
@@ -396,7 +403,7 @@ namespace Slowsharp
                 if (leftIsType == false &&
                         callsite.Length == 0)
                 {
-                    callsite = ExtResolver.GetCallablegExtensions(callee, $"{ma.Name}");
+                    callsite = ExtResolver.GetCallableExtensions(callee, $"{ma.Name}");
 
                     args = (new HybInstance[] { callee }).Concat(args).ToArray();
                 }

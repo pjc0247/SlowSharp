@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Slowsharp
 {
-    internal class OptRunMemberAccessNode : OptNodeBase
+    internal struct OptRunMemberAccessNode : OptNodeBase
     {
         public bool isStaticMemberAccess;
         public HybType leftType;
