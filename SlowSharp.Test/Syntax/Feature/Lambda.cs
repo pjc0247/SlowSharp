@@ -7,6 +7,19 @@ namespace Slowsharp.Test
     [TestClass]
     public class LambdaTest
     {
-        
+        [TestMethod]
+        public void BasicAction()
+        {
+            Assert.AreEqual(
+                10,
+                TestRunner.Run(@"
+var b = 0;
+var a = new Action(() => {
+    b = 10;
+});
+a();
+return b;
+"));
+        }
     }
 }

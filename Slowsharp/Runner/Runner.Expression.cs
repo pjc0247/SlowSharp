@@ -109,27 +109,37 @@ namespace Slowsharp
 
             return cache.value;
         }
-        private HybInstance ResolveId(IdentifierNameSyntax node)
+        private bool TryResolveId(string id, out HybInstance v)
         {
-            if (string.IsNullOrEmpty(node.Identifier.Text))
-                throw new SemanticViolationException($"Invalid syntax: {node.Parent}");
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentException(nameof(id));
 
             // Lookup priority
             //   1. local variables
-            var id = $"{node.Identifier}";
-            HybInstance v = null;
             if (Vars.TryGetValue(id, out v))
-                return v;
+                return true;
 
             //  2. instance properties
             if (Ctx._this != null)
             {
                 if (Ctx._this.GetPropertyOrField(id, out v, AccessLevel.This))
-                    return v;
+                    return true;
             }
 
             //  3. static properties
             if (Ctx.Method.DeclaringType.GetStaticPropertyOrField(id, out v))
+                return true;
+
+            return false;
+        }
+        private HybInstance ResolveId(IdentifierNameSyntax node)
+        {
+            if (string.IsNullOrEmpty(node.Identifier.Text))
+                throw new SemanticViolationException($"Invalid syntax: {node.Parent}");
+
+            var id = node.Identifier.Text;
+            HybInstance v;
+            if (TryResolveId(id, out v))
                 return v;
 
             throw new NoSuchMemberException($"{id}");
@@ -397,21 +407,34 @@ namespace Slowsharp
             else if (node.Expression is SimpleNameSyntax ||
                 node.Expression is MemberBindingExpressionSyntax)
             {
-                SimpleNameSyntax id = node.Expression as SimpleNameSyntax;
-                if (id == null)
+                if (node.Expression is IdentifierNameSyntax ids)
                 {
-                    id = (node.Expression as MemberBindingExpressionSyntax)?.Name;
-                    callee = Ctx._bound;
+                    HybInstance v;
+                    if (TryResolveId(ids.Identifier.Text, out v))
+                    {
+                        implicitGenericArgs = ResolveGenericArgumentsFromName(ids);
+                        callee = v;
+                        callsite = v.GetMethods("Invoke");
+                    }
                 }
-                else
-                    callee = Ctx._this;
+                if (callsite == null)
+                {
+                    SimpleNameSyntax id = node.Expression as SimpleNameSyntax;
+                    if (id == null)
+                    {
+                        id = (node.Expression as MemberBindingExpressionSyntax)?.Name;
+                        callee = Ctx._bound;
+                    }
+                    else
+                        callee = Ctx._this;
 
-                implicitGenericArgs = ResolveGenericArgumentsFromName(id);
-                callsite =
-                    ResolveLocalMember(id)
-                    .Concat(Ctx.Method.DeclaringType.GetStaticMethods(id.Identifier.Text))
-                    .ToArray();
-                targetId = id.Identifier.Text;
+                    implicitGenericArgs = ResolveGenericArgumentsFromName(id);
+                    callsite =
+                        ResolveLocalMember(id)
+                        .Concat(Ctx.Method.DeclaringType.GetStaticMethods(id.Identifier.Text))
+                        .ToArray();
+                    targetId = id.Identifier.Text;
+                }
             }
 
             if (callsite.Length == 0)
