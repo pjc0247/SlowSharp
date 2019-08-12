@@ -39,6 +39,27 @@ namespace Slowsharp
             klassFilters.Add("System.AppDomain");
             klassFilters.Add("System.Environment");
         }
+        public void AddDefaultUnityPoliciese()
+        {
+            klassFilters.Add("UnityEngine.AndroidJNI");
+            klassFilters.Add("UnityEngine.AndroidJNIHelper");
+            klassFilters.Add("UnityEngine.AndroidJavaProxy");
+            klassFilters.Add("UnityEngine.AndroidJavaObject");
+            klassFilters.Add("UnityEngine.AndroidJavaClass");
+            klassFilters.Add("UnityEngine.AssetBundle");
+            klassFilters.Add("UnityEngine.AssetBundleCreateRequest");
+            klassFilters.Add("UnityEngine.Application");
+            klassFilters.Add("UnityEngine.WWW");
+            klassFilters.Add("UnityEngine.WWWForm");
+            klassFilters.Add("UnityEngine.WebCamTexture");
+            klassFilters.Add("UnityEngine.WebCamDevice");
+            klassFilters.Add("UnityEngine.Resources");
+            klassFilters.Add("UnityEngine.Screen");
+            klassFilters.Add("UnityEngine.Handheld");
+            klassFilters.Add("UnityEngine.GL");
+            klassFilters.Add("UnityEngine.PlayerPrefs");
+            klassFilters.Add("UnityEngine.Microphone");
+        }
 
         public bool IsSafeType(HybType type)
         {
