@@ -41,6 +41,7 @@ namespace Slowsharp
         }
         public void AddDefaultUnityPoliciese()
         {
+            namespaceFilters.Add("UnityEngine.Networking");
             klassFilters.Add("UnityEngine.AndroidJNI");
             klassFilters.Add("UnityEngine.AndroidJNIHelper");
             klassFilters.Add("UnityEngine.AndroidJavaProxy");
