@@ -58,7 +58,7 @@ public static object Main() {
             var roots = new List<SyntaxNode>();
             foreach (var src in srcs)
             {
-                var root = ParseAndValidate(src);
+                var root = ParseAndValidate(src, scriptConfig.PredefinedSymbols);
                 r.LoadSyntax(root);
                 roots.Add(root);
             }
@@ -68,13 +68,14 @@ public static object Main() {
         public static CScript CreateRunner(string src, ScriptConfig scriptConfig = null, RunConfig config = null)
             => CreateRunner(new string[] { src }, scriptConfig, config);
 
-        private static CSharpSyntaxNode ParseAndValidate(string src, bool isScript = false)
+        private static CSharpSyntaxNode ParseAndValidate(string src, string[] predefinedSymbols = null, bool isScript = false)
         {
             if (string.IsNullOrEmpty(src))
                 throw new ArgumentException("src is null or empty string");
 
             var options = new CSharpParseOptions(
                 LanguageVersion.Default,
+                preprocessorSymbols: predefinedSymbols,
                 kind: isScript ? SourceCodeKind.Script : SourceCodeKind.Regular);
             var tree = CSharpSyntaxTree.ParseText(src, options);
             var root = tree.GetCompilationUnitRoot();

@@ -21,6 +21,8 @@ namespace Slowsharp
         /// </summary>
         public string[] DefaultUsings { get; set; } = new string[] { };
 
+        public string[] PredefinedSymbols { get; set; } = new string[] { };
+
         public Type[] PrewarmTypes { get; set; } = new Type[] { };
     }
 }
