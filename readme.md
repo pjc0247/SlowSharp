@@ -56,7 +56,7 @@ ss.Instantiate("MyBehaviour");
 ss.Override("MyBehaviour", gameObject);
 ```
 
-Finally, there will be two instances, but act as derivered one object.
+Finally, there will be two instances, but act as one derivered object.
 
 Sandboxing
 ----
