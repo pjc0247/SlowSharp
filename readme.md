@@ -46,7 +46,9 @@ Overriding (Virtual inheritance)
 ----
 Supports virtual inheritance, this is useful with __Unity__.
 ```cs
-class MyBehaviour : MonoBehaviour { /* ... */ }
+class MyBehaviour : MonoBehaviour { 
+   public void SayHello() { /* ... */ }
+}
 ```
 ```cs
 // Error, MonoBehaviour cannot be instantiated by Unity's law
@@ -57,6 +59,13 @@ ss.Override("MyBehaviour", gameObject);
 ```
 
 Finally, there will be two instances, but act as one derivered object.
+```cs
+// You can invoke methods from `MyBehaviour` which are defined in script-side.
+ss.Invoke("SayHello");
+
+// You can also invoke methods from `MonoBehaviour`
+ss.Invoke("StopAllCoroutines");
+```
 
 Sandboxing
 ----
