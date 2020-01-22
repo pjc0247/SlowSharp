@@ -108,6 +108,12 @@ namespace Slowsharp
         }
     }
 
+    public class Player
+    {
+        public static Player instance;
+        public int hp = 20;
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -146,7 +152,7 @@ public void MoveForward() {
 class MyList : List<int> { }
     class Program : Bar, IFoo
     {
-static int bb = 1;
+static int bb = 199;
 static int Foo() { return 5; }
 static int Foo(int n) { return 15; }
 
@@ -162,9 +168,6 @@ private static int acac = 123;
 
         [Aa]
         static int Main(int n) {
-
-var c = new Action<int>((int a) => { Console.WriteLine(a); });
-c.Invoke(1234879);
 
 return 1;
 
@@ -193,26 +196,49 @@ class Fooo : Bar {
     }
 }
 ";
+            src = @"
+using System;
+
+public class Boo {
+public static void Main() {
+
+#if AA
+var b = 0;
+var a = new Action(() => {
+    b = 10;
+});
+a();
+#endif
+
+return b;
+}
+}
+";
+
             //src = System.IO.File.ReadAllText("a.cs");
-
-            Console.WriteLine(nameof(Console));
-            Console.WriteLine(CScript.RunSimple("\"hello from inception\""));
-
-            Console.WriteLine(src);
 
             var config = ScriptConfig.Default;
 
+            config.PredefinedSymbols = new string[] { "AA" };
             config.PrewarmTypes = new Type[] { typeof(Console) };
 
             var run = CScript.CreateRunner(src, config);
-            run.Dump();
-            SSDebugger.runner = run;
+            //run.Dump();
+            //SSDebugger.runner = run;
 
             run.Trap(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }),
                 typeof(Program).GetMethod("NewWriteLine"));
 
-            var myList = run.RunMain();
-            Console.WriteLine(myList.Is<List<int>>());
+            run.RunMain();
+            //Console.WriteLine(myList.Is<List<int>>());
+
+            Console.WriteLine("BBB");
+            run = null;
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+            GC.WaitForPendingFinalizers();
+            Console.WriteLine("BBB");
 
             return;
         }

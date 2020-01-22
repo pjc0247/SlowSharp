@@ -349,18 +349,18 @@ namespace Slowsharp
         /// </summary>
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
         { 
-            var cache = OptCache.GetOrCreate(node, () =>
-            {
-                var optNode = new OptInvocationNode();
-
-                return optNode;
-            });
+            var cache = OptCache.GetOrCreate(node, () => CreateInvocationCache(node));
 
             string calleeId = "";
             string targetId = "";
             HybInstance callee = null;
             SSMethodInfo[] callsite = null;
             HybType[] implicitGenericArgs = null;
+
+            if (cache.Type == InvocationType.Boundcall)
+                callee = Ctx._bound;
+            else if (cache.Type == InvocationType.Thiscall)
+                callee = Ctx._bound;
 
             var (args, hasRefOrOut) = ResolveArgumentList(node.ArgumentList);
 
@@ -444,22 +444,10 @@ namespace Slowsharp
                 }
             }
 
-            if (callsite.Length == 0)
-                throw new NoSuchMethodException($"{calleeId}", targetId);
-            
-            var method = OverloadingResolver.FindMethodWithArguments(
-                Resolver,
-                callsite, 
-                implicitGenericArgs.ToArray(),
-                ref args);
-
-            if (method == null)
-                throw new SemanticViolationException($"No matching override for `{targetId}`");
-
-            if (callee != null && method.DeclaringType.Parent == callee.GetHybType())
+            if (callee != null && cache.Method.DeclaringType.Parent == callee.GetHybType())
                 callee = callee.Parent;
 
-            var target = method.Target;
+            var target = cache.Method.Target;
             if (target.IsCompiled && traps.ContainsKey(target.CompiledMethod))
                 target = new Invokable(traps[target.CompiledMethod]);
 
@@ -479,6 +467,116 @@ namespace Slowsharp
 
             return ret;
         }
+        private OptInvocationNode CreateInvocationCache(InvocationExpressionSyntax node)
+        {
+            var optNode = new OptInvocationNode();
+
+            string calleeId = "";
+            string targetId = "";
+            HybType[] implicitGenericArgs = null;
+            SSMethodInfo[] callsite = null;
+            HybInstance callee = null;
+
+            var (args, hasRefOrOut) = ResolveArgumentList(node.ArgumentList);
+
+            if (node.Expression is MemberAccessExpressionSyntax ma)
+            {
+                var leftIsType = false;
+                var rightName = $"{ma.Name.Identifier}";
+
+                if (ma.Expression is PredefinedTypeSyntax pd)
+                {
+                    HybType leftType = null;
+                    leftIsType = true;
+                    optNode.Type = InvocationType.PredefinedTypeStatic;
+                    optNode.LeftType = Resolver.GetType($"{pd}");
+                    callsite = leftType.GetStaticMethods(rightName);
+                }
+                else if (ma.Expression is IdentifierNameSyntax id)
+                {
+                    HybType leftType = null;
+                    if (Resolver.TryGetType($"{id.Identifier}", out leftType))
+                    {
+                        leftIsType = true;
+                        optNode.Type = InvocationType.RemoteStaticMethod;
+                        optNode.LeftType = leftType;
+                        callsite = leftType.GetStaticMethods(rightName);
+                    }
+                    else
+                    {
+                        callee = ResolveId(id);
+                        optNode.Type = InvocationType.RemoteMethod;
+                        callsite = callee.GetMethods(rightName);
+                    }
+
+                    calleeId = $"{id.Identifier}";
+                }
+                else if (ma.Expression is ExpressionSyntax expr)
+                {
+                    callee = RunExpression(expr);
+                    optNode.Type = InvocationType.ExpressionMethod;
+                    callsite = callee.GetMethods($"{ma.Name}");
+                }
+
+                if (leftIsType == false &&
+                        callsite.Length == 0)
+                {
+                    callsite = ExtResolver.GetCallableExtensions(callee, $"{ma.Name}");
+                    optNode.Type = InvocationType.ExtensionMethod;
+                    args = (new HybInstance[] { callee }).Concat(args).ToArray();
+                }
+
+                targetId = $"{ma.Name}";
+                //callsite = ResolveMemberAccess(node.Expression as MemberAccessExpressionSyntax);
+            }
+            else if (node.Expression is SimpleNameSyntax ||
+                node.Expression is MemberBindingExpressionSyntax)
+            {
+                if (node.Expression is IdentifierNameSyntax ids)
+                {
+                    HybInstance v;
+                    if (TryResolveId(ids.Identifier.Text, out v))
+                    {
+                        optNode.Type = InvocationType.VarInvoke;
+                        implicitGenericArgs = ResolveGenericArgumentsFromName(ids);
+                        callsite = v.GetMethods("Invoke");
+                    }
+                }
+                if (callsite == null)
+                {
+                    SimpleNameSyntax id = node.Expression as SimpleNameSyntax;
+                    if (id == null)
+                    {
+                        id = (node.Expression as MemberBindingExpressionSyntax)?.Name;
+                        optNode.Type = InvocationType.Boundcall;
+                    }
+                    else
+                        optNode.Type = InvocationType.Thiscall;
+
+                    implicitGenericArgs = ResolveGenericArgumentsFromName(id);
+                    callsite =
+                        ResolveLocalMember(id)
+                        .Concat(Ctx.Method.DeclaringType.GetStaticMethods(id.Identifier.Text))
+                        .ToArray();
+                    targetId = id.Identifier.Text;
+                }
+            }
+
+            if (callsite.Length == 0)
+                throw new NoSuchMethodException($"{calleeId}", targetId);
+
+            var method = OverloadingResolver.FindMethodWithArguments(
+                Resolver,
+                callsite,
+                implicitGenericArgs.ToArray(),
+                ref args);
+
+            if (method == null)
+                throw new SemanticViolationException($"No matching override for `{targetId}`");
+
+            return optNode;
+        }
+
         private HybType[] ResolveGenericArgumentsFromName(SimpleNameSyntax name)
         {
             if (name is GenericNameSyntax gn)

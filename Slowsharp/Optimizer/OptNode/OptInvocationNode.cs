@@ -8,7 +8,12 @@ namespace Slowsharp
 {
     internal struct OptInvocationNode : OptNodeBase
     {
+        public InvocationType Type;
+
         public HybType LeftType;
+        public string RightName;
+
+        public SSMethodInfo Method;
     }
     internal enum InvocationType
     {
@@ -17,6 +22,10 @@ namespace Slowsharp
         RemoteStaticMethod,
         RemoteMethod,
         PredefinedTypeStatic,
-        ExpressionMethod
+        ExpressionMethod,
+        ExtensionMethod,
+
+        Thiscall,
+        Boundcall
     }
 }

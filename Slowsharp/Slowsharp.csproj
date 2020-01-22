@@ -94,6 +94,7 @@
     <Compile Include="Optimizer\NodeAnalyzer.cs" />
     <Compile Include="Optimizer\OptNodeCache.cs" />
     <Compile Include="Optimizer\OptNode\OptCastNode.cs" />
+    <Compile Include="Optimizer\OptNode\OptInvocationNode.cs" />
     <Compile Include="Optimizer\OptNode\OptLiteralNode.cs" />
     <Compile Include="Optimizer\OptNode\OptLocalDeclarationNode.cs" />
     <Compile Include="Optimizer\OptNode\OptNodeBase.cs" />
