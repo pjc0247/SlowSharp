@@ -4,7 +4,7 @@ about OptNode
 `OptNode` stores cached runtime data that enables to skip some evaluations.
 
 
-Without OptNode (Evaluates everything, everytime)
+__Without OptNode (Evaluates everything, everytime)__
 ```cs
 HybInstance RunLiteralNode(LiteralNode node) {
   if (node->literalType == LiteralType.Inte) 
@@ -15,7 +15,7 @@ HybInstance RunLiteralNode(LiteralNode node) {
 }
 ```
 
-With OptNode (Uses cached data if possible)
+__With OptNode (Uses cached data if possible)__
 ```cs
 HybInstance RunLiteralNode(LiteralNode node) {
   // If there is a pre-calculated data, just return it
