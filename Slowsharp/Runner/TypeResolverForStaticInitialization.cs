@@ -27,7 +27,7 @@ namespace Slowsharp
             {
                 if (InitializedTypes.Add(type))
                 {
-                    Runner.RunStaticInitializer(type.InterpretKlass);
+                    Runner.RunStaticInitializerForClass(type.InterpretKlass);
                 }
             }
             return ret;
@@ -39,7 +39,7 @@ namespace Slowsharp
             {
                 if (InitializedTypes.Add(type))
                 {
-                    Runner.RunStaticInitializer(type.InterpretKlass);
+                    Runner.RunStaticInitializerForClass(type.InterpretKlass);
                 }
             }
             return type;

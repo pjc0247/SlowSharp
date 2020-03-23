@@ -38,12 +38,12 @@ namespace Slowsharp
 
             foreach (var init in staticInitializers)
             {
-                RunStaticInitializer(init.Key);
+                RunStaticInitializerForClass(init.Key);
             }
 
             Resolver = oldTypeResolver;
         }
-        internal void RunStaticInitializer(Class klass)
+        internal void RunStaticInitializerForClass(Class klass)
         {
             if (initializedTypes.Add(klass) == false)
                 return;
