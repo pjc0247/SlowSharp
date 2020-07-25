@@ -358,7 +358,7 @@ namespace Slowsharp
             return Ret;
         }
         /// <summary>
-        /// Runs method with `_this`.
+        /// Run method with `_this`.
         /// </summary>
         internal HybInstance RunMethod(HybInstance _this, SSInterpretMethodInfo method, HybInstance[] args)
         {
@@ -375,7 +375,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Updates variable with given key and value.
+        /// Update variable with given key and value.
         /// </summary>
         private void UpdateVariable(string key, HybInstance value)
         {

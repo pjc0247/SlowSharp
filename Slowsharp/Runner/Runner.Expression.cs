@@ -71,7 +71,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Returns current `this` instance
+        /// Return current `this` instance
         ///   [Syntax] this
         /// </summary>
         private HybInstance ResolveThis(ThisExpressionSyntax node)
@@ -263,7 +263,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Runs parenthesized expression.
+        /// Run parenthesized expression.
         ///   [Syntax] () => Math.Max(1, 5)
         /// </summary>
         private HybInstance RunParenthesized(ParenthesizedExpressionSyntax node)
@@ -288,7 +288,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Runs default expression.
+        /// Run default expression.
         ///   [Syntax] default(int)
         /// </summary>
         private HybInstance RunDefault(DefaultExpressionSyntax node)
@@ -297,7 +297,7 @@ namespace Slowsharp
             return type.GetDefault();
         }
         /// <summary>
-        /// Runs conditional expression.
+        /// Run conditional expression.
         ///   [Syntax] CONDITION ? IF_TRUE : IF_FALSE
         /// </summary>
         private HybInstance RunConditional(ConditionalExpressionSyntax node)
@@ -309,7 +309,7 @@ namespace Slowsharp
                 return RunExpression(node.WhenFalse);
         }
         /// <summary>
-        /// Runs conditional access expression. (CS6)
+        /// Run conditional access expression. (CS6)
         ///   [Syntax] EXPR?.WHEN_NOT_NULL
         /// </summary>
         private HybInstance RunConditionalAccess(ConditionalAccessExpressionSyntax node)
@@ -324,7 +324,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Runs interpolated string expression.
+        /// Run interpolated string expression.
         ///   [Syntax] $"My name is {VALUE}"
         /// </summary>
         private HybInstance RunInterpolatedString(InterpolatedStringExpressionSyntax node)
@@ -343,7 +343,7 @@ namespace Slowsharp
         }
 
         /// <summary>
-        /// Runs invocation expression.
+        /// Run invocation expression.
         ///   [Syntax] Console.WriteLine("Hello World");
         ///            Foo(1234);
         /// </summary>
@@ -628,66 +628,80 @@ namespace Slowsharp
                 ProcessInitializer(inst, node.Initializer);
             return inst;
         }
+
+        /// <summary>
+        /// Process trailing object's initializer.
+        /// 
+        /// new Object() {
+        ///     foo = "bar",
+        ///     zoo = 5,
+        /// };
+        /// </summary>
         private void ProcessInitializer(HybInstance inst, InitializerExpressionSyntax init)
         {
             if (IsDictionaryAddible(inst, init))
-            {
-                var setMethod = inst.GetSetIndexerMethod();
-                foreach (var expr in init.Expressions)
-                {
-                    if (expr is AssignmentExpressionSyntax assign)
-                    {
-                        var right = RunExpression(assign.Right);
-                        if (assign.Left is ImplicitElementAccessSyntax ea)
-                        {
-                            var args = new HybInstance[ea.ArgumentList.Arguments.Count];
-                            var count = 0;
-                            foreach (var arg in ea.ArgumentList.Arguments)
-                                args[count++] = RunExpression(arg.Expression);
-
-                            inst.SetIndexer(args, right);
-                        }
-                    }
-                    else if (expr is InitializerExpressionSyntax initializer)
-                    {
-                        var left = RunExpression(initializer.Expressions[0]);
-                        var right = RunExpression(initializer.Expressions[1]);
-                        inst.SetIndexer(new HybInstance[] { left }, right);
-                    }
-                    else
-                        throw new SemanticViolationException("");
-                }
-            }
+                ProcessDictionaryInitializer(inst, init);
             else if (IsArrayAddible(inst))
-            {
-                var addMethods = inst.GetMethods("Add");
-                foreach (var expr in init.Expressions)
-                {
-                    if (expr is AssignmentExpressionSyntax)
-                        throw new SemanticViolationException("");
-
-                    var value = RunExpression(expr);
-                    var addArgs = new HybInstance[] { value };
-                    var method = OverloadingResolver.FindMethodWithArguments(
-                        Resolver, addMethods, new HybType[] { }, ref addArgs);
-
-                    method.Target.Invoke(inst, addArgs);
-                }
-            }
+                ProcessArrayInitializer(inst, init);
             else
+                ProcessObjectInitializer(inst, init);
+        }
+        private void ProcessDictionaryInitializer(HybInstance inst, InitializerExpressionSyntax init)
+        {
+            foreach (var expr in init.Expressions)
             {
-                foreach (var expr in init.Expressions)
+                if (expr is AssignmentExpressionSyntax assign)
                 {
-                    if (expr is AssignmentExpressionSyntax assign)
+                    var right = RunExpression(assign.Right);
+                    if (assign.Left is ImplicitElementAccessSyntax ea)
                     {
-                        var id = (IdentifierNameSyntax)assign.Left;
-                        var value = RunExpression(assign.Right);
-                        if (inst.SetPropertyOrField($"{id.Identifier}", value) == false)
-                            throw new SemanticViolationException($"No such member: {id}");
+                        var args = new HybInstance[ea.ArgumentList.Arguments.Count];
+                        var count = 0;
+                        foreach (var arg in ea.ArgumentList.Arguments)
+                            args[count++] = RunExpression(arg.Expression);
+
+                        inst.SetIndexer(args, right);
                     }
-                    else
-                        throw new SemanticViolationException("");
                 }
+                else if (expr is InitializerExpressionSyntax initializer)
+                {
+                    var left = RunExpression(initializer.Expressions[0]);
+                    var right = RunExpression(initializer.Expressions[1]);
+                    inst.SetIndexer(new HybInstance[] { left }, right);
+                }
+                else
+                    throw new SemanticViolationException("");
+            }
+        }
+        private void ProcessArrayInitializer(HybInstance inst, InitializerExpressionSyntax init)
+        {
+            var addMethods = inst.GetMethods("Add");
+            foreach (var expr in init.Expressions)
+            {
+                if (expr is AssignmentExpressionSyntax)
+                    throw new SemanticViolationException("");
+
+                var value = RunExpression(expr);
+                var addArgs = new HybInstance[] { value };
+                var method = OverloadingResolver.FindMethodWithArguments(
+                    Resolver, addMethods, new HybType[] { }, ref addArgs);
+
+                method.Target.Invoke(inst, addArgs);
+            }
+        }
+        private void ProcessObjectInitializer(HybInstance inst, InitializerExpressionSyntax init)
+        {
+            foreach (var expr in init.Expressions)
+            {
+                if (expr is AssignmentExpressionSyntax assign)
+                {
+                    var id = (IdentifierNameSyntax)assign.Left;
+                    var value = RunExpression(assign.Right);
+                    if (inst.SetPropertyOrField($"{id.Identifier}", value) == false)
+                        throw new SemanticViolationException($"No such member: {id}");
+                }
+                else
+                    throw new SemanticViolationException("");
             }
         }
 
