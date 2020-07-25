@@ -349,13 +349,6 @@ namespace Slowsharp
         /// </summary>
         private HybInstance RunInvocation(InvocationExpressionSyntax node)
         { 
-            var cache = OptCache.GetOrCreate(node, () =>
-            {
-                var optNode = new OptInvocationNode();
-
-                return optNode;
-            });
-
             string calleeId = "";
             string targetId = "";
             HybInstance callee = null;
