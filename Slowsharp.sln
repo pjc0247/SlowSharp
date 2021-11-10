@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slowsharp", "Slowsharp\Slowsharp.csproj", "{40CDDE9B-948F-4C53-A846-9C1625B5D192}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowSharp.Test", "SlowSharp.Test\SlowSharp.Test.csproj", "{DB47EF62-FC2A-4707-A42C-88C8BFD53962}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowSharp.JSON", "SlowSharp.JSON\SlowSharp.JSON.csproj", "{91419467-FEA5-43B2-8608-F831D920B2BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testbed", "testbed\testbed.csproj", "{14324352-FC54-418B-B3DD-5CC419DE7393}"
 EndProject
@@ -27,10 +25,6 @@ Global
 		{DB47EF62-FC2A-4707-A42C-88C8BFD53962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB47EF62-FC2A-4707-A42C-88C8BFD53962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB47EF62-FC2A-4707-A42C-88C8BFD53962}.Release|Any CPU.Build.0 = Release|Any CPU
-		{91419467-FEA5-43B2-8608-F831D920B2BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{91419467-FEA5-43B2-8608-F831D920B2BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{91419467-FEA5-43B2-8608-F831D920B2BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{91419467-FEA5-43B2-8608-F831D920B2BB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14324352-FC54-418B-B3DD-5CC419DE7393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14324352-FC54-418B-B3DD-5CC419DE7393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14324352-FC54-418B-B3DD-5CC419DE7393}.Release|Any CPU.ActiveCfg = Release|Any CPU
