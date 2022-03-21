@@ -22,7 +22,7 @@ class Foo { public int GiveMeNumber() => 20; }
         }
 
         [TestMethod]
-        public void MemberShouldBeSafe()
+        public void MembersShouldBeUnchanged()
         {
             var r = CScript.CreateRunner(@"
 class Foo {
