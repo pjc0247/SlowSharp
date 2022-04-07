@@ -340,6 +340,7 @@ namespace Slowsharp
                     method.ReturnType.CompiledType == typeof(IEnumerator))
                 {
                     var enumerator = new SSEnumerator(this, node.Body, vf);
+                    enumerator.Method = method;
                     Ret = HybInstance.Object(enumerator);
                 }
                 else
