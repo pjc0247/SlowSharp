@@ -39,7 +39,9 @@ namespace Slowsharp
             if (pc == -1)
                 return false;
 
+            runner.Ctx.PushMethod(Method);
             pc = runner.RunBlock(block, vf, pc);
+            runner.Ctx.PopMethod();
 
             // -1 means EndOfMethod
             return pc == -1 ? false : true;
