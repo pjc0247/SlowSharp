@@ -62,7 +62,7 @@ namespace Slowsharp
                     args = ExpandArgs(args, CompiledMethod);
 
                 var unwrappedArgs = args.Unwrap();
-                var ret = CompiledMethod.Invoke(_this?.InnerObject, unwrappedArgs);
+                var ret = CompiledMethod.Invoke(_this == null ? null : _this.IsCompiledType ? _this.InnerObject:_this.Parent.InnerObject, unwrappedArgs);
 
                 if (hasRefOrOut)
                 {
