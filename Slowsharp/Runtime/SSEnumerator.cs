@@ -18,7 +18,7 @@ namespace Slowsharp
         private BlockSyntax block;
         private VarFrame vf;
         private Runner runner;
-
+        public SSInterpretMethodInfo Method;
         internal SSEnumerator(Runner runner, BlockSyntax node, VarFrame vf)
         {
             this.runner = runner;
