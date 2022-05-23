@@ -239,6 +239,7 @@ namespace Slowsharp
         }
         public void RunAsExecution(SyntaxNode node)
         {
+            Halt = HaltType.None;
             if (node is BlockSyntax)
                 RunBlock(node as BlockSyntax);
             else if (node is ArrowExpressionClauseSyntax)
