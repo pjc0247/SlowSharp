@@ -50,7 +50,7 @@ namespace Slowsharp
             }
 
             Vars = prevVars;
-            if (children.Length == pc && children.Length != 1)
+            if (children.Length == pc && Halt == HaltType.None)
                 return -1;
 
             return pc;
