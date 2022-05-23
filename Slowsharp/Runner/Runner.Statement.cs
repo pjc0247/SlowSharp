@@ -48,7 +48,9 @@ namespace Slowsharp
             }
 
             Vars = prevVars;
-            if (children.Length == pc)
+            if (children.Length == pc) 
+                pc++;
+            else if (pc>children.Length)
                 return -1;
 
             return pc;
