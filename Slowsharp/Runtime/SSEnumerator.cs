@@ -18,7 +18,11 @@ namespace Slowsharp
         private BlockSyntax block;
         private VarFrame vf;
         private Runner runner;
-        public SSInterpretMethodInfo Method;
+
+        public  SSInterpretMethodInfo Method;
+
+        public object Current => runner.Ret.Unwrap();
+
         internal SSEnumerator(Runner runner, BlockSyntax node, VarFrame vf)
         {
             this.runner = runner;
@@ -26,7 +30,6 @@ namespace Slowsharp
             this.vf = vf;
         }
 
-        public object Current => runner.Ret.Unwrap();
         public void Dispose()
         {
             // releases gc refs just in case
