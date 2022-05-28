@@ -82,6 +82,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Syntax\ControlFlow\Switch.cs" />
     <Compile Include="Syntax\ControlFlow\While.cs" />
+    <Compile Include="Syntax\ControlFlow\Yield.cs" />
     <Compile Include="Syntax\Enum\Enum.cs" />
     <Compile Include="Syntax\Feature\Lambda.cs" />
     <Compile Include="Syntax\Feature\StringInterpolation.cs" />

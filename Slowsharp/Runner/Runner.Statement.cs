@@ -18,8 +18,8 @@ namespace Slowsharp
             var children = node.ChildNodes().ToArray();
 
             if (children.Length == pc)
-                return -1;
-
+                  return -1;
+        
             for (; pc < children.Length; pc++)
             {
                 var child = children[pc];
@@ -50,6 +50,8 @@ namespace Slowsharp
             }
 
             Vars = prevVars;
+            if (children.Length == pc && Halt == HaltType.None)
+                return -1;
 
             return pc;
         }
