@@ -62,6 +62,7 @@
     <Compile Include="Snippet\Fibo.cs" />
     <Compile Include="Snippet\MergeSort.cs" />
     <Compile Include="Snippet\QuickSort.cs" />
+    <Compile Include="Syntax\Array\Array.cs" />
     <Compile Include="Syntax\Class\Ctor.cs" />
     <Compile Include="Syntax\Class\Property.cs" />
     <Compile Include="Syntax\Class\RefOrOut.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Syntax\Op\OpAndAssign.cs" />
     <Compile Include="Syntax\Op\Sub.cs" />
     <Compile Include="Syntax\Op\Unary.cs" />
+    <Compile Include="Syntax\Type\Casting.cs" />
     <Compile Include="TestRunner.cs" />
   </ItemGroup>
   <ItemGroup>
