@@ -47,6 +47,51 @@ return a;
         }
 
         [TestMethod]
+        public void Remove()
+        {
+            var list = (List<int>)TestRunner.Run(@"
+var a = new List<int>();
+a.Add(1); a.Add(2); a.Add(3);
+a.Remove(2);
+return a;
+");
+
+            Assert.AreEqual(2, list.Count);
+            Assert.AreEqual(1, list[0]);
+            Assert.AreEqual(3, list[1]);
+        }
+
+        [TestMethod]
+        public void RemoveAt()
+        {
+            var list = (List<int>)TestRunner.Run(@"
+var a = new List<int>();
+a.Add(1); a.Add(2); a.Add(3);
+a.RemoveAt(1);
+return a;
+");
+
+            Assert.AreEqual(2, list.Count);
+            Assert.AreEqual(1, list[0]);
+            Assert.AreEqual(3, list[1]);
+        }
+
+        [TestMethod]
+        public void RemoveAll()
+        {
+            var list = (List<int>)TestRunner.Run(@"
+var a = new List<int>();
+a.Add(1); a.Add(2); a.Add(3); a.Add(4);
+a.RemoveAll((int x) => { return x % 2 == 0; });
+return a;
+");
+
+            Assert.AreEqual(2, list.Count);
+            Assert.AreEqual(1, list[0]);
+            Assert.AreEqual(3, list[1]);
+        }
+
+        [TestMethod]
         public void Count()
         {
             var count = TestRunner.Run(@"
