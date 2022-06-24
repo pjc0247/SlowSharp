@@ -7,10 +7,11 @@ Hello World
 Console.WriteLine( CScript.RunSimple("\"hello from SlowSharp!\"") );
 ```
 
-Run with file
+Basic Usage
 ----
-__test.cs__
+__Read from disk and execute it__
 ```cs
+// test.cs
 class Program {
     public static void Main() 
         => Console.WriteLine("Hello World");
@@ -24,7 +25,7 @@ runner.RunMain();
 ```
 
 
-__test.cs__
+__Instantiate by class name__
 ```cs
 class Foo {
     public void Hello() 
@@ -36,7 +37,7 @@ var foo = runner.Instantiate("Foo");
 foo.Invoke("Hello");
 ```
 
-__test.cs__
+__Reflection style__
 ```cs
 class Foo {
     public static void Hello() 
