@@ -85,9 +85,11 @@
     <Compile Include="Syntax\ControlFlow\While.cs" />
     <Compile Include="Syntax\ControlFlow\Yield.cs" />
     <Compile Include="Syntax\Enum\Enum.cs" />
-    <Compile Include="Syntax\Feature\Lambda.cs" />
+    <Compile Include="Syntax\Lambda\Action.cs" />
     <Compile Include="Syntax\Feature\StringInterpolation.cs" />
+    <Compile Include="Syntax\Invoke\Invoke.cs" />
     <Compile Include="Syntax\Keyword\Typeof.cs" />
+    <Compile Include="Syntax\Lambda\Func.cs" />
     <Compile Include="Syntax\Op\Add.cs" />
     <Compile Include="Syntax\Op\Eq.cs" />
     <Compile Include="Syntax\Op\OpAndAssign.cs" />
