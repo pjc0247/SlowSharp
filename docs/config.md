@@ -5,7 +5,7 @@ ScriptConfig
 ----
 __ScriptConfig__ contains properties which related to compile-time options.
 
-__string[] DefaulUsings__<br>
+__string[] DefaultUsings__<br>
 
 ```cs
 config.DefaultUsings = new string[] { "System", "System.Collections.Generic" };
