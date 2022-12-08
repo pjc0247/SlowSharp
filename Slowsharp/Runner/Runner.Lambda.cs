@@ -120,10 +120,13 @@ namespace Slowsharp
 
                 if (ps.Count == 0)
                 {
+                    var ssInterpretMethodInfo = new SSInterpretMethodInfo(this, "__scripteval2", HybTypeCache.Void, null, new HybType[] { }, HybTypeCache.Void); 
                     body = new Action(() => {
+                        Ctx.PushMethod(ssInterpretMethodInfo);
                         RunBlock(node.Body as BlockSyntax);
                         if (Halt == HaltType.Return)
                             Halt = HaltType.None;
+                        Ctx.PopMethod();
                     });
                 }
                 else if (ps.Count == 1)
